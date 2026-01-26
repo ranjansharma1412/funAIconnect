@@ -2,9 +2,9 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TabNavigator from './TabNavigator';
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import ChangePasswordScreen from '../screens/ChangePasswordScreen';
+import LoginScreen from '../screens/login/LoginScreen';
+import RegisterScreen from '../screens/register/RegisterScreen';
+import ChangePasswordScreen from '../screens/changePassword/ChangePasswordScreen';
 import { useTheme } from '../theme/ThemeContext';
 
 const Stack = createNativeStackNavigator();

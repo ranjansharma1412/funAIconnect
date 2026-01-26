@@ -1,9 +1,9 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import FeedScreen from '../screens/FeedScreen';
-import CreativeScreen from '../screens/CreativeScreen';
-import HistoryScreen from '../screens/HistoryScreen';
-import AccountScreen from '../screens/AccountScreen';
+import FeedScreen from '../screens/feed/FeedScreen';
+import CreativeScreen from '../screens/creative/CreativeScreen';
+import HistoryScreen from '../screens/history/HistoryScreen';
+import AccountScreen from '../screens/account/AccountScreen';
 import { useTheme } from '../theme/ThemeContext';
 
 const Tab = createBottomTabNavigator();

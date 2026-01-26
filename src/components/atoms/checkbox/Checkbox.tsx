@@ -1,26 +1,26 @@
 import React from 'react';
 import { TouchableOpacity, View, Text } from 'react-native';
 import { useTheme } from '../../../theme/ThemeContext';
-import { createStyles } from './styles';
+import { createStyles } from './CheckboxStyles';
 
-interface RadioButtonProps {
+interface CheckboxProps {
     label: string;
-    selected: boolean;
+    checked: boolean;
     onPress: () => void;
 }
 
-const RadioButton: React.FC<RadioButtonProps> = ({ label, selected, onPress }) => {
+const Checkbox: React.FC<CheckboxProps> = ({ label, checked, onPress }) => {
     const { theme } = useTheme();
     const styles = createStyles(theme);
 
     return (
         <TouchableOpacity style={styles.container} onPress={onPress}>
-            <View style={styles.outerCircle}>
-                {selected && <View style={styles.innerCircle} />}
+            <View style={[styles.box, checked && styles.boxChecked]}>
+                {checked && <Text style={styles.checkmark}>✓</Text>}
             </View>
             <Text style={styles.label}>{label}</Text>
         </TouchableOpacity>
     );
 };
 
-export default RadioButton;
+export default Checkbox;

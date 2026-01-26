@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '../theme/ThemeContext';
+import { View, Text } from 'react-native';
+import { useTheme } from '../../theme/ThemeContext';
+import { styles } from './CreativeScreenStyles';
 
 const CreativeScreen = () => {
     const { theme } = useTheme();
@@ -10,17 +11,5 @@ const CreativeScreen = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    text: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-});
 
 export default CreativeScreen;

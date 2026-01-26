@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '../theme/ThemeContext';
-import Button from '../components/atoms/Button';
-import TextInput from '../components/atoms/TextInput';
+import { View, Text } from 'react-native';
+import { useTheme } from '../../theme/ThemeContext';
+import Button from '../../components/atoms/button/Button';
+import TextInput from '../../components/atoms/textInput/TextInput';
+import { styles } from './ChangePasswordScreenStyles';
 
 const ChangePasswordScreen = ({ navigation }: any) => {
     const { theme } = useTheme();
@@ -15,19 +16,5 @@ const ChangePasswordScreen = ({ navigation }: any) => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        padding: 20,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-});
 
 export default ChangePasswordScreen;
