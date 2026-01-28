@@ -4,23 +4,17 @@ import FeedScreen from '../screens/feed/FeedScreen';
 import CreativeScreen from '../screens/creative/CreativeScreen';
 import HistoryScreen from '../screens/history/HistoryScreen';
 import AccountScreen from '../screens/account/AccountScreen';
-import { useTheme } from '../theme/ThemeContext';
+import CustomTabBar from '../components/molecules/customTabBar/CustomTabBar';
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
-    const { theme } = useTheme();
-
     return (
         <Tab.Navigator
+            tabBar={(props) => <CustomTabBar {...props} />}
             screenOptions={{
                 headerShown: false,
-                tabBarStyle: {
-                    backgroundColor: theme.colors.background,
-                    borderTopColor: theme.colors.border,
-                },
-                tabBarActiveTintColor: theme.colors.primary,
-                tabBarInactiveTintColor: theme.colors.text,
+                tabBarShowLabel: false, // hide labels as we are using icons
             }}
         >
             <Tab.Screen name="Feed" component={FeedScreen} />
