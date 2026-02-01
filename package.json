@@ -12,6 +12,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@callstack/liquid-glass": "^0.7.0",
     "@react-native-community/blur": "^4.4.1",
     "@react-native/new-app-screen": "0.83.1",
     "@react-navigation/bottom-tabs": "^7.10.1",

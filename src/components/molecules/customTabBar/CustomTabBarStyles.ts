@@ -32,7 +32,7 @@ export const styles = StyleSheet.create({
         height: '100%',
         alignItems: 'center',
         justifyContent: 'space-around',
-        backgroundColor: 'rgba(255, 255, 255, 0.2)', // translucent background
+        backgroundColor: 'transparent', // translucent background
     },
     tabItem: {
         flex: 1,
@@ -40,6 +40,9 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     creativeTabItem: {
-        marginBottom: 20, // push content up slightly if needed, or just let the icon be larger
+        // marginBottom: 20, // push content up slightly if needed, or just let the icon be larger
     },
+    glassEffect: {
+        backgroundColor: 'transparent', // translucent background
+    }
 });
