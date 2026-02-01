@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, SafeAreaViewBase, StatusBar, Platform } from 'react-native';
+import { View, StyleSheet, FlatList, StatusBar, Platform } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import DashboardHeader from '../../components/molecules/DashboardHeader';
 import StoriesRail from '../../components/organisms/StoriesRail';
@@ -49,34 +49,36 @@ const DashboardScreen: React.FC = () => {
     const { theme } = useTheme();
     const insets = useSafeAreaInsets();
 
+    const renderHeader = () => (
+        <StoriesRail data={STORIES_DATA} />
+    );
+
+    const renderItem = ({ item }: { item: typeof POSTS_DATA[0] }) => (
+        <PostCard
+            userName={item.userName}
+            userHandle={item.userHandle}
+            userImage={item.userImage}
+            isVerified={item.isVerified}
+            postImage={item.postImage}
+            likes={item.likes}
+        />
+    );
+
     return (
         <View style={[styles.safeArea, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
             <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
                 {/* Header */}
                 <DashboardHeader />
 
-                {/* Scrollable Content */}
-                <ScrollView
+                {/* FlatList for optimize scrolling */}
+                <FlatList
+                    data={POSTS_DATA}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderItem}
+                    ListHeaderComponent={renderHeader}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.scrollContent}
-                >
-                    {/* Stories */}
-                    <StoriesRail data={STORIES_DATA} />
-
-                    {/* Posts */}
-                    <View style={styles.feedContainer}>
-                        {POSTS_DATA.map((post) => (
-                            <PostCard
-                                key={post.id}
-                                userName={post.userName}
-                                userHandle={post.userHandle}
-                                userImage={post.userImage}
-                                isVerified={post.isVerified}
-                                postImage={post.postImage}
-                            />
-                        ))}
-                    </View>
-                </ScrollView>
+                    contentContainerStyle={styles.listContent}
+                />
             </View>
         </View>
     );
@@ -90,11 +92,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    scrollContent: {
+    listContent: {
         paddingBottom: 80, // Space for Bottom Tab Bar
-    },
-    feedContainer: {
-        marginTop: 10,
+        paddingTop: 10,
     },
 });
 
