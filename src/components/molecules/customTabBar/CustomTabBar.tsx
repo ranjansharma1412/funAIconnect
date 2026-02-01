@@ -96,6 +96,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                 blurAmount={30}
                 reducedTransparencyFallbackColor="transparent"
                 blurRadius={2}
+                overlayColor="transparent"
             />
             <View style={styles.tabBar}>
                 {state.routes.map((route, index) => {

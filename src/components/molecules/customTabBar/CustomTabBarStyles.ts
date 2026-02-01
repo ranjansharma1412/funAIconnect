@@ -21,11 +21,12 @@ export const styles = StyleSheet.create({
         shadowRadius: 10,
     },
     blurView: {
-        // position: 'absolute',
-        // top: 0,
-        // left: 0,
-        // bottom: 0,
-        // right: 0,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+        borderRadius: 30,
     },
     tabBar: {
         flexDirection: 'row',
