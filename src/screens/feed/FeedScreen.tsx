@@ -6,8 +6,8 @@ import { styles } from './FeedScreenStyles';
 const FeedScreen = () => {
     const { theme } = useTheme();
     return (
-        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            <Text style={[styles.text, { color: theme.colors.text }]}>Feed Screen</Text>
+        <View style={[styles.container, { backgroundColor: theme.colors.primary }]}>
+            <Text>Feed Screen</Text>
         </View>
     );
 };
