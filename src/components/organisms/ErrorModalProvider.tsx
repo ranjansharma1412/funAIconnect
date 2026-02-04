@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import ErrorModal from '../molecules/ErrorModal';
-import modalStore from '../../services/modalStore';
-import { ErrorModalConfig } from '../../types/api.types';
+import { RootState } from '../../store';
+import { hideError } from '../../store/slices/modalSlice';
 
 /**
  * Global Error Modal Provider
@@ -11,20 +12,16 @@ import { ErrorModalConfig } from '../../types/api.types';
 const ErrorModalProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
-    const [modalConfig, setModalConfig] = useState<ErrorModalConfig>(
-        modalStore.getConfig(),
-    );
+    const modalConfig = useSelector((state: RootState) => state.modal);
+    const dispatch = useDispatch();
 
-    useEffect(() => {
-        // Subscribe to modal store changes
-        const unsubscribe = modalStore.subscribe(config => {
-            setModalConfig(config);
-        });
+    const handleClose = () => {
+        dispatch(hideError());
+    };
 
-        return () => {
-            unsubscribe();
-        };
-    }, []);
+    const handleButtonPress = () => {
+        dispatch(hideError());
+    };
 
     return (
         <>
@@ -37,8 +34,8 @@ const ErrorModalProvider: React.FC<{ children: React.ReactNode }> = ({
                 iconColor={modalConfig.iconColor}
                 showCloseButton={modalConfig.showCloseButton}
                 buttonText={modalConfig.buttonText}
-                onClose={modalConfig.onClose}
-                onButtonPress={modalConfig.onButtonPress}
+                onClose={handleClose}
+                onButtonPress={handleButtonPress}
             />
         </>
     );
