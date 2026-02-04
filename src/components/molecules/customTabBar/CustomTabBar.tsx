@@ -53,8 +53,6 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                             iconName = isFocused ? 'person' : 'person-outline';
                         }
 
-                        const isCreative = route.name === 'Creative';
-
                         // Active color: Primary Text (Black), Inactive: Text Secondary (Gray)
                         // For Creative tab, we can make it stand out if needed, or keep consistent.
                         const iconColor = isFocused
@@ -70,15 +68,12 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
 
                                 onPress={onPress}
                                 onLongPress={onLongPress}
-                                style={[
-                                    styles.tabItem,
-                                    isCreative && styles.creativeTabItem, // Special styling for creative tab
-                                ]}
+                                style={styles.tabItem}
                             >
                                 <Ionicons
                                     name={iconName}
-                                    size={isCreative ? 32 : 24}
-                                    color={isCreative ? theme.colors.accentRed : iconColor}
+                                    size={24}
+                                    color={iconColor}
                                 />
                             </TouchableOpacity>
                         );
@@ -150,15 +145,12 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
 
                             onPress={onPress}
                             onLongPress={onLongPress}
-                            style={[
-                                styles.tabItem,
-                                isCreative && styles.creativeTabItem, // Special styling for creative tab
-                            ]}
+                            style={styles.tabItem}
                         >
                             <Ionicons
                                 name={iconName}
-                                size={isCreative ? 32 : 24}
-                                color={isCreative ? theme.colors.accentRed : iconColor}
+                                size={24}
+                                color={iconColor}
                             />
                         </TouchableOpacity>
                     );
