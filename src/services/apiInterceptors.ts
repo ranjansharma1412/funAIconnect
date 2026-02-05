@@ -13,6 +13,15 @@ apiClient.interceptors.request.use(
         // Check internet connectivity before making request
         const isConnected = await checkInternetConnection();
 
+        if (__DEV__) {
+            console.log('API Request:', {
+                url: config.url,
+                method: config.method,
+                data: config.data,
+                headers: config.headers
+            });
+        }
+
         if (!isConnected) {
             // Show no internet error modal
             store.dispatch(showError({

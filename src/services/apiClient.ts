@@ -6,7 +6,7 @@ import axios, { AxiosInstance } from 'axios';
  * For environment-based configuration, consider using react-native-config
  */
 const API_CONFIG = {
-    BASE_URL: 'https://api.example.com', // Replace with your API URL
+    BASE_URL: 'https://glaucomatous-isis-lazily.ngrok-free.dev', // Updated to 5001 to avoid AirPlay conflict
     TIMEOUT: 30000, // 30 seconds
     HEADERS: {
         'Content-Type': 'application/json',
