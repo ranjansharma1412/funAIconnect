@@ -45,6 +45,8 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                         let iconName = '';
                         if (route.name === 'Feed') {
                             iconName = isFocused ? 'home' : 'home-outline';
+                        } else if (route.name === 'AI') {
+                            iconName = isFocused ? 'hardware-chip' : 'hardware-chip-outline';
                         } else if (route.name === 'Creative') {
                             iconName = isFocused ? 'add-circle' : 'add-circle-outline';
                         } else if (route.name === 'History') {
@@ -120,6 +122,8 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                     let iconName = '';
                     if (route.name === 'Feed') {
                         iconName = isFocused ? 'home' : 'home-outline';
+                    } else if (route.name === 'AI') {
+                        iconName = isFocused ? 'hardware-chip' : 'hardware-chip-outline';
                     } else if (route.name === 'Creative') {
                         iconName = isFocused ? 'add-circle' : 'add-circle-outline';
                     } else if (route.name === 'History') {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import DashboardScreen from '../screens/dashboard/DashboardScreen';
+import AIScreen from '../screens/ai/AIScreen';
 import CreativeScreen from '../screens/creative/CreativeScreen';
 import HistoryScreen from '../screens/history/HistoryScreen';
 import AccountScreen from '../screens/account/AccountScreen';
@@ -18,6 +19,7 @@ const TabNavigator = () => {
             }}
         >
             <Tab.Screen name="Feed" component={DashboardScreen} />
+            <Tab.Screen name="AI" component={AIScreen} />
             <Tab.Screen name="Creative" component={CreativeScreen} />
             <Tab.Screen name="History" component={HistoryScreen} />
             <Tab.Screen name="Account" component={AccountScreen} />

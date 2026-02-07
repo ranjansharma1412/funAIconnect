@@ -5,6 +5,7 @@ import DashboardHeader from '../../components/molecules/DashboardHeader';
 import StoriesRail from '../../components/organisms/StoriesRail';
 import PostCard from '../../components/organisms/PostCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { styles } from './DashboardScreenStyle';
 
 // Dummy Data
 const STORIES_DATA = [
@@ -83,19 +84,5 @@ const DashboardScreen: React.FC = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    container: {
-        flex: 1,
-    },
-    listContent: {
-        paddingBottom: 80, // Space for Bottom Tab Bar
-        paddingTop: 10,
-    },
-});
 
 export default DashboardScreen;
