@@ -45,6 +45,8 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                         let iconName = '';
                         if (route.name === 'Feed') {
                             iconName = isFocused ? 'home' : 'home-outline';
+                        } else if (route.name === 'AI') {
+                            iconName = isFocused ? 'hardware-chip' : 'hardware-chip-outline';
                         } else if (route.name === 'Creative') {
                             iconName = isFocused ? 'add-circle' : 'add-circle-outline';
                         } else if (route.name === 'History') {
@@ -52,8 +54,6 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                         } else if (route.name === 'Account') {
                             iconName = isFocused ? 'person' : 'person-outline';
                         }
-
-                        const isCreative = route.name === 'Creative';
 
                         // Active color: Primary Text (Black), Inactive: Text Secondary (Gray)
                         // For Creative tab, we can make it stand out if needed, or keep consistent.
@@ -70,15 +70,12 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
 
                                 onPress={onPress}
                                 onLongPress={onLongPress}
-                                style={[
-                                    styles.tabItem,
-                                    isCreative && styles.creativeTabItem, // Special styling for creative tab
-                                ]}
+                                style={styles.tabItem}
                             >
                                 <Ionicons
                                     name={iconName}
-                                    size={isCreative ? 32 : 24}
-                                    color={isCreative ? theme.colors.accentRed : iconColor}
+                                    size={24}
+                                    color={iconColor}
                                 />
                             </TouchableOpacity>
                         );
@@ -125,6 +122,8 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                     let iconName = '';
                     if (route.name === 'Feed') {
                         iconName = isFocused ? 'home' : 'home-outline';
+                    } else if (route.name === 'AI') {
+                        iconName = isFocused ? 'hardware-chip' : 'hardware-chip-outline';
                     } else if (route.name === 'Creative') {
                         iconName = isFocused ? 'add-circle' : 'add-circle-outline';
                     } else if (route.name === 'History') {
@@ -150,15 +149,12 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
 
                             onPress={onPress}
                             onLongPress={onLongPress}
-                            style={[
-                                styles.tabItem,
-                                isCreative && styles.creativeTabItem, // Special styling for creative tab
-                            ]}
+                            style={styles.tabItem}
                         >
                             <Ionicons
                                 name={iconName}
-                                size={isCreative ? 32 : 24}
-                                color={isCreative ? theme.colors.accentRed : iconColor}
+                                size={24}
+                                color={iconColor}
                             />
                         </TouchableOpacity>
                     );
