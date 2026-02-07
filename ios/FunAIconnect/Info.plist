@@ -33,6 +33,12 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>FunAIconnect needs access to your camera to take photos for posts.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>FunAIconnect needs access to your photo library to select photos for posts.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>FunAIconnect needs access to your microphone for video recording.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>RCTNewArchEnabled</key>

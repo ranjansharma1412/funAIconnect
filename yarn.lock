@@ -5545,12 +5545,22 @@ react-native-animatable@1.4.0:
   dependencies:
     prop-types "^15.8.1"
 
+react-native-image-picker@^8.2.1:
+  version "8.2.1"
+  resolved "https://registry.npmjs.org/react-native-image-picker/-/react-native-image-picker-8.2.1.tgz"
+  integrity sha512-FBeGYJGFDjMdGCcyubDJgBAPCQ4L1D3hwLXyUU91jY9ahOZMTbluceVvRmrEKqnDPFJ0gF1NVhJ0nr1nROFLdg==
+
 react-native-modal@^14.0.0-rc.1:
   version "14.0.0-rc.1"
   resolved "https://registry.npmjs.org/react-native-modal/-/react-native-modal-14.0.0-rc.1.tgz"
   integrity sha512-v5pvGyx1FlmBzdHyPqBsYQyS2mIJhVmuXyNo5EarIzxicKhuoul6XasXMviGcXboEUT0dTYWs88/VendojPiVw==
   dependencies:
     react-native-animatable "1.4.0"
+
+react-native-permissions@^5.4.4:
+  version "5.4.4"
+  resolved "https://registry.npmjs.org/react-native-permissions/-/react-native-permissions-5.4.4.tgz"
+  integrity sha512-WB5lRCBGXETfuaUhem2vgOceb9+URCeyfKpLGFSwoOffLuyJCA6+NTR3l1KLkrK4Ykxsig37z16/shUVufmt7A==
 
 react-native-safe-area-context@^5.6.2:
   version "5.6.2"
@@ -5572,6 +5582,11 @@ react-native-vector-icons@^10.3.0:
   dependencies:
     prop-types "^15.7.2"
     yargs "^16.1.1"
+
+react-native-vision-camera@^4.7.3:
+  version "4.7.3"
+  resolved "https://registry.npmjs.org/react-native-vision-camera/-/react-native-vision-camera-4.7.3.tgz"
+  integrity sha512-g1/neOyjSqn1kaAa2FxI/qp5KzNvPcF0bnQw6NntfbxH6tm0+8WFZszlgb5OV+iYlB6lFUztCbDtyz5IpL47OA==
 
 react-native@0.83.1:
   version "0.83.1"
