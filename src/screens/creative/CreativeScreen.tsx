@@ -14,14 +14,26 @@ import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './CreativeScreenStyle';
 import { launchImageLibrary, ImageLibraryOptions, Asset } from 'react-native-image-picker';
 import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
+import { useRoute } from '@react-navigation/native';
 
 
 const CreativeScreen = () => {
     const { theme } = useTheme();
+    const route = useRoute<any>();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [description, setDescription] = useState('');
     const [hashtags, setHashtags] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (route.params) {
+            const { initialImage, initialDescription, initialHashtags } = route.params;
+            if (initialImage) setSelectedImage(initialImage);
+            if (initialDescription) setDescription(initialDescription);
+            if (initialHashtags) setHashtags(initialHashtags);
+        }
+    }, [route.params]);
+
     const [isCameraOpen, setIsCameraOpen] = useState(false);
 
     const device = useCameraDevice('back');
