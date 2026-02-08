@@ -4,6 +4,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import DashboardHeader from '../../components/molecules/DashboardHeader';
 import StoriesRail from '../../components/organisms/StoriesRail';
 import PostCard from '../../components/organisms/PostCard';
+import StatusViewerModal from '../../components/organisms/StatusViewerModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './DashboardScreenStyle';
 
@@ -50,8 +51,46 @@ const DashboardScreen: React.FC = () => {
     const { theme } = useTheme();
     const insets = useSafeAreaInsets();
 
+    // Status Viewer State
+    const [isStatusModalVisible, setIsStatusModalVisible] = React.useState(false);
+    const [selectedStatusUserIndex, setSelectedStatusUserIndex] = React.useState(0);
+
+    // Prepare mock stories data
+    const userStories = React.useMemo(() => {
+        return STORIES_DATA.map((user, index) => ({
+            id: user.id,
+            username: user.name,
+            avatar: user.image,
+            stories: [
+                {
+                    id: `story-${user.id}-1`,
+                    url: `https://picsum.photos/seed/${user.id}1/500/900`,
+                    type: 'image' as const,
+                    duration: 3000
+                },
+                {
+                    id: `story-${user.id}-2`,
+                    url: `https://picsum.photos/seed/${user.id}2/500/900`,
+                    type: 'image' as const,
+                    duration: 3000
+                },
+                {
+                    id: `story-${user.id}-3`,
+                    url: `https://picsum.photos/seed/${user.id}3/500/900`,
+                    type: 'image' as const,
+                    duration: 3000
+                },
+            ]
+        }));
+    }, []);
+
+    const handleStoryPress = (id: string, index: number) => {
+        setSelectedStatusUserIndex(index);
+        setIsStatusModalVisible(true);
+    };
+
     const renderHeader = () => (
-        <StoriesRail data={STORIES_DATA} />
+        <StoriesRail data={STORIES_DATA} onPressItem={handleStoryPress} />
     );
 
     const renderItem = ({ item }: { item: typeof POSTS_DATA[0] }) => (
@@ -81,6 +120,14 @@ const DashboardScreen: React.FC = () => {
                     contentContainerStyle={styles.listContent}
                 />
             </View>
+
+            {/* Status Viewer Modal */}
+            <StatusViewerModal
+                visible={isStatusModalVisible}
+                userStories={userStories}
+                initialUserIndex={selectedStatusUserIndex}
+                onClose={() => setIsStatusModalVisible(false)}
+            />
         </View>
     );
 };
