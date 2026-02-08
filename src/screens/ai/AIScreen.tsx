@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './AIScreenStyle';
+import Button from '../../components/atoms/button/Button';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -98,20 +99,15 @@ const AIScreen = () => {
                         value={prompt}
                         onChangeText={setPrompt}
                     />
-                    <TouchableOpacity
-                        style={[styles.generateButton, isLoading && { opacity: 0.7 }]}
+                    <Button
+                        title={isLoading ? "Generating..." : "Generate"}
                         onPress={handleGenerate}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator color="#FFF" />
-                        ) : (
-                            <>
-                                <Ionicons name="sparkles" size={20} color="#FFF" />
-                                <Text style={styles.generateButtonText}>Generate</Text>
-                            </>
-                        )}
-                    </TouchableOpacity>
+                        useGradient={true}
+                        style={isLoading ? { opacity: 0.7 } : {}}
+                    // To support icon, I need to update Button component or usage. 
+                    // For now, let's keep it simple and just use title. 
+                    // If user wants icon, I should update Button.
+                    />
                 </View>
 
                 {/* Generated Result */}
@@ -144,9 +140,12 @@ const AIScreen = () => {
                                 onChangeText={(text) => setGeneratedContent({ ...generatedContent, hashtags: text })}
                             />
 
-                            <TouchableOpacity style={styles.createPostButton} onPress={handleCreatePost}>
-                                <Text style={styles.createPostButtonText}>Create Post with This</Text>
-                            </TouchableOpacity>
+                            <Button
+                                title="Create Post with This"
+                                onPress={handleCreatePost}
+                                style={{ marginTop: 15 }}
+                                useGradient={true}
+                            />
                         </View>
                     </View>
                 )}

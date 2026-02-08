@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, StatusBar } from 'react-native';
+import Button from '../../components/atoms/button/Button';
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './NotificationsStyle';
 import { useNavigation } from '@react-navigation/native';
@@ -105,12 +106,13 @@ const NotificationsScreen = () => {
                     {/* Contextual Actions */}
                     {item.type === 'follow' && item.isRequest && (
                         <View style={styles.actionsContainer}>
-                            <TouchableOpacity
-                                style={[styles.actionButton, styles.primaryButton]}
+                            <Button
+                                title="Confirm"
                                 onPress={handlePrimaryAction}
-                            >
-                                <Text style={[styles.actionButtonText, styles.primaryButtonText]}>Confirm</Text>
-                            </TouchableOpacity>
+                                useGradient={false}
+                                style={[styles.actionButton, styles.primaryButton]}
+                                textStyle={styles.primaryButtonText}
+                            />
                             <TouchableOpacity
                                 style={[styles.actionButton, styles.secondaryButton]}
                                 onPress={handleSecondaryAction}
@@ -122,12 +124,13 @@ const NotificationsScreen = () => {
 
                     {item.type === 'follow' && !item.isRequest && (
                         <View style={styles.actionsContainer}>
-                            <TouchableOpacity
-                                style={[styles.actionButton, styles.primaryButton]}
+                            <Button
+                                title="Follow Back"
                                 onPress={() => console.log('Follow back')}
-                            >
-                                <Text style={[styles.actionButtonText, styles.primaryButtonText]}>Follow Back</Text>
-                            </TouchableOpacity>
+                                useGradient={false}
+                                style={[styles.actionButton, styles.primaryButton]}
+                                textStyle={styles.primaryButtonText}
+                            />
                         </View>
                     )}
 

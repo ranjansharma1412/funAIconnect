@@ -10,6 +10,7 @@ import {
     Linking,
     StyleSheet
 } from 'react-native';
+import Button from '../../components/atoms/button/Button';
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './CreativeScreenStyle';
 import { launchImageLibrary, ImageLibraryOptions, Asset } from 'react-native-image-picker';
@@ -189,9 +190,12 @@ const CreativeScreen = () => {
                     </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity style={styles.postButton} onPress={handlePost}>
-                    <Text style={styles.postButtonText}>Post</Text>
-                </TouchableOpacity>
+                <Button
+                    title="Post"
+                    onPress={handlePost}
+                    useGradient={true}
+                    style={{ marginTop: 20 }}
+                />
             </ScrollView>
         </View>
     );
