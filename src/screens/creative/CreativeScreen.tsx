@@ -11,6 +11,8 @@ import {
     StyleSheet
 } from 'react-native';
 import Button from '../../components/atoms/button/Button';
+import { useDispatch, useSelector } from 'react-redux';
+import { postService } from '../../services/postService';
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './CreativeScreenStyle';
 import { launchImageLibrary, ImageLibraryOptions, Asset } from 'react-native-image-picker';
@@ -87,7 +89,11 @@ const CreativeScreen = () => {
         }
     };
 
-    const handlePost = () => {
+    const dispatch = useDispatch();
+    const { user } = useSelector((state: any) => state.auth); // Assuming RootState is any for now or import it
+    const [isPosting, setIsPosting] = useState(false);
+
+    const handlePost = async () => {
         if (!selectedImage) {
             Alert.alert('Validation', 'Please select an image first.');
             return;
@@ -97,17 +103,49 @@ const CreativeScreen = () => {
             return;
         }
 
-        // Mock post submission
-        Alert.alert('Success', 'Post created successfully! (Mock)', [
-            {
-                text: 'OK',
-                onPress: () => {
-                    setDescription('');
-                    setHashtags('');
-                    setSelectedImage(null);
+        setIsPosting(true);
+        try {
+            // Use user data from store, fallback to defaults if not logged in (for dev)
+            const userName = user?.name || 'Guest User';
+            const userHandle = user?.username || '@guest';
+            const userImage = user?.avatar || 'https://via.placeholder.com/150';
+
+            const payload: any = { // Use 'any' or import CreatePostPayload to avoid strict type checks for now if types mismatch slightly
+                userName,
+                userHandle,
+                userImage,
+                description,
+                hashtags,
+                isVerified: user?.isVerified || false,
+                postImage: {
+                    uri: selectedImage,
+                    type: 'image/jpeg', // Simple default
+                    fileName: 'upload.jpg',
+                }
+            };
+
+            console.log('Sending post payload:', JSON.stringify(payload, null, 2)); // Debug log
+            const response = await postService.createPost(payload);
+            console.log('Post created successfully:', response);
+
+            Alert.alert('Success', 'Post created successfully!', [
+                {
+                    text: 'OK',
+                    onPress: () => {
+                        setDescription('');
+                        setHashtags('');
+                        setSelectedImage(null);
+                        // Optional: Navigate back or to feed
+                        // navigation.navigate('Dashboard'); 
+                    },
                 },
-            },
-        ]);
+            ]);
+        } catch (error: any) {
+            Alert.alert('Error', error.message || 'Failed to create post');
+            console.error('Post creation error:', error);
+        } finally {
+            setIsPosting(false);
+        }
     };
 
     if (isCameraOpen && device) {
@@ -191,10 +229,11 @@ const CreativeScreen = () => {
                 </View>
 
                 <Button
-                    title="Post"
+                    title={isPosting ? "Posting..." : "Post"}
                     onPress={handlePost}
                     useGradient={true}
-                    style={{ marginTop: 20 }}
+                    style={{ marginTop: 20, opacity: isPosting ? 0.7 : 1 }}
+                    disabled={isPosting}
                 />
             </ScrollView>
         </View>

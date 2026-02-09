@@ -25,6 +25,8 @@ const PostCard: React.FC<PostCardProps> = ({
     postImage
 }) => {
     const { theme } = useTheme();
+    // Fallback for null/undefined postImage to prevent crash and show placeholder
+    const validPostImage = postImage || 'https://via.placeholder.com/500?text=No+Image';
 
     const renderGlassHeader = () => {
         const headerContent = (
@@ -85,7 +87,7 @@ const PostCard: React.FC<PostCardProps> = ({
         <View style={styles.container}>
             <View style={styles.mediaContainer}>
                 <Image
-                    source={{ uri: postImage }}
+                    source={{ uri: validPostImage }}
                     style={styles.postImage}
                     resizeMode="cover"
                 />
