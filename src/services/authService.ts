@@ -32,4 +32,24 @@ export const authService = {
             throw parseApiError(error);
         }
     },
+
+    /**
+     * Update user profile
+     * @param formData FormData object containing profile fields and image
+     * @returns Promise<any>
+     */
+    updateProfile: async (formData: FormData): Promise<any> => {
+        try {
+            const response = await apiClient.put('/api/auth/profile', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data', // Let browser/engine set boundary
+                },
+                transformRequest: (data) => data,
+            });
+            return response.data;
+        } catch (error: any) {
+            console.error('Update Profile Error:', error);
+            throw parseApiError(error);
+        }
+    },
 };

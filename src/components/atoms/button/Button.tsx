@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { TouchableOpacity, Text, ViewStyle, TextStyle, StyleProp } from 'react-native';
+import { TouchableOpacity, Text, ViewStyle, TextStyle, StyleProp, View, StyleSheet } from 'react-native';
 import { useTheme } from '../../../theme/ThemeContext';
 import { createStyles } from './ButtonStyles';
 
@@ -25,15 +25,26 @@ const Button: React.FC<ButtonProps> = ({ title, onPress, style, textStyle, useGr
 
     if (useGradient) {
         return (
-            <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={[style, { borderRadius: 8, overflow: 'hidden' }]} disabled={disabled}>
+            <TouchableOpacity
+                onPress={onPress}
+                activeOpacity={0.8}
+                style={[
+                    styles.button,
+                    style,
+                    { padding: 0, overflow: 'hidden', backgroundColor: 'transparent' } // Ensure gradient fills and no background conflict
+                ]}
+                disabled={disabled}
+            >
                 <LinearGradient
                     colors={theme.colors.primaryGradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
-                    style={[styles.button, { backgroundColor: 'transparent', width: '100%' }]}
-                >
+                    style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
+                />
+                {/* Content Container */}
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
                     {buttonContent}
-                </LinearGradient>
+                </View>
             </TouchableOpacity>
         );
     }
