@@ -1,0 +1,40 @@
+{
+    "common": {
+        "welcome": "Welcome",
+        "change_language": "Change Language",
+        "english": "English",
+        "hindi": "Hindi",
+        "save": "Save Changes",
+        "cancel": "Cancel",
+        "loading": "Loading...",
+        "error": "Error"
+    },
+    "account": {
+        "title": "Account",
+        "personal_info": "Personal Information",
+        "email": "Email",
+        "mobile": "Mobile",
+        "dob": "Date of Birth",
+        "settings_privacy": "Settings & Privacy",
+        "privacy_settings": "Privacy Settings",
+        "security": "Security",
+        "notifications": "Notifications",
+        "help_support": "Help & Support",
+        "logout_button": "Log Out",
+        "logout_title": "Logout",
+        "logout_confirm": "Are you sure you want to logout?",
+        "update_profile_pic": "Update Profile Picture",
+        "choose_option": "Choose an option",
+        "camera": "Camera",
+        "gallery": "Gallery",
+        "success": "Success",
+        "profile_updated": "Profile updated successfully!",
+        "failed_update": "Failed to update profile",
+        "name_placeholder": "Your Name",
+        "bio_placeholder": "Add a bio...",
+        "email_placeholder": "Enter your email",
+        "mobile_placeholder": "Enter mobile number",
+        "dob_placeholder": "DD/MM/YYYY",
+        "language": "Language"
+    }
+}

@@ -13,6 +13,7 @@ import {
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './AccountScreenStyle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTranslation } from 'react-i18next';
 import { launchImageLibrary, launchCamera, ImageLibraryOptions, CameraOptions } from 'react-native-image-picker';
 import { authService } from '../../services/authService';
 
@@ -21,6 +22,7 @@ import { useSelector, useDispatch } from 'react-redux';
 const AccountScreen = () => {
     const { theme } = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
+    const { t, i18n } = useTranslation();
 
     const { user } = useSelector((state: any) => state.auth);
 
@@ -39,12 +41,16 @@ const AccountScreen = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+    const changeLanguage = (lang: string) => {
+        i18n.changeLanguage(lang);
+    };
+
     const handleProfileImagePick = () => {
         if (!isEditing) return;
 
-        Alert.alert('Update Profile Picture', 'Choose an option', [
+        Alert.alert(t('account.update_profile_pic'), t('account.choose_option'), [
             {
-                text: 'Camera',
+                text: t('account.camera'),
                 onPress: async () => {
                     const result = await launchCamera({ mediaType: 'photo', quality: 0.8 });
                     if (result.assets && result.assets.length > 0) {
@@ -53,7 +59,7 @@ const AccountScreen = () => {
                 },
             },
             {
-                text: 'Gallery',
+                text: t('account.gallery'),
                 onPress: async () => {
                     const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.8, selectionLimit: 1 });
                     if (result.assets && result.assets.length > 0) {
@@ -61,7 +67,7 @@ const AccountScreen = () => {
                     }
                 },
             },
-            { text: 'Cancel', style: 'cancel' },
+            { text: t('common.cancel'), style: 'cancel' },
         ]);
     };
 
@@ -87,19 +93,19 @@ const AccountScreen = () => {
             console.log('Updating profile...', formData);
             await authService.updateProfile(formData);
 
-            Alert.alert('Success', 'Profile updated successfully!');
+            Alert.alert(t('account.success'), t('account.profile_updated'));
             setIsEditing(false);
         } catch (error: any) {
-            Alert.alert('Error', error.message || 'Failed to update profile');
+            Alert.alert(t('common.error'), error.message || t('account.failed_update'));
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleLogout = () => {
-        Alert.alert('Logout', 'Are you sure you want to logout?', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Logout', style: 'destructive', onPress: () => console.log('Logged out') }
+        Alert.alert(t('account.logout_title'), t('account.logout_confirm'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('account.logout_button'), style: 'destructive', onPress: () => console.log('Logged out') }
         ]);
     };
 
@@ -135,7 +141,7 @@ const AccountScreen = () => {
                         style={styles.nameInput}
                         value={name}
                         onChangeText={setName}
-                        placeholder="Your Name"
+                        placeholder={t('account.name_placeholder')}
                         placeholderTextColor={theme.colors.textSecondary}
                         editable={isEditing}
                     />
@@ -143,17 +149,43 @@ const AccountScreen = () => {
                         style={styles.bioInput}
                         value={bio}
                         onChangeText={setBio}
-                        placeholder="Add a bio..."
+                        placeholder={t('account.bio_placeholder')}
                         placeholderTextColor={theme.colors.textSecondary}
                         multiline
                         editable={isEditing}
                     />
                 </View>
 
+                {/* Language Selection */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>{t('account.language')}</Text>
+                    <View style={styles.languageSection}>
+                        <TouchableOpacity
+                            style={styles.languageOption}
+                            onPress={() => changeLanguage('en')}
+                        >
+                            <View style={[styles.radioButton, { borderColor: theme.colors.primary }]}>
+                                {i18n.language === 'en' && <View style={[styles.radioButtonSelected, { backgroundColor: theme.colors.primary }]} />}
+                            </View>
+                            <Text style={[styles.languageText, { color: theme.colors.text }]}>{t('common.english')}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.languageOption}
+                            onPress={() => changeLanguage('hi')}
+                        >
+                            <View style={[styles.radioButton, { borderColor: theme.colors.primary }]}>
+                                {i18n.language === 'hi' && <View style={[styles.radioButtonSelected, { backgroundColor: theme.colors.primary }]} />}
+                            </View>
+                            <Text style={[styles.languageText, { color: theme.colors.text }]}>{t('common.hindi')}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
                 {/* Personal Information */}
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>Personal Information</Text>
+                        <Text style={styles.sectionTitle}>{t('account.personal_info')}</Text>
                         {isLoading ? (
                             <ActivityIndicator size="small" color={theme.colors.primary} />
                         ) : (
@@ -172,36 +204,36 @@ const AccountScreen = () => {
 
                     <View style={styles.inputGroup}>
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Email</Text>
+                            <Text style={styles.label}>{t('account.email')}</Text>
                             <TextInput
                                 style={[styles.input, !isEditing && styles.inputReadOnly]}
                                 value={email}
                                 onChangeText={setEmail}
                                 keyboardType="email-address"
-                                placeholder="Enter your email"
+                                placeholder={t('account.email_placeholder')}
                                 placeholderTextColor={theme.colors.textSecondary}
                                 editable={isEditing}
                             />
                         </View>
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Mobile</Text>
+                            <Text style={styles.label}>{t('account.mobile')}</Text>
                             <TextInput
                                 style={[styles.input, !isEditing && styles.inputReadOnly]}
                                 value={mobile}
                                 onChangeText={setMobile}
                                 keyboardType="phone-pad"
-                                placeholder="Enter mobile number"
+                                placeholder={t('account.mobile_placeholder')}
                                 placeholderTextColor={theme.colors.textSecondary}
                                 editable={isEditing}
                             />
                         </View>
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Date of Birth</Text>
+                            <Text style={styles.label}>{t('account.dob')}</Text>
                             <TextInput
                                 style={[styles.input, !isEditing && styles.inputReadOnly]}
                                 value={startDob}
                                 onChangeText={setDob}
-                                placeholder="DD/MM/YYYY"
+                                placeholder={t('account.dob_placeholder')}
                                 placeholderTextColor={theme.colors.textSecondary}
                                 editable={isEditing}
                             />
@@ -211,16 +243,16 @@ const AccountScreen = () => {
 
                 {/* Settings & Privacy */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Settings & Privacy</Text>
-                    {renderSettingItem('lock-closed-outline', 'Privacy Settings')}
-                    {renderSettingItem('shield-checkmark-outline', 'Security')}
-                    {renderSettingItem('notifications-outline', 'Notifications')}
-                    {renderSettingItem('help-circle-outline', 'Help & Support')}
+                    <Text style={styles.sectionTitle}>{t('account.settings_privacy')}</Text>
+                    {renderSettingItem('lock-closed-outline', t('account.privacy_settings'))}
+                    {renderSettingItem('shield-checkmark-outline', t('account.security'))}
+                    {renderSettingItem('notifications-outline', t('account.notifications'))}
+                    {renderSettingItem('help-circle-outline', t('account.help_support'))}
                 </View>
 
                 {/* Logout Action */}
                 <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Text style={styles.logoutButtonText}>Log Out</Text>
+                    <Text style={styles.logoutButtonText}>{t('account.logout_button')}</Text>
                 </TouchableOpacity>
 
             </ScrollView>

@@ -1,0 +1,40 @@
+{
+    "common": {
+        "welcome": "स्वागत है",
+        "change_language": "भाषा बदलें",
+        "english": "अंग्रेज़ी",
+        "hindi": "हिंदी",
+        "save": "परिवर्तन सहेजें",
+        "cancel": "रद्द करें",
+        "loading": "लोड हो रहा है...",
+        "error": "त्रुटि"
+    },
+    "account": {
+        "title": "खाता",
+        "personal_info": "व्यक्तिगत जानकारी",
+        "email": "ईमेल",
+        "mobile": "मोबाइल",
+        "dob": "जन्म तिथि",
+        "settings_privacy": "सेटिंग्स और गोपनीयता",
+        "privacy_settings": "गोपनीयता सेटिंग्स",
+        "security": "सुरक्षा",
+        "notifications": "सूचनाएं",
+        "help_support": "सहायता और समर्थन",
+        "logout_button": "लॉग आउट",
+        "logout_title": "लॉग आउट",
+        "logout_confirm": "क्या आप वाकई लॉग आउट करना चाहते हैं?",
+        "update_profile_pic": "प्रोफ़ाइल चित्र अपडेट करें",
+        "choose_option": "एक विकल्प चुनें",
+        "camera": "कैमरा",
+        "gallery": "गैलरी",
+        "success": "सफल",
+        "profile_updated": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई!",
+        "failed_update": "प्रोफ़ाइल अपडेट करने में विफल",
+        "name_placeholder": "आपका नाम",
+        "bio_placeholder": "बायो जोड़ें...",
+        "email_placeholder": "अपना ईमेल दर्ज करें",
+        "mobile_placeholder": "मोबाइल नंबर दर्ज करें",
+        "dob_placeholder": "दिन/माह/वर्ष",
+        "language": "भाषा"
+    }
+}
