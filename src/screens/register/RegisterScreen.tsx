@@ -8,9 +8,11 @@ import { styles } from './RegisterScreenStyles';
 import { registerUser } from '../../store/slices/authSlice';
 import { showError } from '../../store/slices/modalSlice';
 import { AppDispatch, RootState } from '../../store';
+import { useTranslation } from 'react-i18next';
 
 const RegisterScreen = ({ navigation }: any) => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const { isLoading } = useSelector((state: RootState) => state.auth);
 
@@ -22,8 +24,8 @@ const RegisterScreen = ({ navigation }: any) => {
         // Validation
         if (!username || !email || !password) {
             dispatch(showError({
-                title: 'Validation Error',
-                message: 'All fields are required.',
+                title: t('auth.Validation_error'),
+                message: t('auth.all_fields_required'),
                 icon: 'alert-outline'
             }));
             return;
@@ -32,8 +34,8 @@ const RegisterScreen = ({ navigation }: any) => {
         const emailRegex = /\S+@\S+\.\S+/;
         if (!emailRegex.test(email)) {
             dispatch(showError({
-                title: 'Validation Error',
-                message: 'Please enter a valid email address.',
+                title: t('auth.Validation_error'),
+                message: t('auth.invalid_email'),
                 icon: 'alert-outline'
             }));
             return;
@@ -54,24 +56,24 @@ const RegisterScreen = ({ navigation }: any) => {
 
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            <Text style={[styles.title, { color: theme.colors.text }]}>Register Screen</Text>
+            <Text style={[styles.title, { color: theme.colors.text }]}>{t('auth.register_title')}</Text>
             <TextInput
-                label="Username"
-                placeholder="Enter username"
+                label={t('auth.username_label')}
+                placeholder={t('auth.username_placeholder')}
                 value={username}
                 onChangeText={setUsername}
             />
             <TextInput
-                label="Email"
-                placeholder="Enter email"
+                label={t('auth.email_label')}
+                placeholder={t('auth.email_placeholder')}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
             />
             <TextInput
-                label="Password"
-                placeholder="Enter password"
+                label={t('auth.password_label')}
+                placeholder={t('auth.password_placeholder')}
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
@@ -80,11 +82,11 @@ const RegisterScreen = ({ navigation }: any) => {
             {isLoading ? (
                 <ActivityIndicator size="large" color={theme.colors.primary || '#0000ff'} style={{ marginTop: 20 }} />
             ) : (
-                <Button title="Sign Up" onPress={handleRegister} />
+                <Button title={t('auth.signup_button')} onPress={handleRegister} />
             )}
 
             <Button
-                title="Back to Login"
+                title={t('auth.back_to_login')}
                 onPress={() => navigation.goBack()}
                 style={{ marginTop: 10, backgroundColor: 'transparent' }}
                 textStyle={{ color: theme.colors.text }}

@@ -13,6 +13,7 @@ import {
 import Modal from 'react-native-modal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Replaced with Text since vector icons might not be installed or configured
 
 const { width, height } = Dimensions.get('window');
@@ -46,6 +47,7 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
     onClose,
 }) => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const insets = useSafeAreaInsets();
 
     const [currentUserIndex, setCurrentUserIndex] = useState(initialUserIndex);
@@ -207,7 +209,7 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
                 {/* Footer / Reply (Visual only for now) */}
                 <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
                     <View style={styles.replyInput}>
-                        <Text style={styles.replyPlaceholder}>Send a message</Text>
+                        <Text style={styles.replyPlaceholder}>{t('dashboard.send_message')}</Text>
                     </View>
                     <TouchableOpacity>
                         <Text style={{ color: 'white', fontSize: 24 }}>♡</Text>

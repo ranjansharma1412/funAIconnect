@@ -7,7 +7,8 @@
         "save": "परिवर्तन सहेजें",
         "cancel": "रद्द करें",
         "loading": "लोड हो रहा है...",
-        "error": "त्रुटि"
+        "error": "त्रुटि",
+        "okay": "ठीक है"
     },
     "account": {
         "title": "खाता",
@@ -36,5 +37,89 @@
         "mobile_placeholder": "मोबाइल नंबर दर्ज करें",
         "dob_placeholder": "दिन/माह/वर्ष",
         "language": "भाषा"
+    },
+    "auth": {
+        "login_title": "लॉगिन स्क्रीन",
+        "login_button": "लॉगिन",
+        "register_button": "रजिस्टर",
+        "signup_button": "साइन अप",
+        "back_to_login": "वापस लॉगिन पर जाएं",
+        "register_title": "रजिस्टर स्क्रीन",
+        "email_label": "ईमेल",
+        "email_placeholder": "ईमेल दर्ज करें",
+        "password_label": "पासवर्ड",
+        "password_placeholder": "पासवर्ड दर्ज करें",
+        "username_label": "उपयोगकर्ता नाम",
+        "username_placeholder": "उपयोगकर्ता नाम दर्ज करें",
+        "Validation_error": "सत्यापन त्रुटि",
+        "all_fields_required": "सभी फ़ील्ड आवश्यक हैं।",
+        "invalid_email": "कृपया एक मान्य ईमेल पता दर्ज करें।",
+        "change_password_title": "पासवर्ड बदलें",
+        "old_password_label": "पुराना पासवर्ड",
+        "old_password_placeholder": "पुराना पासवर्ड दर्ज करें",
+        "new_password_label": "नया पासवर्ड",
+        "new_password_placeholder": "नया पासवर्ड दर्ज करें",
+        "update_password_button": "पासवर्ड अपडेट करें"
+    },
+    "dashboard": {
+        "you": "आप",
+        "send_message": "संदेश भेजें",
+        "fetch_error": "पोस्ट लोड करने में विफल",
+        "brand_name": "बाबागंग"
+    },
+    "creative": {
+        "header_title": "नई पोस्ट बनाएँ",
+        "tap_to_select": "छवि चुनने के लिए टैप करें",
+        "description_label": "विवरण",
+        "description_placeholder": "आपके मन में क्या है?",
+        "hashtags_label": "हैशटैग",
+        "hashtags_placeholder": "#मज़ा #एआई #कनेक्ट",
+        "camera_button": "कैमरा",
+        "gallery_button": "गैलरी",
+        "post_button": "पोस्ट करें",
+        "posting_button": "पोस्ट कर रहे हैं...",
+        "camera_close": "बंद करें",
+        "camera_error": "कैमरा डिवाइस नहीं मिला",
+        "go_back": "वापस जाओ",
+        "permission_denied": "अनुमति अस्वीकृत",
+        "permission_instruction": "फोटो लेने के लिए कैमरा अनुमति आवश्यक है।",
+        "settings": "सेटिंग्स",
+        "validation_title": "सत्यापन",
+        "select_image_error": "कृपया पहले एक छवि चुनें।",
+        "add_description_error": "कृपया एक विवरण जोड़ें।",
+        "success_title": "सफलता",
+        "post_created": "पोस्ट सफलतापूर्वक बनाई गई!"
+    },
+    "notifications": {
+        "title": "सूचनाएं",
+        "confirm": "पुष्टि करें",
+        "delete": "हटाएं",
+        "follow_back": "वापस फॉलो करें",
+        "reply": "उत्तर दें",
+        "followed_you": "ने आपको फॉलो करना शुरू किया।",
+        "liked_post": "ने आपकी पोस्ट को लाइक किया।",
+        "sent_message": "ने आपको एक संदेश भेजा:",
+        "requested_follow": "ने आपको फॉलो करने का अनुरोध किया।",
+        "liked_comment": "ने आपकी टिप्पणी को लाइक किया:"
+    },
+    "ai": {
+        "header_title": "एआई स्टूडियो",
+        "subtitle": "अपनी कल्पना को हकीकत में बदलें।",
+        "prompt_placeholder": "वर्णन करें कि आप क्या बनाना चाहते हैं...",
+        "generate_button": "उत्पन्न करें",
+        "generating_button": "उत्पन्न कर रहा है...",
+        "result_description_label": "विवरण",
+        "result_hashtags_label": "हैशटैग",
+        "create_post_button": "इसके साथ पोस्ट बनाएँ",
+        "trending_title": "ट्रेंडिंग कृतियाँ",
+        "prompt_required_title": "प्रॉम्प्ट आवश्यक है",
+        "prompt_required_message": "कृपया छवि उत्पन्न करने के लिए एक प्रॉम्प्ट दर्ज करें।"
+    },
+    "navigation": {
+        "feed": "फ़ीड",
+        "ai": "एआई स्टूडियो",
+        "creative": "रचनात्मक",
+        "history": "इतिहास",
+        "account": "खाता"
     }
 }

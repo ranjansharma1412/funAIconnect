@@ -18,10 +18,12 @@ import { createStyles } from './CreativeScreenStyle';
 import { launchImageLibrary, ImageLibraryOptions, Asset } from 'react-native-image-picker';
 import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 import { useRoute } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 
 const CreativeScreen = () => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const route = useRoute<any>();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [description, setDescription] = useState('');
@@ -55,7 +57,7 @@ const CreativeScreen = () => {
             console.log('User cancelled image picker');
         } else if (result.errorCode) {
             console.log('ImagePicker Error: ', result.errorMessage);
-            Alert.alert('Error', result.errorMessage);
+            Alert.alert(t('common.error'), result.errorMessage);
         } else if (result.assets && result.assets.length > 0) {
             setSelectedImage(result.assets[0].uri || null);
         }
@@ -64,9 +66,9 @@ const CreativeScreen = () => {
     const handleCameraCapture = async () => {
         const permissionStatus = await requestPermission();
         if (!permissionStatus) {
-            Alert.alert('Permission Denied', 'Camera permission is required to take photos.', [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Settings', onPress: () => Linking.openSettings() },
+            Alert.alert(t('creative.permission_denied'), t('creative.permission_instruction'), [
+                { text: t('common.cancel'), style: 'cancel' },
+                { text: t('creative.settings'), onPress: () => Linking.openSettings() },
             ]);
             return;
         }
@@ -82,9 +84,9 @@ const CreativeScreen = () => {
                 });
                 setSelectedImage(`file://${photo.path}`);
                 setIsCameraOpen(false);
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Failed to take photo:', error);
-                Alert.alert('Error', 'Failed to take photo');
+                Alert.alert(t('common.error'), 'Failed to take photo');
             }
         }
     };
@@ -95,11 +97,11 @@ const CreativeScreen = () => {
 
     const handlePost = async () => {
         if (!selectedImage) {
-            Alert.alert('Validation', 'Please select an image first.');
+            Alert.alert(t('creative.validation_title'), t('creative.select_image_error'));
             return;
         }
         if (!description) {
-            Alert.alert('Validation', 'Please add a description.');
+            Alert.alert(t('creative.validation_title'), t('creative.add_description_error'));
             return;
         }
 
@@ -128,9 +130,9 @@ const CreativeScreen = () => {
             const response = await postService.createPost(payload);
             console.log('Post created successfully:', response);
 
-            Alert.alert('Success', 'Post created successfully!', [
+            Alert.alert(t('creative.success_title'), t('creative.post_created'), [
                 {
-                    text: 'OK',
+                    text: t('common.okay'),
                     onPress: () => {
                         setDescription('');
                         setHashtags('');
@@ -141,7 +143,7 @@ const CreativeScreen = () => {
                 },
             ]);
         } catch (error: any) {
-            Alert.alert('Error', error.message || 'Failed to create post');
+            Alert.alert(t('common.error'), error.message || t('creative.fetch_error') || 'Failed to create post');
             console.error('Post creation error:', error);
         } finally {
             setIsPosting(false);
@@ -159,7 +161,7 @@ const CreativeScreen = () => {
                     ref={camera}
                 />
                 <TouchableOpacity style={styles.closeCameraButton} onPress={() => setIsCameraOpen(false)}>
-                    <Text style={styles.closeCameraText}>Close</Text>
+                    <Text style={styles.closeCameraText}>{t('creative.camera_close')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.captureButton} onPress={takePhoto} />
             </View>
@@ -169,9 +171,9 @@ const CreativeScreen = () => {
     if (isCameraOpen && !device) {
         return (
             <View style={styles.centeredContainer}>
-                <Text style={styles.errorText}>Camera device not found</Text>
+                <Text style={styles.errorText}>{t('creative.camera_error')}</Text>
                 <TouchableOpacity onPress={() => setIsCameraOpen(false)} style={{ padding: 20 }}>
-                    <Text style={styles.linkText}>Go Back</Text>
+                    <Text style={styles.linkText}>{t('creative.go_back')}</Text>
                 </TouchableOpacity>
             </View>
         )
@@ -180,21 +182,21 @@ const CreativeScreen = () => {
     return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                <Text style={styles.header}>Create New Post</Text>
+                <Text style={styles.header}>{t('creative.header_title')}</Text>
 
                 <TouchableOpacity style={styles.imagePreview} onPress={handleGalleryPick}>
                     {selectedImage ? (
                         <Image source={{ uri: selectedImage }} style={styles.fullImage} />
                     ) : (
-                        <Text style={styles.placeholderText}>Tap to select an image</Text>
+                        <Text style={styles.placeholderText}>{t('creative.tap_to_select')}</Text>
                     )}
                 </TouchableOpacity>
 
                 <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Description</Text>
+                    <Text style={styles.label}>{t('creative.description_label')}</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="What's on your mind?"
+                        placeholder={t('creative.description_placeholder')}
                         placeholderTextColor={theme.colors.textSecondary}
                         multiline
                         value={description}
@@ -203,10 +205,10 @@ const CreativeScreen = () => {
                 </View>
 
                 <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Hashtags</Text>
+                    <Text style={styles.label}>{t('creative.hashtags_label')}</Text>
                     <TextInput
                         style={[styles.input, styles.hashtagsInput]}
-                        placeholder="#fun #ai #connect"
+                        placeholder={t('creative.hashtags_placeholder')}
                         placeholderTextColor={theme.colors.textSecondary}
                         value={hashtags}
                         onChangeText={setHashtags}
@@ -218,18 +220,18 @@ const CreativeScreen = () => {
                         style={styles.actionButton}
                         onPress={handleCameraCapture}
                     >
-                        <Text style={styles.actionButtonText}>Camera</Text>
+                        <Text style={styles.actionButtonText}>{t('creative.camera_button')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.actionButton}
                         onPress={handleGalleryPick}
                     >
-                        <Text style={styles.actionButtonText}>Gallery</Text>
+                        <Text style={styles.actionButtonText}>{t('creative.gallery_button')}</Text>
                     </TouchableOpacity>
                 </View>
 
                 <Button
-                    title={isPosting ? "Posting..." : "Post"}
+                    title={isPosting ? t('creative.posting_button') : t('creative.post_button')}
                     onPress={handlePost}
                     useGradient={true}
                     style={{ marginTop: 20, opacity: isPosting ? 0.7 : 1 }}
