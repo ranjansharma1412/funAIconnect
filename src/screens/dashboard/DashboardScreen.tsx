@@ -1,13 +1,15 @@
-import React from 'react';
-import { View, StyleSheet, FlatList, StatusBar, Platform } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, FlatList, RefreshControl, ActivityIndicator, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import DashboardHeader from '../../components/molecules/DashboardHeader';
 import StoriesRail from '../../components/organisms/StoriesRail';
 import PostCard from '../../components/organisms/PostCard';
+import StatusViewerModal from '../../components/organisms/StatusViewerModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './DashboardScreenStyle';
+import { postService, Post } from '../../services/postService';
 
-// Dummy Data
+// Dummy Stories Data (Keep for now)
 const STORIES_DATA = [
     { id: '1', name: 'You', image: 'https://i.pravatar.cc/150?u=1', isLive: false },
     { id: '2', name: 'Irma', image: 'https://i.pravatar.cc/150?u=2', isLive: true },
@@ -16,45 +18,80 @@ const STORIES_DATA = [
     { id: '5', name: 'Sarah', image: 'https://i.pravatar.cc/150?u=5', isLive: false },
 ];
 
-const POSTS_DATA = [
-    {
-        id: '1',
-        userName: 'Amanda Johnson',
-        userHandle: '@mandaj',
-        userImage: 'https://i.pravatar.cc/150?u=3',
-        isVerified: true,
-        postImage: 'https://picsum.photos/500/500?random=1',
-        likes: 120,
-    },
-    {
-        id: '2',
-        userName: 'Irma Flores',
-        userHandle: '@irma_f',
-        userImage: 'https://i.pravatar.cc/150?u=2',
-        isVerified: false,
-        postImage: 'https://picsum.photos/500/500?random=2',
-        likes: 85,
-    },
-    {
-        id: '3',
-        userName: 'John Doe',
-        userHandle: '@johnd',
-        userImage: 'https://i.pravatar.cc/150?u=4',
-        isVerified: true,
-        postImage: 'https://picsum.photos/500/500?random=3',
-        likes: 342,
-    },
-];
-
 const DashboardScreen: React.FC = () => {
     const { theme } = useTheme();
     const insets = useSafeAreaInsets();
 
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // Status Viewer State
+    const [isStatusModalVisible, setIsStatusModalVisible] = React.useState(false);
+    const [selectedStatusUserIndex, setSelectedStatusUserIndex] = React.useState(0);
+
+    const fetchPosts = useCallback(async () => {
+        try {
+            const response = await postService.getPosts();
+            console.log('Posts:', response.posts);
+            setPosts(response.posts);
+        } catch (error) {
+            console.error('Failed to fetch posts:', error);
+            // Alert.alert('Error', 'Failed to fetch posts');
+        } finally {
+            setIsLoading(false);
+            setIsRefreshing(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchPosts();
+    }, [fetchPosts]);
+
+    const onRefresh = useCallback(() => {
+        setIsRefreshing(true);
+        fetchPosts();
+    }, [fetchPosts]);
+
+    // Prepare mock stories data
+    const userStories = React.useMemo(() => {
+        return STORIES_DATA.map((user, index) => ({
+            id: user.id,
+            username: user.name,
+            avatar: user.image,
+            stories: [
+                {
+                    id: `story-${user.id}-1`,
+                    url: `https://picsum.photos/seed/${user.id}1/500/900`,
+                    type: 'image' as const,
+                    duration: 3000
+                },
+                {
+                    id: `story-${user.id}-2`,
+                    url: `https://picsum.photos/seed/${user.id}2/500/900`,
+                    type: 'image' as const,
+                    duration: 3000
+                },
+                {
+                    id: `story-${user.id}-3`,
+                    url: `https://picsum.photos/seed/${user.id}3/500/900`,
+                    type: 'image' as const,
+                    duration: 3000
+                },
+            ]
+        }));
+    }, []);
+
+    const handleStoryPress = (id: string, index: number) => {
+        setSelectedStatusUserIndex(index);
+        setIsStatusModalVisible(true);
+    };
+
     const renderHeader = () => (
-        <StoriesRail data={STORIES_DATA} />
+        <StoriesRail data={STORIES_DATA} onPressItem={handleStoryPress} />
     );
 
-    const renderItem = ({ item }: { item: typeof POSTS_DATA[0] }) => (
+    const renderItem = ({ item }: { item: Post }) => (
         <PostCard
             userName={item.userName}
             userHandle={item.userHandle}
@@ -72,15 +109,40 @@ const DashboardScreen: React.FC = () => {
                 <DashboardHeader />
 
                 {/* FlatList for optimize scrolling */}
-                <FlatList
-                    data={POSTS_DATA}
-                    keyExtractor={(item) => item.id}
-                    renderItem={renderItem}
-                    ListHeaderComponent={renderHeader}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.listContent}
-                />
+                {isLoading && !isRefreshing ? (
+                    <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 20 }} />
+                ) : (
+                    <FlatList
+                        data={posts}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={renderItem}
+                        ListHeaderComponent={renderHeader}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.listContent}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={isRefreshing}
+                                onRefresh={onRefresh}
+                                tintColor={theme.colors.primary}
+                                colors={[theme.colors.primary]}
+                            />
+                        }
+                        ListEmptyComponent={
+                            <View style={{ padding: 20, alignItems: 'center' }}>
+                                <ActivityIndicator size="small" color={theme.colors.textSecondary} />
+                            </View>
+                        }
+                    />
+                )}
             </View>
+
+            {/* Status Viewer Modal */}
+            <StatusViewerModal
+                visible={isStatusModalVisible}
+                userStories={userStories}
+                initialUserIndex={selectedStatusUserIndex}
+                onClose={() => setIsStatusModalVisible(false)}
+            />
         </View>
     );
 };

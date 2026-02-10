@@ -1,11 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 // Using generic shapes for icons since we might not have a specific icon library installed yet. 
 // In a real app we'd use react-native-vector-icons or SVGs.
 
 const DashboardHeader: React.FC = () => {
     const { theme } = useTheme();
+    const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -23,7 +26,7 @@ const DashboardHeader: React.FC = () => {
             <Text style={[styles.logoText, { color: theme.colors.text }]}>Babagang</Text>
 
             {/* Right: Notification Icon Placeholder */}
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Notifications')}>
                 <View style={[styles.notificationIcon, { borderColor: theme.colors.text }]}>
                     <View style={[styles.notificationDot, { backgroundColor: theme.colors.accentRed }]} />
                 </View>

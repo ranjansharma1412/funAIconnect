@@ -9,6 +9,7 @@ export const createStyles = (theme: Theme) =>
             borderRadius: 8,
             alignItems: 'center',
             justifyContent: 'center',
+            height: 48
         },
         text: {
             color: theme.colors.text,

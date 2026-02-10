@@ -6,21 +6,12 @@ import { store } from '../store';
 import { showError, hideError } from '../store/slices/modalSlice';
 
 /**
- * Request Interceptor - Check network connectivity
+ * Request Interceptor - Check network connectivity & Inject Token
  */
 apiClient.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
         // Check internet connectivity before making request
         const isConnected = await checkInternetConnection();
-
-        if (__DEV__) {
-            console.log('API Request:', {
-                url: config.url,
-                method: config.method,
-                data: config.data,
-                headers: config.headers
-            });
-        }
 
         if (!isConnected) {
             // Show no internet error modal
@@ -35,6 +26,23 @@ apiClient.interceptors.request.use(
             return Promise.reject({
                 message: 'No internet connection',
                 code: 'NETWORK_ERROR',
+            });
+        }
+
+        // Inject Authorization Token
+        const state = store.getState();
+        const token = state.auth.token;
+
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        if (__DEV__) {
+            console.log('API Request:', {
+                url: config.url,
+                method: config.method,
+                data: config.data,
+                headers: config.headers
             });
         }
 

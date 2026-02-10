@@ -80,7 +80,7 @@ const RegisterScreen = ({ navigation }: any) => {
             {isLoading ? (
                 <ActivityIndicator size="large" color={theme.colors.primary || '#0000ff'} style={{ marginTop: 20 }} />
             ) : (
-                <Button title="sign up" onPress={handleRegister} />
+                <Button title="Sign Up" onPress={handleRegister} />
             )}
 
             <Button

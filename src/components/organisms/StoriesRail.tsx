@@ -12,9 +12,10 @@ interface StoryData {
 
 interface StoriesRailProps {
     data: StoryData[];
+    onPressItem: (id: string, index: number) => void;
 }
 
-const StoriesRail: React.FC<StoriesRailProps> = ({ data }) => {
+const StoriesRail: React.FC<StoriesRailProps> = ({ data, onPressItem }) => {
     return (
         <View style={styles.container}>
             <ScrollView
@@ -22,12 +23,13 @@ const StoriesRail: React.FC<StoriesRailProps> = ({ data }) => {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {data.map((story) => (
+                {data.map((story, index) => (
                     <StoryItem
                         key={story.id}
                         name={story.name}
                         imageSource={{ uri: story.image }}
                         isLive={story.isLive}
+                        onPress={() => onPressItem(story.id, index)}
                     />
                 ))}
             </ScrollView>
