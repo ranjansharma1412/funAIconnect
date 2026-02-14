@@ -14,6 +14,7 @@ import { createStyles } from './AIScreenStyle';
 import Button from '../../components/atoms/button/Button';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 // Mock Data for Trending
 const TRENDING_CREATIONS = [
@@ -31,6 +32,7 @@ const MOCK_GENERATED_IMAGES = [
 
 const AIScreen = () => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const navigation = useNavigation<any>();
 
@@ -40,7 +42,7 @@ const AIScreen = () => {
 
     const handleGenerate = () => {
         if (!prompt.trim()) {
-            Alert.alert('Prompt Required', 'Please enter a prompt to generate an image.');
+            Alert.alert(t('ai.prompt_required_title'), t('ai.prompt_required_message'));
             return;
         }
 
@@ -50,7 +52,7 @@ const AIScreen = () => {
             const randomImage = MOCK_GENERATED_IMAGES[Math.floor(Math.random() * MOCK_GENERATED_IMAGES.length)];
             setGeneratedContent({
                 uri: randomImage,
-                description: `Generated art based on: ${prompt}`,
+                description: `Generated art based on: ${prompt}`, // Localize this? Maybe difficult as it includes prompt.
                 hashtags: '#aiart #generated #creative',
             });
             setIsLoading(false);
@@ -85,22 +87,22 @@ const AIScreen = () => {
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>AI Studio</Text>
-                    <Text style={styles.subtitle}>Turn your imagination into reality.</Text>
+                    <Text style={styles.title}>{t('ai.header_title')}</Text>
+                    <Text style={styles.subtitle}>{t('ai.subtitle')}</Text>
                 </View>
 
                 {/* Generator Input */}
                 <View style={styles.generatorContainer}>
                     <TextInput
                         style={styles.promptInput}
-                        placeholder="Describe what you want to Create..."
+                        placeholder={t('ai.prompt_placeholder')}
                         placeholderTextColor={theme.colors.textSecondary}
                         multiline
                         value={prompt}
                         onChangeText={setPrompt}
                     />
                     <Button
-                        title={isLoading ? "Generating..." : "Generate"}
+                        title={isLoading ? t('ai.generating_button') : t('ai.generate_button')}
                         onPress={handleGenerate}
                         useGradient={true}
                         style={isLoading ? { opacity: 0.7 } : {}}
@@ -126,14 +128,14 @@ const AIScreen = () => {
                         </View>
 
                         <View style={styles.resultInputs}>
-                            <Text style={styles.resultLabel}>Description</Text>
+                            <Text style={styles.resultLabel}>{t('ai.result_description_label')}</Text>
                             <TextInput
                                 style={styles.resultInput}
                                 value={generatedContent.description}
                                 onChangeText={(text) => setGeneratedContent({ ...generatedContent, description: text })}
                                 multiline
                             />
-                            <Text style={styles.resultLabel}>Hashtags</Text>
+                            <Text style={styles.resultLabel}>{t('ai.result_hashtags_label')}</Text>
                             <TextInput
                                 style={styles.resultInput}
                                 value={generatedContent.hashtags}
@@ -141,7 +143,7 @@ const AIScreen = () => {
                             />
 
                             <Button
-                                title="Create Post with This"
+                                title={t('ai.create_post_button')}
                                 onPress={handleCreatePost}
                                 style={{ marginTop: 15 }}
                                 useGradient={true}
@@ -152,7 +154,7 @@ const AIScreen = () => {
 
                 {/* Trending Section */}
                 <View style={styles.trendingSection}>
-                    <Text style={styles.sectionTitle}>Trending Creations</Text>
+                    <Text style={styles.sectionTitle}>{t('ai.trending_title')}</Text>
                     <View style={styles.trendingGrid}>
                         {TRENDING_CREATIONS.map((item) => (
                             <TouchableOpacity

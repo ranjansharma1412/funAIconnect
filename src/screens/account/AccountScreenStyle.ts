@@ -152,4 +152,30 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
     },
+    // Language Selection Styles
+    languageSection: {
+        marginBottom: 20,
+    },
+    languageOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    radioButton: {
+        height: 20,
+        width: 20,
+        borderRadius: 10,
+        borderWidth: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    radioButtonSelected: {
+        height: 10,
+        width: 10,
+        borderRadius: 5,
+    },
+    languageText: {
+        fontSize: 16,
+    },
 });

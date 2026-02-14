@@ -4,8 +4,9 @@ import Button from '../../components/atoms/button/Button';
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './NotificationsStyle';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
-// Mock data (replace with real data later)
+// Mock data
 const NOTIFICATIONS_DATA = [
     {
         id: '1',
@@ -28,7 +29,7 @@ const NOTIFICATIONS_DATA = [
         message: 'liked your post.',
         time: '15m ago',
         read: true,
-        postImage: 'https://picsum.photos/200', // Example post image
+        postImage: 'https://picsum.photos/200',
     },
     {
         id: '3',
@@ -68,8 +69,23 @@ const NOTIFICATIONS_DATA = [
 
 const NotificationsScreen = () => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const navigation = useNavigation();
+
+    // Memoized localized data
+    const notificationsData = useMemo(() => {
+        return NOTIFICATIONS_DATA.map(item => {
+            let message = item.message;
+            if (item.type === 'follow' && !item.isRequest) message = t('notifications.followed_you');
+            else if (item.type === 'like' && !item.message.includes('comment')) message = t('notifications.liked_post');
+            else if (item.type === 'message') message = `${t('notifications.sent_message')} "..."`;
+            else if (item.type === 'follow' && item.isRequest) message = t('notifications.requested_follow');
+            else if (item.type === 'like' && item.message.includes('comment')) message = `${t('notifications.liked_comment')} "..."`;
+
+            return { ...item, message };
+        });
+    }, [t]);
 
     const renderItem = ({ item }: { item: any }) => {
         const handlePress = () => {
@@ -107,7 +123,7 @@ const NotificationsScreen = () => {
                     {item.type === 'follow' && item.isRequest && (
                         <View style={styles.actionsContainer}>
                             <Button
-                                title="Confirm"
+                                title={t('notifications.confirm')}
                                 onPress={handlePrimaryAction}
                                 useGradient={false}
                                 style={[styles.actionButton, styles.primaryButton]}
@@ -117,7 +133,7 @@ const NotificationsScreen = () => {
                                 style={[styles.actionButton, styles.secondaryButton]}
                                 onPress={handleSecondaryAction}
                             >
-                                <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>Delete</Text>
+                                <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>{t('notifications.delete')}</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -125,7 +141,7 @@ const NotificationsScreen = () => {
                     {item.type === 'follow' && !item.isRequest && (
                         <View style={styles.actionsContainer}>
                             <Button
-                                title="Follow Back"
+                                title={t('notifications.follow_back')}
                                 onPress={() => console.log('Follow back')}
                                 useGradient={false}
                                 style={[styles.actionButton, styles.primaryButton]}
@@ -141,7 +157,7 @@ const NotificationsScreen = () => {
                                 style={[styles.actionButton, styles.secondaryButton]}
                                 onPress={() => console.log('Reply')}
                             >
-                                <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>Reply</Text>
+                                <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>{t('notifications.reply')}</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -156,10 +172,10 @@ const NotificationsScreen = () => {
         <View style={styles.container}>
             <StatusBar barStyle={theme.mode === 'dark' ? 'light-content' : 'dark-content'} />
             <View style={styles.header}>
-                <Text style={styles.title}>Notifications</Text>
+                <Text style={styles.title}>{t('notifications.title')}</Text>
             </View>
             <FlatList
-                data={NOTIFICATIONS_DATA}
+                data={notificationsData}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.listContent}

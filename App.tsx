@@ -9,6 +9,7 @@ import { store } from './src/store';
 import { startNetworkMonitoring } from './src/utils/networkUtils';
 // Import interceptors to initialize them
 import './src/services/apiInterceptors';
+import './src/i18n';
 
 const App = () => {
   useEffect(() => {

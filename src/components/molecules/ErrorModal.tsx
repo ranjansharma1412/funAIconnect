@@ -9,6 +9,7 @@ import {
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ErrorModalConfig } from '../../types/api.types';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
@@ -25,10 +26,13 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
     icon = 'alert-circle-outline',
     iconColor = '#FF6B6B',
     showCloseButton = true,
-    buttonText = 'Okay',
+    buttonText: propButtonText,
     onClose,
     onButtonPress,
 }) => {
+    const { t } = useTranslation();
+    const buttonText = propButtonText || t('common.okay');
+
     const handleButtonPress = () => {
         if (onButtonPress) {
             onButtonPress();

@@ -9,9 +9,11 @@ import { styles } from './LoginScreenStyles';
 import { loginUser } from '../../store/slices/authSlice';
 import { showError } from '../../store/slices/modalSlice';
 import { AppDispatch, RootState } from '../../store';
+import { useTranslation } from 'react-i18next';
 
 const LoginScreen = ({ navigation }: any) => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const { isLoading } = useSelector((state: RootState) => state.auth);
 
@@ -22,8 +24,8 @@ const LoginScreen = ({ navigation }: any) => {
         // Validation
         if (!email || !password) {
             dispatch(showError({
-                title: 'Validation Error',
-                message: 'All fields are required.',
+                title: t('auth.Validation_error'),
+                message: t('auth.all_fields_required'),
                 icon: 'alert-outline'
             }));
             return;
@@ -32,8 +34,8 @@ const LoginScreen = ({ navigation }: any) => {
         const emailRegex = /\S+@\S+\.\S+/;
         if (!emailRegex.test(email)) {
             dispatch(showError({
-                title: 'Validation Error',
-                message: 'Please enter a valid email address.',
+                title: t('auth.Validation_error'),
+                message: t('auth.invalid_email'),
                 icon: 'alert-outline'
             }));
             return;
@@ -54,18 +56,18 @@ const LoginScreen = ({ navigation }: any) => {
 
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            <Text style={[styles.title, { color: theme.colors.text }]}>Login Screen</Text>
+            <Text style={[styles.title, { color: theme.colors.text }]}>{t('auth.login_title')}</Text>
             <TextInput
-                label="Email"
-                placeholder="Enter email"
+                label={t('auth.email_label')}
+                placeholder={t('auth.email_placeholder')}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
             />
             <TextInput
-                label="Password"
-                placeholder="Enter password"
+                label={t('auth.password_label')}
+                placeholder={t('auth.password_placeholder')}
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
@@ -74,11 +76,11 @@ const LoginScreen = ({ navigation }: any) => {
             {isLoading ? (
                 <ActivityIndicator size="large" color={theme.colors.primary || '#0000ff'} style={{ marginTop: 20 }} />
             ) : (
-                <Button title="Login" onPress={handleLogin} />
+                <Button title={t('auth.login_button')} onPress={handleLogin} />
             )}
 
             <Button
-                title="Register"
+                title={t('auth.register_button')}
                 onPress={() => navigation.navigate('Register')}
                 style={{ marginTop: 10, backgroundColor: theme.colors.secondary }}
             />

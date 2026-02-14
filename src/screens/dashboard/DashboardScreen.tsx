@@ -18,8 +18,13 @@ const STORIES_DATA = [
     { id: '5', name: 'Sarah', image: 'https://i.pravatar.cc/150?u=5', isLive: false },
 ];
 
+import { useTranslation } from 'react-i18next';
+
+// ... imports
+
 const DashboardScreen: React.FC = () => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const insets = useSafeAreaInsets();
 
     const [posts, setPosts] = useState<Post[]>([]);
@@ -37,12 +42,12 @@ const DashboardScreen: React.FC = () => {
             setPosts(response.posts);
         } catch (error) {
             console.error('Failed to fetch posts:', error);
-            // Alert.alert('Error', 'Failed to fetch posts');
+            // Alert.alert(t('common.error'), t('dashboard.fetch_error'));
         } finally {
             setIsLoading(false);
             setIsRefreshing(false);
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         fetchPosts();
@@ -57,9 +62,10 @@ const DashboardScreen: React.FC = () => {
     const userStories = React.useMemo(() => {
         return STORIES_DATA.map((user, index) => ({
             id: user.id,
-            username: user.name,
+            username: user.name === 'You' ? t('dashboard.you') : user.name,
             avatar: user.image,
             stories: [
+                // ... same stories structure
                 {
                     id: `story-${user.id}-1`,
                     url: `https://picsum.photos/seed/${user.id}1/500/900`,
@@ -80,16 +86,26 @@ const DashboardScreen: React.FC = () => {
                 },
             ]
         }));
-    }, []);
+    }, [t]);
 
     const handleStoryPress = (id: string, index: number) => {
         setSelectedStatusUserIndex(index);
         setIsStatusModalVisible(true);
     };
 
+    // Need to pass localized data to StoriesRail too
+    const localizedStoriesData = React.useMemo(() => {
+        return STORIES_DATA.map(user => ({
+            ...user,
+            name: user.name === 'You' ? t('dashboard.you') : user.name,
+        }));
+    }, [t]);
+
     const renderHeader = () => (
-        <StoriesRail data={STORIES_DATA} onPressItem={handleStoryPress} />
+        <StoriesRail data={localizedStoriesData} onPressItem={handleStoryPress} />
     );
+
+    // ... renderItem and return
 
     const renderItem = ({ item }: { item: Post }) => (
         <PostCard
