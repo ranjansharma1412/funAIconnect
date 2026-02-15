@@ -1,6 +1,8 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 import TabNavigator from './TabNavigator';
 import LoginScreen from '../screens/login/LoginScreen';
 import RegisterScreen from '../screens/register/RegisterScreen';
@@ -13,6 +15,7 @@ const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
     const { theme } = useTheme();
+    const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
     return (
         <NavigationContainer>
@@ -27,16 +30,23 @@ const AppNavigator = () => {
                     },
                 }}
             >
-                <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-                <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-                <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: false }} />
-                <Stack.Screen
-                    name="Main"
-                    component={TabNavigator}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
-                <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
+                {isAuthenticated ? (
+                    <>
+                        <Stack.Screen
+                            name="Main"
+                            component={TabNavigator}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+                        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+                        <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
+                    </>
+                ) : (
+                    <>
+                        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+                    </>
+                )}
             </Stack.Navigator>
         </NavigationContainer>
     );

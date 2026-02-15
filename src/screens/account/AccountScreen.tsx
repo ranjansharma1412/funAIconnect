@@ -18,11 +18,13 @@ import { launchImageLibrary, launchCamera, ImageLibraryOptions, CameraOptions } 
 import { authService } from '../../services/authService';
 
 import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
 
 const AccountScreen = () => {
     const { theme } = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const { t, i18n } = useTranslation();
+    const dispatch = useDispatch();
 
     const { user } = useSelector((state: any) => state.auth);
 
@@ -105,7 +107,13 @@ const AccountScreen = () => {
     const handleLogout = () => {
         Alert.alert(t('account.logout_title'), t('account.logout_confirm'), [
             { text: t('common.cancel'), style: 'cancel' },
-            { text: t('account.logout_button'), style: 'destructive', onPress: () => console.log('Logged out') }
+            {
+                text: t('account.logout_button'),
+                style: 'destructive',
+                onPress: () => {
+                    dispatch(logout());
+                }
+            }
         ]);
     };
 
