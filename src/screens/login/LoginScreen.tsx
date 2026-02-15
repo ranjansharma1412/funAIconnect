@@ -124,6 +124,15 @@ const LoginScreen = ({ navigation }: any) => {
                 <Text style={[styles.errorText, { color: theme.colors.error }]}>{passwordError}</Text>
             ) : null}
 
+            <TouchableOpacity
+                onPress={() => navigation.navigate('ForgotPassword')}
+                style={{ alignSelf: 'flex-end', marginBottom: 16, marginTop: -4 }}
+            >
+                <Text style={{ color: theme.colors.primary, fontSize: 14 }}>
+                    {t('auth.forgot_password_link')}
+                </Text>
+            </TouchableOpacity>
+
             {isLoading ? (
                 <ActivityIndicator size="large" color={theme.colors.primary || '#0000ff'} style={{ marginTop: 20 }} />
             ) : (

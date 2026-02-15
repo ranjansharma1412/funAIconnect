@@ -66,4 +66,18 @@ export const authService = {
             throw parseApiError(error);
         }
     },
+
+    /**
+     * Request password reset email
+     * @param email - User's email address
+     * @returns Promise<{ message: string }>
+     */
+    forgotPassword: async (email: string): Promise<{ message: string }> => {
+        try {
+            const response = await apiClient.post<{ message: string }>('/api/auth/forgot-password', { email });
+            return response.data;
+        } catch (error: any) {
+            throw parseApiError(error);
+        }
+    },
 };
