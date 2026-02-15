@@ -32,3 +32,4 @@ const TextInput: React.FC<CustomTextInputProps> = ({ label, style, rightIcon, ..
 };
 
 export default TextInput;
+
