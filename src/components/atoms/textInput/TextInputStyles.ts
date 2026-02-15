@@ -6,6 +6,10 @@ export const createStyles = (theme: Theme) =>
         container: {
             marginBottom: 16,
         },
+        inputWrapper: {
+            position: 'relative',
+            justifyContent: 'center',
+        },
         input: {
             height: 48,
             borderWidth: 1,
@@ -15,6 +19,14 @@ export const createStyles = (theme: Theme) =>
             color: theme.colors.text,
             backgroundColor: theme.colors.background,
         },
+        rightIconContainer: {
+            position: 'absolute',
+            right: 12,
+            top: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
         label: {
             marginBottom: 8,
             color: theme.colors.text,
@@ -22,3 +34,4 @@ export const createStyles = (theme: Theme) =>
             fontWeight: '600',
         },
     });
+
