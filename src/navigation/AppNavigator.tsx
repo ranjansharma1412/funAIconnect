@@ -10,14 +10,36 @@ import ChangePasswordScreen from '../screens/changePassword/ChangePasswordScreen
 import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import { useTheme } from '../theme/ThemeContext';
 
+import ForgotPasswordScreen from '../screens/login/ForgotPasswordScreen';
+import ResetPasswordScreen from '../screens/login/ResetPasswordScreen';
+import { LinkingOptions } from '@react-navigation/native';
+
 const Stack = createNativeStackNavigator();
+
+const linking: LinkingOptions<ReactNavigation.RootParamList> = {
+    prefixes: ['funai://'],
+    config: {
+        screens: {
+            Login: 'login',
+            Register: 'register',
+            ForgotPassword: 'forgot-password',
+            ResetPassword: 'reset-password/:token',
+            Main: {
+                screens: {
+                    Home: 'home',
+                    // Add other nested screens if needed
+                },
+            },
+        },
+    },
+};
 
 const AppNavigator = () => {
     const { theme } = useTheme();
     const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
     return (
-        <NavigationContainer>
+        <NavigationContainer linking={linking}>
             <Stack.Navigator
                 screenOptions={{
                     headerStyle: {
@@ -43,6 +65,8 @@ const AppNavigator = () => {
                     <>
                         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
                         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Forgot Password' }} />
+                        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ title: 'Reset Password' }} />
                     </>
                 )}
             </Stack.Navigator>
