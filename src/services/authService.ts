@@ -66,4 +66,22 @@ export const authService = {
             throw parseApiError(error);
         }
     },
+
+    forgotPassword: async (email: string) => {
+        try {
+            const response = await apiClient.post('/api/auth/forgot-password', { email });
+            return response.data;
+        } catch (error: any) {
+            throw parseApiError(error);
+        }
+    },
+
+    resetPassword: async (token: string, new_password: string) => {
+        try {
+            const response = await apiClient.post('/api/auth/reset-password', { token, new_password });
+            return response.data;
+        } catch (error: any) {
+            throw parseApiError(error);
+        }
+    },
 };
