@@ -33,5 +33,13 @@ export const createStyles = (theme: Theme) =>
             fontSize: 14,
             fontWeight: '600',
         },
+        rightIconContainer: {
+            position: 'absolute',
+            right: 12,
+            top: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
     });
 

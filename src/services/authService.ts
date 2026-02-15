@@ -52,4 +52,18 @@ export const authService = {
             throw parseApiError(error);
         }
     },
+
+    /**
+     * Check if a username is available
+     * @param username - Username to check
+     * @returns Promise<{ available: boolean }>
+     */
+    checkUsername: async (username: string): Promise<{ available: boolean }> => {
+        try {
+            const response = await apiClient.post<{ available: boolean }>('/api/auth/check-username', { username });
+            return response.data;
+        } catch (error: any) {
+            throw parseApiError(error);
+        }
+    },
 };
