@@ -5,9 +5,12 @@ import DashboardHeader from '../../components/molecules/DashboardHeader';
 import StoriesRail from '../../components/organisms/StoriesRail';
 import PostCard from '../../components/organisms/PostCard';
 import StatusViewerModal from '../../components/organisms/StatusViewerModal';
+import CommentsModal from '../../components/organisms/CommentsModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './DashboardScreenStyle';
 import { postService, Post } from '../../services/postService';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 // Dummy Stories Data (Keep for now)
 const STORIES_DATA = [
@@ -26,6 +29,7 @@ const DashboardScreen: React.FC = () => {
     const { theme } = useTheme();
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
+    const { user } = useSelector((state: RootState) => state.auth);
 
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -34,6 +38,10 @@ const DashboardScreen: React.FC = () => {
     // Status Viewer State
     const [isStatusModalVisible, setIsStatusModalVisible] = React.useState(false);
     const [selectedStatusUserIndex, setSelectedStatusUserIndex] = React.useState(0);
+
+    // Comments Modal State
+    const [isCommentsVisible, setIsCommentsVisible] = useState(false);
+    const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
     const fetchPosts = useCallback(async () => {
         try {
@@ -93,6 +101,11 @@ const DashboardScreen: React.FC = () => {
         setIsStatusModalVisible(true);
     };
 
+    const handleCommentPress = (postId: number) => {
+        setSelectedPostId(postId);
+        setIsCommentsVisible(true);
+    };
+
     // Need to pass localized data to StoriesRail too
     const localizedStoriesData = React.useMemo(() => {
         return STORIES_DATA.map(user => ({
@@ -115,6 +128,7 @@ const DashboardScreen: React.FC = () => {
             isVerified={item.isVerified}
             postImage={item.postImage}
             likes={item.likes}
+            onCommentPress={() => handleCommentPress(item.id)}
         />
     );
 
@@ -158,6 +172,14 @@ const DashboardScreen: React.FC = () => {
                 userStories={userStories}
                 initialUserIndex={selectedStatusUserIndex}
                 onClose={() => setIsStatusModalVisible(false)}
+            />
+
+            {/* Comments Modal */}
+            <CommentsModal
+                visible={isCommentsVisible}
+                onClose={() => setIsCommentsVisible(false)}
+                postId={selectedPostId}
+                currentUserId={user ? parseInt(user.id) : undefined}
             />
         </View>
     );

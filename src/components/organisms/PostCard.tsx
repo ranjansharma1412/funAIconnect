@@ -15,6 +15,7 @@ interface PostCardProps {
     isVerified?: boolean;
     postImage: string;
     likes?: number; // Optional statistic for display
+    onCommentPress?: () => void;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -22,7 +23,8 @@ const PostCard: React.FC<PostCardProps> = ({
     userName,
     userHandle,
     isVerified = false,
-    postImage
+    postImage,
+    onCommentPress
 }) => {
     const { theme } = useTheme();
     // Fallback for null/undefined postImage to prevent crash and show placeholder
@@ -104,7 +106,7 @@ const PostCard: React.FC<PostCardProps> = ({
                             <Ionicons name="heart-outline" size={26} color="white" />
                             <Text style={styles.actionText}>1.2k</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionButton}>
+                        <TouchableOpacity style={styles.actionButton} onPress={onCommentPress}>
                             <Ionicons name="chatbubble-outline" size={24} color="white" />
                             <Text style={styles.actionText}>342</Text>
                         </TouchableOpacity>
