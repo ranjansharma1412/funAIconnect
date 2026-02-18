@@ -9,6 +9,7 @@ import CommentsModal from '../../components/organisms/CommentsModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './DashboardScreenStyle';
 import { postService, Post } from '../../services/postService';
+import { commentService } from '../../services/commentService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 
@@ -47,7 +48,21 @@ const DashboardScreen: React.FC = () => {
         try {
             const response = await postService.getPosts();
             console.log('Posts:', response.posts);
-            setPosts(response.posts);
+
+            // Fetch comment counts for each post
+            const postsWithComments = await Promise.all(
+                response.posts.map(async (post) => {
+                    try {
+                        const commentsResponse = await commentService.getComments(post.id, 1, 1);
+                        return { ...post, commentsCount: commentsResponse.total };
+                    } catch (error) {
+                        console.error(`Failed to fetch comments for post ${post.id}`, error);
+                        return { ...post, commentsCount: 0 };
+                    }
+                })
+            );
+
+            setPosts(postsWithComments);
         } catch (error) {
             console.error('Failed to fetch posts:', error);
             // Alert.alert(t('common.error'), t('dashboard.fetch_error'));
@@ -128,6 +143,7 @@ const DashboardScreen: React.FC = () => {
             isVerified={item.isVerified}
             postImage={item.postImage}
             likes={item.likes}
+            commentsCount={item.commentsCount}
             onCommentPress={() => handleCommentPress(item.id)}
         />
     );
