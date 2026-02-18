@@ -23,6 +23,7 @@ export interface Post {
     isVerified: boolean;
     likes: number;
     createdAt: string;
+    commentsCount?: number;
 }
 
 export interface GetPostsResponse {
