@@ -12,6 +12,7 @@ import { postService, Post } from '../../services/postService';
 import { commentService } from '../../services/commentService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { sharePost } from '../../utils/shareUtils';
 
 // Dummy Stories Data (Keep for now)
 const STORIES_DATA = [
@@ -121,6 +122,14 @@ const DashboardScreen: React.FC = () => {
         setIsCommentsVisible(true);
     };
 
+    const handleSharePress = async (post: Post) => {
+        await sharePost({
+            message: `${post.description}\n\nCheck out this post on FunAIconnect!`,
+            url: post.postImage, // iOS supports url
+            title: 'Share Post', // Android
+        });
+    };
+
     // Need to pass localized data to StoriesRail too
     const localizedStoriesData = React.useMemo(() => {
         return STORIES_DATA.map(user => ({
@@ -145,6 +154,7 @@ const DashboardScreen: React.FC = () => {
             likes={item.likes}
             commentsCount={item.commentsCount}
             onCommentPress={() => handleCommentPress(item.id)}
+            onSharePress={() => handleSharePress(item)}
         />
     );
 
