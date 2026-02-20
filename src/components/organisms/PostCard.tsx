@@ -17,6 +17,7 @@ interface PostCardProps {
     likes?: number; // Optional statistic for display
     commentsCount?: number;
     onCommentPress?: () => void;
+    onSharePress?: () => void;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -26,6 +27,7 @@ const PostCard: React.FC<PostCardProps> = ({
     isVerified = false,
     postImage,
     onCommentPress,
+    onSharePress,
     commentsCount = 0
 }) => {
     const { theme } = useTheme();
@@ -112,7 +114,7 @@ const PostCard: React.FC<PostCardProps> = ({
                             <Ionicons name="chatbubble-outline" size={24} color="white" />
                             {commentsCount > 0 && <Text style={styles.actionText}>{commentsCount}</Text>}
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionButton}>
+                        <TouchableOpacity style={styles.actionButton} onPress={onSharePress}>
                             <Ionicons name="share-outline" size={24} color="white" />
                         </TouchableOpacity>
                     </View>
