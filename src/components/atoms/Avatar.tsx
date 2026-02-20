@@ -19,10 +19,15 @@ const Avatar: React.FC<AvatarProps> = ({
 }) => {
     const { theme } = useTheme();
 
+    // Ensure we handle null/undefined uri gracefully
+    const validSource = (typeof source === 'object' && source !== null && 'uri' in source && !source.uri)
+        ? { uri: 'https://i.pravatar.cc/300' } // Fallback URI
+        : source;
+
     return (
         <View style={[styles.container, { width: size, height: size }, style]}>
             <Image
-                source={source}
+                source={validSource}
                 style={[
                     styles.image,
                     {

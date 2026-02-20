@@ -33,12 +33,13 @@ const PostCard: React.FC<PostCardProps> = ({
     const { theme } = useTheme();
     // Fallback for null/undefined postImage to prevent crash and show placeholder
     const validPostImage = postImage || 'https://via.placeholder.com/500?text=No+Image';
+    const validUserImage = userImage || 'https://i.pravatar.cc/300';
 
     const renderGlassHeader = () => {
         const headerContent = (
             <View style={styles.glassHeaderInner}>
                 <View style={styles.userInfo}>
-                    <Avatar source={{ uri: userImage }} size={40} />
+                    <Avatar source={{ uri: validUserImage }} size={40} />
                     <View style={styles.textContainer}>
                         <View style={styles.nameRow}>
                             <Text style={styles.glassName}>
