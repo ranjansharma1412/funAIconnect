@@ -8,7 +8,8 @@ import {
     TextInput,
     Alert,
     Platform,
-    ActivityIndicator
+    ActivityIndicator,
+    Linking
 } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './AccountScreenStyle';
@@ -19,12 +20,14 @@ import { authService } from '../../services/authService';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
+import { useNavigation } from '@react-navigation/native';
 
 const AccountScreen = () => {
     const { theme } = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const { t, i18n } = useTranslation();
     const dispatch = useDispatch();
+    const navigation = useNavigation<any>();
 
     const { user } = useSelector((state: any) => state.auth);
 
@@ -252,10 +255,10 @@ const AccountScreen = () => {
                 {/* Settings & Privacy */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>{t('account.settings_privacy')}</Text>
-                    {renderSettingItem('lock-closed-outline', t('account.privacy_settings'))}
-                    {renderSettingItem('shield-checkmark-outline', t('account.security'))}
-                    {renderSettingItem('notifications-outline', t('account.notifications'))}
-                    {renderSettingItem('help-circle-outline', t('account.help_support'))}
+                    {renderSettingItem('key-outline', t('account.change_password', 'Change Password'), () => navigation.navigate('ChangePassword'))}
+                    {renderSettingItem('lock-closed-outline', t('account.privacy_settings', 'Privacy Policy'), () => Linking.openURL('https://funaiconnect.netlify.app/privacy'))}
+                    {renderSettingItem('document-text-outline', t('account.terms_conditions', 'Terms & Conditions'), () => Linking.openURL('https://funaiconnect.netlify.app/terms'))}
+                    {renderSettingItem('help-circle-outline', t('account.help_support', 'Contact Us'), () => Linking.openURL('https://funaiconnect.netlify.app/contact'))}
                 </View>
 
                 {/* Logout Action */}

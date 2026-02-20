@@ -84,4 +84,13 @@ export const authService = {
             throw parseApiError(error);
         }
     },
+
+    changePassword: async (data: { old_password: string; new_password: string }) => {
+        try {
+            const response = await apiClient.post('/api/auth/change-password', data);
+            return response.data;
+        } catch (error: any) {
+            throw parseApiError(error);
+        }
+    },
 };
