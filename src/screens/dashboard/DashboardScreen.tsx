@@ -13,6 +13,7 @@ import { commentService } from '../../services/commentService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { sharePost } from '../../utils/shareUtils';
+import EmptyPostsState from '../../components/molecules/EmptyPostsState';
 
 // Dummy Stories Data (Keep for now)
 const STORIES_DATA = [
@@ -183,11 +184,7 @@ const DashboardScreen: React.FC = () => {
                                 colors={[theme.colors.primary]}
                             />
                         }
-                        ListEmptyComponent={
-                            <View style={{ padding: 20, alignItems: 'center' }}>
-                                <ActivityIndicator size="small" color={theme.colors.textSecondary} />
-                            </View>
-                        }
+                        ListEmptyComponent={<EmptyPostsState />}
                     />
                 )}
             </View>
