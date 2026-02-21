@@ -108,7 +108,7 @@ const CreativeScreen = () => {
         setIsPosting(true);
         try {
             // Use user data from store, fallback to defaults if not logged in (for dev)
-            const userName = user?.name || 'Guest User';
+            const userName = user?.fullName || 'Guest User';
             const userHandle = user?.username || '@guest';
             const userImage = user?.avatar || 'https://via.placeholder.com/150';
 

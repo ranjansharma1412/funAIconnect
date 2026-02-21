@@ -111,7 +111,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
                 title="Back to Login"
                 onPress={() => navigation.goBack()}
                 style={{ marginTop: 10, backgroundColor: 'transparent', borderWidth: 0 }}
-                textStyle={{ color: theme.colors.primary }}
+                textStyle={{ color: theme.colors.text }}
             />
         </ScrollView>
     );
