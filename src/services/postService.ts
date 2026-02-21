@@ -22,6 +22,7 @@ export interface Post {
     postImage: string;
     isVerified: boolean;
     likes: number;
+    hasLiked?: boolean;
     createdAt: string;
     commentsCount?: number;
 }
@@ -75,17 +76,26 @@ export const postService = {
         }
     },
 
-    getPosts: async (page: number = 1, perPage: number = 10): Promise<GetPostsResponse> => {
+    getPosts: async (page: number = 1, perPage: number = 10, userId?: string): Promise<GetPostsResponse> => {
         try {
-            const response = await apiClient.get('/api/posts/', {
-                params: {
-                    page,
-                    per_page: perPage,
-                },
-            });
+            const params: any = { page, per_page: perPage };
+            if (userId) {
+                params.user_id = userId;
+            }
+            const response = await apiClient.get('/api/posts/', { params });
             return response.data;
         } catch (error) {
             console.error('Error fetching posts:', error);
+            throw error;
+        }
+    },
+
+    toggleLike: async (postId: number, userId: string): Promise<{ liked: boolean; likes: number }> => {
+        try {
+            const response = await apiClient.post(`/api/posts/${postId}/like`, { userId });
+            return response.data;
+        } catch (error) {
+            console.error('Error toggling like:', error);
             throw error;
         }
     },

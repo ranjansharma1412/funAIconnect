@@ -48,7 +48,8 @@ const DashboardScreen: React.FC = () => {
 
     const fetchPosts = useCallback(async () => {
         try {
-            const response = await postService.getPosts();
+            const currentUserId = user?.id ? String(user.id) : undefined;
+            const response = await postService.getPosts(1, 10, currentUserId);
             console.log('Posts:', response.posts);
 
             // Fetch comment counts for each post
@@ -72,7 +73,7 @@ const DashboardScreen: React.FC = () => {
             setIsLoading(false);
             setIsRefreshing(false);
         }
-    }, [t]);
+    }, [t, user?.id]);
 
     useEffect(() => {
         fetchPosts();
@@ -131,6 +132,52 @@ const DashboardScreen: React.FC = () => {
         });
     };
 
+    const handleLikePress = async (post: Post) => {
+        if (!user || (!user.id && !user.token)) {
+            // User needs to be logged in to like posts
+            Alert.alert(t('common.error', 'Error'), t('auth.login_required', 'You must be logged in to like posts.'));
+            return;
+        }
+
+        const currentUserId = String(user.id);
+
+        // 1. Optimistic UI update
+        const originalPosts = [...posts];
+        setPosts(prevPosts => prevPosts.map(p => {
+            if (p.id === post.id) {
+                const isCurrentlyLiked = p.hasLiked;
+                return {
+                    ...p,
+                    hasLiked: !isCurrentlyLiked,
+                    likes: isCurrentlyLiked ? Math.max(0, p.likes - 1) : p.likes + 1
+                };
+            }
+            return p;
+        }));
+
+        // 2. Make API Call
+        try {
+            const response = await postService.toggleLike(post.id, currentUserId);
+
+            // 3. Sync strictly with server response just in case
+            setPosts(prevPosts => prevPosts.map(p => {
+                if (p.id === post.id) {
+                    return {
+                        ...p,
+                        hasLiked: response.liked,
+                        likes: response.likes
+                    };
+                }
+                return p;
+            }));
+        } catch (error) {
+            // 4. Revert UI on failure
+            console.error('Failed to toggle like:', error);
+            setPosts(originalPosts);
+            Alert.alert(t('common.error', 'Error'), t('api.something_went_wrong', 'Could not process like action.'));
+        }
+    };
+
     // Need to pass localized data to StoriesRail too
     const localizedStoriesData = React.useMemo(() => {
         return STORIES_DATA.map(user => ({
@@ -153,7 +200,9 @@ const DashboardScreen: React.FC = () => {
             isVerified={item.isVerified}
             postImage={item.postImage}
             likes={item.likes}
+            hasLiked={item.hasLiked}
             commentsCount={item.commentsCount}
+            onLikePress={() => handleLikePress(item)}
             onCommentPress={() => handleCommentPress(item.id)}
             onSharePress={() => handleSharePress(item)}
         />
