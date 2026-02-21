@@ -15,9 +15,11 @@ interface PostCardProps {
     isVerified?: boolean;
     postImage: string;
     likes?: number; // Optional statistic for display
+    hasLiked?: boolean;
     commentsCount?: number;
     onCommentPress?: () => void;
     onSharePress?: () => void;
+    onLikePress?: () => void;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -26,8 +28,11 @@ const PostCard: React.FC<PostCardProps> = ({
     userHandle,
     isVerified = false,
     postImage,
+    likes = 0,
+    hasLiked = false,
     onCommentPress,
     onSharePress,
+    onLikePress,
     commentsCount = 0
 }) => {
     const { theme } = useTheme();
@@ -107,9 +112,13 @@ const PostCard: React.FC<PostCardProps> = ({
                 {/* Bottom Actions & Caption */}
                 <View style={styles.footerOverlay}>
                     <View style={styles.actionRow}>
-                        <TouchableOpacity style={styles.actionButton}>
-                            <Ionicons name="heart-outline" size={26} color="white" />
-                            <Text style={styles.actionText}>1.2k</Text>
+                        <TouchableOpacity style={styles.actionButton} onPress={onLikePress}>
+                            <Ionicons
+                                name={hasLiked ? "heart" : "heart-outline"}
+                                size={26}
+                                color={hasLiked ? theme.colors.error : "white"}
+                            />
+                            <Text style={styles.actionText}>{likes}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.actionButton} onPress={onCommentPress}>
                             <Ionicons name="chatbubble-outline" size={24} color="white" />

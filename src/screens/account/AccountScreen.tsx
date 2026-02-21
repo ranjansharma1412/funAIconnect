@@ -81,7 +81,7 @@ const AccountScreen = () => {
         try {
             const formData = new FormData();
             formData.append('name', name);
-            formData.append('email', email);
+            // formData.append('email', email);
             formData.append('mobile', mobile);
             formData.append('bio', bio);
             formData.append('dob', startDob);

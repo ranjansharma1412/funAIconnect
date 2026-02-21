@@ -115,8 +115,16 @@ const LoginScreen = ({ navigation }: any) => {
                     if (passwordError) { setPasswordError(''); }
                 }}
                 rightIcon={
-                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                        <Icon name={showPassword ? 'eye-off' : 'eye'} size={22} color={theme.colors.border} />
+                    <TouchableOpacity
+                        onPress={() => setShowPassword(!showPassword)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        disabled={password.length === 0}
+                    >
+                        <Icon
+                            name={showPassword ? 'eye-off' : 'eye'}
+                            size={22}
+                            color={password.length > 0 ? theme.colors.text : theme.colors.border}
+                        />
                     </TouchableOpacity>
                 }
             />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTheme } from '../../theme/ThemeContext';
 import Button from '../../components/atoms/button/Button';
@@ -22,6 +22,7 @@ const RegisterScreen = ({ navigation }: any) => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     // Username availability states
     const [usernameError, setUsernameError] = useState('');
@@ -229,9 +230,22 @@ const RegisterScreen = ({ navigation }: any) => {
             <TextInput
                 label={t('auth.password_label')}
                 placeholder={t('auth.password_placeholder')}
-                secureTextEntry
+                secureTextEntry={!isPasswordVisible}
                 value={password}
                 onChangeText={setPassword}
+                rightIcon={
+                    <TouchableOpacity
+                        onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        disabled={password.length === 0}
+                    >
+                        <Icon
+                            name={isPasswordVisible ? 'eye-off' : 'eye'}
+                            size={22}
+                            color={password.length > 0 ? theme.colors.text : theme.colors.border}
+                        />
+                    </TouchableOpacity>
+                }
             />
 
             {isLoading ? (
