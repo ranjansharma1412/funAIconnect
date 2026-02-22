@@ -10,9 +10,13 @@ import { startNetworkMonitoring } from './src/utils/networkUtils';
 // Import interceptors to initialize them
 import './src/services/apiInterceptors';
 import './src/i18n';
+import { checkAuthStatus } from './src/store/slices/authSlice';
 
 const App = () => {
   useEffect(() => {
+    // Check local storage for persistent auth
+    store.dispatch(checkAuthStatus());
+
     const unsubscribe = startNetworkMonitoring();
     return () => {
       unsubscribe();
