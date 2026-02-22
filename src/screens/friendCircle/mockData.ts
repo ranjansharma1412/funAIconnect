@@ -21,6 +21,7 @@ export interface Post {
     likes: number;
     hasLiked: boolean;
     commentsCount: number;
+    description?: string;
 }
 
 export const mockFriendRequests: FriendRequest[] = [
@@ -102,10 +103,11 @@ export const mockMyPosts: Post[] = [
         userName: 'You',
         userHandle: '@me',
         isVerified: true,
-        postImage: 'https://picsum.photos/seed/post1/500/500',
+        postImage: 'https://picsum.photos/seed/post1/500/800',
         likes: 120,
         hasLiked: true,
         commentsCount: 15,
+        description: 'Exploring the beautiful streets of downtown! 📸 #citylife #photography',
     },
     {
         id: '102',
@@ -113,9 +115,58 @@ export const mockMyPosts: Post[] = [
         userName: 'You',
         userHandle: '@me',
         isVerified: true,
-        postImage: 'https://picsum.photos/seed/post2/500/500',
+        postImage: 'https://picsum.photos/seed/post2/500/800',
         likes: 85,
         hasLiked: false,
         commentsCount: 3,
+        description: 'Coffee breaks are the best breaks. ☕️',
+    },
+    {
+        id: '103',
+        userImage: 'https://i.pravatar.cc/150?u=me',
+        userName: 'You',
+        userHandle: '@me',
+        isVerified: true,
+        postImage: 'https://picsum.photos/seed/post3/500/800',
+        likes: 234,
+        hasLiked: true,
+        commentsCount: 42,
+        description: 'Nature vibes today. So peaceful here. 🌿',
+    },
+    {
+        id: '104',
+        userImage: 'https://i.pravatar.cc/150?u=me',
+        userName: 'You',
+        userHandle: '@me',
+        isVerified: true,
+        postImage: 'https://picsum.photos/seed/post4/500/800',
+        likes: 56,
+        hasLiked: false,
+        commentsCount: 1,
+        description: 'Just setting up the new workspace! 💻🚀',
+    },
+    {
+        id: '105',
+        userImage: 'https://i.pravatar.cc/150?u=me',
+        userName: 'You',
+        userHandle: '@me',
+        isVerified: true,
+        postImage: 'https://picsum.photos/seed/post5/500/800',
+        likes: 88,
+        hasLiked: true,
+        commentsCount: 11,
+        description: 'Late night walks and long talks 🌙',
+    },
+    {
+        id: '106',
+        userImage: 'https://i.pravatar.cc/150?u=me',
+        userName: 'You',
+        userHandle: '@me',
+        isVerified: true,
+        postImage: 'https://picsum.photos/seed/post6/500/800',
+        likes: 91,
+        hasLiked: false,
+        commentsCount: 5,
+        description: 'Trying out a new recipe tonight! 🍝👨‍🍳',
     }
 ];

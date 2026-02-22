@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Avatar from '../../components/atoms/Avatar';
 import TextButton from '../../components/atoms/button/TextButton';
 import PostCard from '../../components/organisms/PostCard';
+import GridPostCard from '../../components/organisms/GridPostCard';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
     mockFriendRequests,
@@ -138,17 +139,18 @@ const FriendCircleScreen = () => {
         <FlatList
             data={mockMyPosts}
             keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={styles.postsListContent}
+            numColumns={2}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 4, paddingTop: 16 }}
             renderItem={({ item }) => (
-                <PostCard
-                    userName={item.userName}
-                    userHandle={item.userHandle}
-                    userImage={item.userImage}
-                    isVerified={item.isVerified}
+                <GridPostCard
                     postImage={item.postImage}
                     likes={item.likes}
-                    hasLiked={item.hasLiked}
                     commentsCount={item.commentsCount}
+                    description={item.description}
+                    hasLiked={item.hasLiked}
+                    onPress={() => { }}
+                    onSharePress={() => { }}
                 />
             )}
         />
