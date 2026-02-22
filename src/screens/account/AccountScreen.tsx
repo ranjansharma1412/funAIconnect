@@ -33,7 +33,7 @@ const AccountScreen = () => {
 
     // Profile State
     const [avatar, setAvatar] = useState<string | null>(user?.userImage || user?.avatar || null);
-    const [name, setName] = useState(user?.name || user?.userName || '');
+    const [name, setName] = useState(user?.fullName || user?.userName || '');
     const [bio, setBio] = useState(user?.bio || '');
 
     // Personal Info State
