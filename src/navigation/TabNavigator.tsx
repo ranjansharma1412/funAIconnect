@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import DashboardScreen from '../screens/dashboard/DashboardScreen';
 import AIScreen from '../screens/ai/AIScreen';
 import CreativeScreen from '../screens/creative/CreativeScreen';
-import HistoryScreen from '../screens/history/HistoryScreen';
+import FriendCircleScreen from '../screens/friendCircle/FriendCircleScreen';
 import AccountScreen from '../screens/account/AccountScreen';
 import CustomTabBar from '../components/molecules/customTabBar/CustomTabBar';
 import { useTranslation } from 'react-i18next';
@@ -37,9 +37,9 @@ const TabNavigator = () => {
                 options={{ tabBarAccessibilityLabel: t('navigation.creative') }}
             />
             <Tab.Screen
-                name="History"
-                component={HistoryScreen}
-                options={{ tabBarAccessibilityLabel: t('navigation.history') }}
+                name="FriendCircle"
+                component={FriendCircleScreen}
+                options={{ tabBarAccessibilityLabel: t('navigation.friendCircle') }}
             />
             <Tab.Screen
                 name="Account"

@@ -49,8 +49,8 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                             iconName = isFocused ? 'hardware-chip' : 'hardware-chip-outline';
                         } else if (route.name === 'Creative') {
                             iconName = isFocused ? 'add-circle' : 'add-circle-outline';
-                        } else if (route.name === 'History') {
-                            iconName = isFocused ? 'time' : 'time-outline';
+                        } else if (route.name === 'FriendCircle') {
+                            iconName = isFocused ? 'people' : 'people-outline';
                         } else if (route.name === 'Account') {
                             iconName = isFocused ? 'person' : 'person-outline';
                         }
@@ -126,8 +126,8 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                         iconName = isFocused ? 'hardware-chip' : 'hardware-chip-outline';
                     } else if (route.name === 'Creative') {
                         iconName = isFocused ? 'add-circle' : 'add-circle-outline';
-                    } else if (route.name === 'History') {
-                        iconName = isFocused ? 'time' : 'time-outline';
+                    } else if (route.name === 'FriendCircle') {
+                        iconName = isFocused ? 'people' : 'people-outline';
                     } else if (route.name === 'Account') {
                         iconName = isFocused ? 'person' : 'person-outline';
                     }
