@@ -119,11 +119,11 @@ const AIScreen = () => {
                             <Image source={{ uri: generatedContent.uri }} style={styles.generatedImage} />
                             {isLoading && (
                                 <View style={styles.loadingOverlay}>
-                                    <ActivityIndicator size="large" color="#FFF" />
+                                    <ActivityIndicator size="large" color={theme.colors.white} />
                                 </View>
                             )}
                             <TouchableOpacity style={styles.regenerateButton} onPress={handleRegenerate} disabled={isLoading}>
-                                <Ionicons name="refresh" size={24} color="#FFF" />
+                                <Ionicons name="refresh" size={24} color={theme.colors.white} />
                             </TouchableOpacity>
                         </View>
 

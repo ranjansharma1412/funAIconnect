@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Image, ViewStyle } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
-import { styles } from './AvatarStyle';
+import { createStyles } from './AvatarStyle';
 
 interface AvatarProps {
     source: { uri: string } | number;
@@ -19,6 +19,7 @@ const Avatar: React.FC<AvatarProps> = ({
     style
 }) => {
     const { theme } = useTheme();
+    const styles = createStyles(theme);
 
     // Ensure we handle null/undefined uri gracefully
     const validSource = (typeof source === 'object' && source !== null && 'uri' in source && !source.uri)

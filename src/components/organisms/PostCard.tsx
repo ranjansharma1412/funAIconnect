@@ -5,7 +5,7 @@ import Avatar from '../atoms/Avatar';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
 import { BlurView } from '@react-native-community/blur';
-import { styles } from './PostCardStyle';
+import { createStyles } from './PostCardStyle';
 
 const { width } = Dimensions.get('window');
 
@@ -37,6 +37,8 @@ const PostCard: React.FC<PostCardProps> = ({
     commentsCount = 0
 }) => {
     const { theme } = useTheme();
+    const styles = createStyles(theme);
+
     // Fallback for null/undefined postImage to prevent crash and show placeholder
     const validPostImage = postImage || 'https://via.placeholder.com/500?text=No+Image';
     const validUserImage = userImage || 'https://i.pravatar.cc/300';
@@ -67,8 +69,9 @@ const PostCard: React.FC<PostCardProps> = ({
         );
 
         if (Platform.OS === 'ios' && isLiquidGlassSupported) {
+            const LiquidGlassViewAny = LiquidGlassView as any;
             return (
-                <LiquidGlassView
+                <LiquidGlassViewAny
                     style={styles.glassHeaderContainer}
                     blurRadius={15}
                     glassColor="rgba(255, 255, 255, 0.2)"
@@ -76,7 +79,7 @@ const PostCard: React.FC<PostCardProps> = ({
                     borderColor="rgba(255, 255, 255, 0.3)"
                 >
                     {headerContent}
-                </LiquidGlassView>
+                </LiquidGlassViewAny>
             );
         }
 

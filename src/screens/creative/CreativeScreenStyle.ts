@@ -91,13 +91,13 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         marginBottom: 20,
     },
     postButtonText: {
-        color: '#fff', // White usually looks best on primary buttons
+        color: theme.colors.buttonTextPrimary, // White usually looks best on primary buttons
         fontSize: 18,
         fontWeight: 'bold',
     },
     cameraContainer: {
         flex: 1,
-        backgroundColor: 'black',
+        backgroundColor: theme.colors.black,
     },
     captureButton: {
         position: 'absolute',
@@ -106,20 +106,20 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         width: 70,
         height: 70,
         borderRadius: 35,
-        backgroundColor: 'white',
+        backgroundColor: theme.colors.white,
         borderWidth: 5,
-        borderColor: '#ccc',
+        borderColor: theme.colors.disabled,
     },
     closeCameraButton: {
         position: 'absolute',
         top: 50,
         right: 20,
         padding: 10,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: theme.colors.overlay,
         borderRadius: 20,
     },
     closeCameraText: {
-        color: 'white',
+        color: theme.colors.white,
         fontWeight: 'bold',
     },
     permissionText: {

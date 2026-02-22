@@ -86,7 +86,7 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         fontWeight: '600',
     },
     primaryButtonText: {
-        color: '#FFFFFF',
+        color: theme.colors.buttonTextPrimary,
     },
     secondaryButtonText: {
         color: theme.colors.text,

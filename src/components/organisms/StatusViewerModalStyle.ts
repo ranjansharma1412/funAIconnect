@@ -1,8 +1,9 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { Theme } from '../../theme/theme';
 
 const { width, height } = Dimensions.get('window');
 
-export const styles = StyleSheet.create({
+export const createStyles = (theme: Theme) => StyleSheet.create({
     modal: {
         margin: 0,
         justifyContent: 'flex-start',
@@ -23,7 +24,7 @@ export const styles = StyleSheet.create({
     },
     progressBarBackground: {
         flex: 1,
-        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+        backgroundColor: theme.colors.glassBackground,
         borderRadius: 1.5,
         marginHorizontal: 2,
         height: 3,
@@ -31,7 +32,7 @@ export const styles = StyleSheet.create({
     },
     progressBarFill: {
         height: '100%',
-        backgroundColor: '#FFF',
+        backgroundColor: theme.colors.white,
     },
     header: {
         position: 'absolute',
@@ -52,16 +53,16 @@ export const styles = StyleSheet.create({
         borderRadius: 16,
         marginRight: 10,
         borderWidth: 1,
-        borderColor: '#FFF',
+        borderColor: theme.colors.white,
     },
     username: {
-        color: '#FFF',
+        color: theme.colors.white,
         fontWeight: '600',
         fontSize: 14,
         marginRight: 10,
     },
     timeAgo: {
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: theme.colors.textOnImageSecondary,
         fontSize: 12,
     },
     closeButton: {
@@ -104,13 +105,13 @@ export const styles = StyleSheet.create({
         height: 44,
         borderRadius: 22,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.5)',
+        borderColor: theme.colors.textOnImageSecondary,
         justifyContent: 'center',
         paddingHorizontal: 15,
         marginRight: 15,
     },
     replyPlaceholder: {
-        color: '#FFF',
+        color: theme.colors.white,
         fontSize: 14,
     }
 });

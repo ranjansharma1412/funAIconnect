@@ -1,8 +1,9 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { Theme } from '../../theme/theme';
 
 const { width } = Dimensions.get('window');
 
-export const styles = StyleSheet.create({
+export const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
@@ -48,7 +49,7 @@ export const styles = StyleSheet.create({
         borderRadius: 24,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
+        shadowColor: theme.colors.shadow,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.15,
         shadowRadius: 8,

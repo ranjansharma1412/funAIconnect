@@ -16,7 +16,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { commentService, Comment } from '../../services/commentService';
 import CommentItem from '../molecules/CommentItem';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { styles } from './CommentsModalStyle';
+import { createStyles } from './CommentsModalStyle';
 
 interface CommentsModalProps {
     visible: boolean;
@@ -27,6 +27,7 @@ interface CommentsModalProps {
 
 const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId, currentUserId }) => {
     const { theme } = useTheme();
+    const styles = createStyles(theme);
     const insets = useSafeAreaInsets();
     const [comments, setComments] = useState<Comment[]>([]);
     const [isLoading, setIsLoading] = useState(false);

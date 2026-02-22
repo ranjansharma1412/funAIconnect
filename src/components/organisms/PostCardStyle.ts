@@ -1,18 +1,19 @@
 import { StyleSheet, Dimensions, Platform } from 'react-native';
+import { Theme } from '../../theme/theme';
 
 const { width } = Dimensions.get('window');
 
-export const styles = StyleSheet.create({
+export const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         marginBottom: 24,
         marginHorizontal: 16,
         borderRadius: 32, // High border radius from design
-        shadowColor: "#000",
+        shadowColor: theme.colors.shadow,
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 6,
-        backgroundColor: 'transparent', // Let image define shape
+        backgroundColor: theme.colors.transparent, // Let image define shape
     },
     mediaContainer: {
         borderRadius: 32,
@@ -37,14 +38,14 @@ export const styles = StyleSheet.create({
         overflow: 'hidden',
         // Common styles for both implementations
         ...(Platform.OS === 'android' && {
-            backgroundColor: 'rgba(255,255,255,0.15)', // Fallback tint
-            borderColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: theme.colors.glassBackground, // Fallback tint
+            borderColor: theme.colors.glassBorder,
             borderWidth: 1,
         })
     },
     androidGlassOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: theme.colors.glassOverlay,
     },
     glassHeaderInner: {
         flexDirection: 'row',
@@ -66,8 +67,8 @@ export const styles = StyleSheet.create({
     glassName: {
         fontWeight: '700',
         fontSize: 16,
-        color: 'white',
-        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+        color: theme.colors.textOnImage,
+        textShadowColor: theme.colors.textShadow,
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 3,
     },
@@ -76,13 +77,13 @@ export const styles = StyleSheet.create({
     },
     glassHandle: {
         fontSize: 13,
-        color: 'rgba(255, 255, 255, 0.9)',
+        color: theme.colors.textOnImageSecondary,
         marginTop: 2,
     },
     moreButton: {
         padding: 8,
         borderRadius: 20,
-        backgroundColor: 'rgba(0,0,0,0.1)',
+        backgroundColor: theme.colors.overlayLighter,
     },
     footerOverlay: {
         position: 'absolute',
@@ -93,7 +94,7 @@ export const styles = StyleSheet.create({
         paddingBottom: 24,
         zIndex: 10,
         // Gradient simulation since we replaced the gradient package text
-        backgroundColor: 'rgba(0,0,0,0.2)',
+        backgroundColor: theme.colors.overlayLight,
     },
     actionRow: {
         flexDirection: 'row',
@@ -106,18 +107,18 @@ export const styles = StyleSheet.create({
         marginRight: 24,
     },
     actionText: {
-        color: 'white',
+        color: theme.colors.textOnImage,
         fontWeight: '600',
         marginLeft: 6,
         fontSize: 15,
     },
     caption: {
-        color: 'rgba(255, 255, 255, 0.95)',
+        color: theme.colors.textOnImage,
         fontSize: 14,
         lineHeight: 20,
     },
     captionName: {
         fontWeight: 'bold',
-        color: 'white',
+        color: theme.colors.textOnImage,
     }
 });

@@ -13,7 +13,7 @@ import Modal from 'react-native-modal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { styles } from './StatusViewerModalStyle';
+import { createStyles } from './StatusViewerModalStyle';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Replaced with Text since vector icons might not be installed or configured
 
 const { width, height } = Dimensions.get('window');
@@ -47,6 +47,7 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
     onClose,
 }) => {
     const { theme } = useTheme();
+    const styles = createStyles(theme);
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
 
@@ -144,7 +145,7 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
             propagateSwipe
             statusBarTranslucent
         >
-            <View style={[styles.container, { backgroundColor: 'black' }]}>
+            <View style={[styles.container, { backgroundColor: theme.colors.black }]}>
                 <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
                 {/* Progress Bars */}

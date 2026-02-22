@@ -8,7 +8,8 @@ import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ErrorModalConfig } from '../../types/api.types';
 import { useTranslation } from 'react-i18next';
-import { styles } from './ErrorModalStyle';
+import { createStyles } from './ErrorModalStyle';
+import { useTheme } from '../../theme/ThemeContext';
 
 interface ErrorModalProps extends Partial<ErrorModalConfig> {
     visible: boolean;
@@ -21,14 +22,17 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
     title,
     message,
     icon = 'alert-circle-outline',
-    iconColor = '#FF6B6B',
+    iconColor,
     showCloseButton = true,
     buttonText: propButtonText,
     onClose,
     onButtonPress,
 }) => {
+    const { theme } = useTheme();
+    const styles = createStyles(theme);
     const { t } = useTranslation();
     const buttonText = propButtonText || t('common.okay');
+    const defaultIconColor = iconColor || theme.colors.error;
 
     const handleButtonPress = () => {
         if (onButtonPress) {
@@ -69,7 +73,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
                     {/* Icon */}
                     {icon && (
                         <View style={styles.iconContainer}>
-                            <Icon name={icon} size={64} color={iconColor} />
+                            <Icon name={icon} size={64} color={defaultIconColor} />
                         </View>
                     )}
 

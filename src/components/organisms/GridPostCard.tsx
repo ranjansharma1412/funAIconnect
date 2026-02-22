@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
-import { styles } from './GridPostCardStyle';
+import { createStyles } from './GridPostCardStyle';
+import { useTheme } from '../../theme/ThemeContext';
 
 interface GridPostCardProps {
     postImage: string;
@@ -23,6 +24,9 @@ const GridPostCard: React.FC<GridPostCardProps> = ({
     onPress,
     onSharePress
 }) => {
+    const { theme } = useTheme();
+    const styles = createStyles(theme);
+
     const validPostImage = postImage || 'https://via.placeholder.com/500?text=No+Image';
 
     return (

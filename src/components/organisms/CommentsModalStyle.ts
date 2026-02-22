@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
+import { Theme } from '../../theme/theme';
 
-export const styles = StyleSheet.create({
+export const createStyles = (theme: Theme) => StyleSheet.create({
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -21,14 +22,14 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 10,
         borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE', // Should use theme border color potentially, but local style for now
+        borderBottomColor: theme.colors.divider, // Should use theme border color potentially, but local style for now
         marginBottom: 10,
         position: 'relative',
     },
     headerIndicator: {
         width: 40,
         height: 4,
-        backgroundColor: '#DDDDDD',
+        backgroundColor: theme.colors.skeletonBackground,
         borderRadius: 2,
         marginBottom: 10,
     },

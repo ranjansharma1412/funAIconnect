@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import Avatar from '../atoms/Avatar';
-import { styles } from './StoryItemStyle';
+import { createStyles } from './StoryItemStyle';
 
 interface StoryItemProps {
     name: string;
@@ -13,6 +13,7 @@ interface StoryItemProps {
 
 const StoryItem: React.FC<StoryItemProps> = ({ name, imageSource, isLive = false, onPress }) => {
     const { theme } = useTheme();
+    const styles = createStyles(theme);
 
     return (
         <TouchableOpacity style={styles.container} onPress={onPress}>

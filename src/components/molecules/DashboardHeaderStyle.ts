@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
+import { Theme } from '../../theme/theme';
 
-export const styles = StyleSheet.create({
+export const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -47,6 +48,6 @@ export const styles = StyleSheet.create({
         height: 10,
         borderRadius: 5,
         borderWidth: 2,
-        borderColor: '#FFFFFF', // Should match background but hardcoded for now
+        borderColor: theme.colors.background, // Should match background but hardcoded for now
     }
 });

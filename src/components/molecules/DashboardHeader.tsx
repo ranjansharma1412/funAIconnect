@@ -7,12 +7,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 // In a real app we'd use react-native-vector-icons or SVGs.
 
 import { useTranslation } from 'react-i18next';
-import { styles } from './DashboardHeaderStyle';
+import { createStyles } from './DashboardHeaderStyle';
 
 // ... imports
 
 const DashboardHeader: React.FC = () => {
     const { theme } = useTheme();
+    const styles = createStyles(theme);
     const { t } = useTranslation();
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
 

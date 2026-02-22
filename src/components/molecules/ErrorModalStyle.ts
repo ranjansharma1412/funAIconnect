@@ -1,8 +1,9 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { Theme } from '../../theme/theme';
 
 const { width } = Dimensions.get('window');
 
-export const styles = StyleSheet.create({
+export const createStyles = (theme: Theme) => StyleSheet.create({
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -10,11 +11,11 @@ export const styles = StyleSheet.create({
     },
     modalContent: {
         width: width * 0.85,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: theme.colors.card,
         borderRadius: 24,
         padding: 24,
         alignItems: 'center',
-        shadowColor: '#000',
+        shadowColor: theme.colors.shadow,
         shadowOffset: {
             width: 0,
             height: 8,
@@ -33,7 +34,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 16,
-        backgroundColor: '#F5F5F7',
+        backgroundColor: theme.colors.background,
     },
     iconContainer: {
         marginTop: 8,
@@ -42,21 +43,21 @@ export const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontWeight: '700',
-        color: '#111111',
+        color: theme.colors.text,
         textAlign: 'center',
         marginBottom: 12,
     },
     message: {
         fontSize: 16,
         fontWeight: '400',
-        color: '#8E8E93',
+        color: theme.colors.textSecondary,
         textAlign: 'center',
         lineHeight: 24,
         marginBottom: 24,
     },
     button: {
         width: '100%',
-        backgroundColor: '#007AFF',
+        backgroundColor: theme.colors.primary,
         borderRadius: 12,
         paddingVertical: 14,
         paddingHorizontal: 24,
@@ -66,6 +67,6 @@ export const styles = StyleSheet.create({
     buttonText: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#FFFFFF',
+        color: theme.colors.buttonTextPrimary,
     },
 });

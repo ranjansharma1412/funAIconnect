@@ -1,13 +1,14 @@
 import { StyleSheet } from 'react-native';
+import { Theme } from '../../theme/theme';
 
-export const styles = StyleSheet.create({
+export const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         position: 'relative',
         justifyContent: 'center',
         alignItems: 'center',
     },
     image: {
-        backgroundColor: '#E1E1E1',
+        backgroundColor: theme.colors.disabled,
     },
     liveBadge: {
         position: 'absolute',
@@ -17,7 +18,7 @@ export const styles = StyleSheet.create({
         height: 12,
         borderRadius: 6,
         borderWidth: 2,
-        borderColor: '#FFFFFF',
+        borderColor: theme.colors.white,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -25,6 +26,6 @@ export const styles = StyleSheet.create({
         width: 4,
         height: 4,
         borderRadius: 2,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: theme.colors.white,
     }
 });

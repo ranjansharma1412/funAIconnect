@@ -3,10 +3,11 @@ import { View, Text, Image } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
-import { styles } from './EmptyPostsStateStyle';
+import { createStyles } from './EmptyPostsStateStyle';
 
 const EmptyPostsState = () => {
     const { theme } = useTheme();
+    const styles = createStyles(theme);
 
     return (
         <View style={styles.container}>
