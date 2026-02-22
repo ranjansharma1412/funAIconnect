@@ -1,6 +1,7 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import StoryItem from '../molecules/StoryItem';
+import { styles } from './StoriesRailStyle';
 
 // Dummy data interface
 interface StoryData {
@@ -36,14 +37,5 @@ const StoriesRail: React.FC<StoriesRailProps> = ({ data, onPressItem }) => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        marginVertical: 10,
-    },
-    scrollContent: {
-        paddingHorizontal: 20,
-    }
-});
 
 export default StoriesRail;

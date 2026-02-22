@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, Button } from 'react-native';
+import { styles } from './ErrorBoundaryStyle';
 
 interface Props {
     children: ReactNode;
@@ -35,19 +36,5 @@ class ErrorBoundary extends Component<Props, State> {
         return this.props.children;
     }
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-});
 
 export default ErrorBoundary;

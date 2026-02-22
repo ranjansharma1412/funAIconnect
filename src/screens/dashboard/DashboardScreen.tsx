@@ -216,7 +216,7 @@ const DashboardScreen: React.FC = () => {
 
                 {/* FlatList for optimize scrolling */}
                 {isLoading && !isRefreshing ? (
-                    <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 20 }} />
+                    <ActivityIndicator size="large" color={theme.colors.primary} style={styles.loadingIndicator} />
                 ) : (
                     <FlatList
                         data={posts}

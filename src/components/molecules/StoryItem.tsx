@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import Avatar from '../atoms/Avatar';
+import { styles } from './StoryItemStyle';
 
 interface StoryItemProps {
     name: string;
@@ -33,19 +34,5 @@ const StoryItem: React.FC<StoryItemProps> = ({ name, imageSource, isLive = false
         </TouchableOpacity>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        alignItems: 'center',
-        marginRight: 16,
-        maxWidth: 72,
-    },
-    name: {
-        marginTop: 6,
-        fontSize: 12,
-        textAlign: 'center',
-        fontWeight: '500',
-    }
-});
 
 export default StoryItem;

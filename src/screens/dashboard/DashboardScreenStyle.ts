@@ -12,4 +12,7 @@ export const styles = StyleSheet.create({
         paddingBottom: 80, // Space for Bottom Tab Bar
         paddingTop: 10,
     },
+    loadingIndicator: {
+        marginTop: 20,
+    }
 });
