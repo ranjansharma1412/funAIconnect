@@ -99,4 +99,18 @@ export const postService = {
             throw error;
         }
     },
+
+    getUserPosts: async (targetUserId: string, page: number = 1, perPage: number = 10, currentUserId?: string): Promise<GetPostsResponse> => {
+        try {
+            const params: any = { page, per_page: perPage };
+            if (currentUserId) {
+                params.current_user_id = currentUserId;
+            }
+            const response = await apiClient.get(`/api/posts/user/${targetUserId}`, { params });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user posts:', error);
+            throw error;
+        }
+    },
 };

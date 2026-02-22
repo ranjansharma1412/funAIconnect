@@ -12,7 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { friendService, FriendRequestDto } from '../../services/friendService';
-import { mockMyPosts } from './mockData';
+import { postService, Post } from '../../services/postService';
 
 const { width } = Dimensions.get('window');
 
@@ -30,6 +30,7 @@ const FriendCircleScreen = () => {
     const [requests, setRequests] = useState<FriendRequestDto[]>([]);
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [friends, setFriends] = useState<any[]>([]);
+    const [myPosts, setMyPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(false);
 
     const fetchDiscoverData = useCallback(async () => {
@@ -64,13 +65,28 @@ const FriendCircleScreen = () => {
         }
     }, [currentUserId]);
 
+    const fetchMyPostsData = useCallback(async () => {
+        if (!currentUserId) return;
+        setLoading(true);
+        try {
+            const response = await postService.getUserPosts(currentUserId, 1, 50, currentUserId);
+            setMyPosts(response.posts);
+        } catch (error) {
+            console.error('Failed to fetch API data for My Posts tab', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [currentUserId]);
+
     useEffect(() => {
         if (activeTab === 0) {
             fetchDiscoverData();
         } else if (activeTab === 1) {
             fetchFriendsData();
+        } else if (activeTab === 2) {
+            fetchMyPostsData();
         }
-    }, [activeTab, fetchDiscoverData, fetchFriendsData]);
+    }, [activeTab, fetchDiscoverData, fetchFriendsData, fetchMyPostsData]);
 
     const handleAcceptRequest = async (requestId: number) => {
         if (!currentUserId) return;
@@ -243,26 +259,41 @@ const FriendCircleScreen = () => {
         );
     };
 
-    const renderMyPostsTab = () => (
-        <FlatList
-            data={mockMyPosts}
-            keyExtractor={(item) => item.id.toString()}
-            numColumns={2}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 4, paddingTop: 16 }}
-            renderItem={({ item }) => (
-                <GridPostCard
-                    postImage={item.postImage}
-                    likes={item.likes}
-                    commentsCount={item.commentsCount}
-                    description={item.description}
-                    hasLiked={item.hasLiked}
-                    onPress={() => { }}
-                    onSharePress={() => { }}
-                />
-            )}
-        />
-    );
+    const renderMyPostsTab = () => {
+        if (loading && myPosts.length === 0) {
+            return (
+                <View style={styles.emptyContainer}>
+                    <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>Loading...</Text>
+                </View>
+            );
+        }
+
+        return (
+            <FlatList
+                data={myPosts}
+                keyExtractor={(item) => item.id.toString()}
+                numColumns={2}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 4, paddingTop: 16 }}
+                renderItem={({ item }) => (
+                    <GridPostCard
+                        postImage={item.postImage}
+                        likes={item.likes}
+                        commentsCount={item.commentsCount}
+                        description={item.description}
+                        hasLiked={item.hasLiked}
+                        onPress={() => { }}
+                        onSharePress={() => { }}
+                    />
+                )}
+                ListEmptyComponent={
+                    <View style={styles.emptyContainer}>
+                        <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>No posts found.</Text>
+                    </View>
+                }
+            />
+        );
+    };
 
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
