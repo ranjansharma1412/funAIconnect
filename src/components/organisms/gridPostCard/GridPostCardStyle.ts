@@ -1,5 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
-import { Theme } from '../../theme/theme';
+import { Theme } from '../../../theme/theme';
 
 const { width } = Dimensions.get('window');
 const GRID_SPACING = 12;

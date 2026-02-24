@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, Platform } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
-import Avatar from '../atoms/Avatar';
+import { useTheme } from '../../../theme/ThemeContext';
+import Avatar from '../../atoms/avatar/Avatar';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
 import { BlurView } from '@react-native-community/blur';

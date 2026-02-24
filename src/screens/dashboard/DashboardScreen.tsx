@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, RefreshControl, ActivityIndicator, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
-import DashboardHeader from '../../components/molecules/DashboardHeader';
-import StoriesRail from '../../components/organisms/StoriesRail';
-import PostCard from '../../components/organisms/PostCard';
-import StatusViewerModal from '../../components/organisms/StatusViewerModal';
-import CommentsModal from '../../components/organisms/CommentsModal';
+import DashboardHeader from '../../components/molecules/dashboardHeader/DashboardHeader';
+import StoriesRail from '../../components/organisms/storiesRail/StoriesRail';
+import PostCard from '../../components/organisms/postCard/PostCard';
+import StatusViewerModal from '../../components/organisms/statusViewerModal/StatusViewerModal';
+import CommentsModal from '../../components/organisms/commentsModal/CommentsModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './DashboardScreenStyle';
 import { postService, Post } from '../../services/postService';
@@ -13,7 +13,7 @@ import { commentService } from '../../services/commentService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { sharePost } from '../../utils/shareUtils';
-import EmptyPostsState from '../../components/molecules/EmptyPostsState';
+import EmptyPostsState from '../../components/molecules/emptyPostsState/EmptyPostsState';
 
 // Dummy Stories Data (Keep for now)
 const STORIES_DATA = [

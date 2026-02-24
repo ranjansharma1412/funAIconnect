@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'rea
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
 import { createStyles } from './GridPostCardStyle';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../../theme/ThemeContext';
 
 interface GridPostCardProps {
     postImage: string;

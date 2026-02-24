@@ -6,10 +6,10 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ErrorModalConfig } from '../../types/api.types';
+import { ErrorModalConfig } from '../../../types/api.types';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from './ErrorModalStyle';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../../theme/ThemeContext';
 
 interface ErrorModalProps extends Partial<ErrorModalConfig> {
     visible: boolean;

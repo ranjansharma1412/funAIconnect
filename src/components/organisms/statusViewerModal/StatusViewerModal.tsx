@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from './StatusViewerModalStyle';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Replaced with Text since vector icons might not be installed or configured

@@ -11,10 +11,10 @@ import {
     Platform,
     Alert,
 } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../../theme/ThemeContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { commentService, Comment } from '../../services/commentService';
-import CommentItem from '../molecules/CommentItem';
+import { commentService, Comment } from '../../../services/commentService';
+import CommentItem from '../../molecules/commentItem/CommentItem';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createStyles } from './CommentsModalStyle';
 

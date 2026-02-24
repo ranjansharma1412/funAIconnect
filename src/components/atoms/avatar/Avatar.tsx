@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, ViewStyle } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../../theme/ThemeContext';
 import { createStyles } from './AvatarStyle';
 
 interface AvatarProps {

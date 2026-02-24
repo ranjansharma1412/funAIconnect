@@ -1,8 +1,8 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
-import StoryItem from '../molecules/StoryItem';
+import StoryItem from '../../molecules/storyItem/StoryItem';
 import { createStyles } from './StoriesRailStyle';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../../theme/ThemeContext';
 
 // Dummy data interface
 interface StoryData {

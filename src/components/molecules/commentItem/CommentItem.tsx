@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
-import Avatar from '../atoms/Avatar';
+import { useTheme } from '../../../theme/ThemeContext';
+import Avatar from '../../atoms/avatar/Avatar';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Comment } from '../../services/commentService';
+import { Comment } from '../../../services/commentService';
 import { formatDistanceToNow } from 'date-fns';
 import { styles } from './CommentItemStyle';
 

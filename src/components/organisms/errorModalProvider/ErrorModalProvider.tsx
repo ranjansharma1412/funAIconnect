@@ -1,8 +1,8 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import ErrorModal from '../molecules/ErrorModal';
-import { RootState } from '../../store';
-import { hideError } from '../../store/slices/modalSlice';
+import ErrorModal from '../../molecules/errorModal/ErrorModal';
+import { RootState } from '../../../store';
+import { hideError } from '../../../store/slices/modalSlice';
 
 /**
  * Global Error Modal Provider

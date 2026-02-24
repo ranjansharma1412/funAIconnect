@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
-import Avatar from '../atoms/Avatar';
+import { useTheme } from '../../../theme/ThemeContext';
+import Avatar from '../../atoms/avatar/Avatar';
 import { createStyles } from './StoryItemStyle';
 
 interface StoryItemProps {
