@@ -13,14 +13,14 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { friendService, FriendRequestDto } from '../../services/friendService';
 import { postService, Post } from '../../services/postService';
-
+import { useNavigation } from '@react-navigation/native';
 const { width } = Dimensions.get('window');
 
 const FriendCircleScreen = () => {
     const { theme } = useTheme();
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
-
+    const navigation = useNavigation<any>();
     // 0 = Discover, 1 = Friends, 2 = My Posts
     const [activeTab, setActiveTab] = useState(0);
 
@@ -282,7 +282,7 @@ const FriendCircleScreen = () => {
                         commentsCount={item.commentsCount}
                         description={item.description}
                         hasLiked={item.hasLiked}
-                        onPress={() => { }}
+                        onPress={() => navigation.navigate('PostDetails', { post: item })}
                         onSharePress={() => { }}
                     />
                 )}

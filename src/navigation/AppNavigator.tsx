@@ -9,6 +9,7 @@ import LoginScreen from '../screens/login/LoginScreen';
 import RegisterScreen from '../screens/register/RegisterScreen';
 import ChangePasswordScreen from '../screens/changePassword/ChangePasswordScreen';
 import NotificationsScreen from '../screens/notifications/NotificationsScreen';
+import PostDetailsScreen from '../screens/postDetails/PostDetailsScreen';
 import { useTheme } from '../theme/ThemeContext';
 
 import ForgotPasswordScreen from '../screens/login/ForgotPasswordScreen';
@@ -69,6 +70,7 @@ const AppNavigator = () => {
                         />
                         <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
                         <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="PostDetails" component={PostDetailsScreen} options={{ headerShown: false }} />
                     </>
                 ) : (
                     <>

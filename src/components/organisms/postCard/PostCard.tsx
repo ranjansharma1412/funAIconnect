@@ -15,12 +15,13 @@ interface PostCardProps {
     userHandle: string;
     isVerified?: boolean;
     postImage: string;
-    likes?: number; // Optional statistic for display
+    likes?: number;
     hasLiked?: boolean;
     commentsCount?: number;
     onCommentPress?: () => void;
     onSharePress?: () => void;
     onLikePress?: () => void;
+    onLikesCountPress?: () => void;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -34,12 +35,13 @@ const PostCard: React.FC<PostCardProps> = ({
     onCommentPress,
     onSharePress,
     onLikePress,
+    onLikesCountPress,
     commentsCount = 0
 }) => {
     const { theme } = useTheme();
     const styles = createStyles(theme);
 
-    // Fallback for null/undefined postImage to prevent crash and show placeholder
+    // Default processing code...
     const validPostImage = postImage || 'https://via.placeholder.com/500?text=No+Image';
     const validUserImage = userImage || 'https://i.pravatar.cc/300';
 
@@ -86,13 +88,11 @@ const PostCard: React.FC<PostCardProps> = ({
         return (
             <View style={styles.glassHeaderContainer}>
                 <BlurView
-                    // style={StyleSheet.absoluteFill}
                     blurType="light"
                     blurAmount={20}
                     reducedTransparencyFallbackColor="white"
                     overlayColor='transparent'
                 />
-                {/* Semi-transparent background for Android fallback/overlay effect */}
                 <View style={styles.androidGlassOverlay} />
                 {headerContent}
             </View>
@@ -108,26 +108,31 @@ const PostCard: React.FC<PostCardProps> = ({
                     resizeMode="cover"
                 />
 
-                {/* Floating Glass Header */}
                 <View style={styles.headerWrapper}>
                     {renderGlassHeader()}
                 </View>
 
-                {/* Bottom Actions & Caption */}
                 <View style={styles.footerOverlay}>
                     <View style={styles.actionRow}>
-                        <TouchableOpacity style={styles.actionButton} onPress={onLikePress}>
-                            <Ionicons
-                                name={hasLiked ? "heart" : "heart-outline"}
-                                size={26}
-                                color={hasLiked ? theme.colors.error : "white"}
-                            />
-                            <Text style={styles.actionText}>{likes}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionButton} onPress={onCommentPress}>
+                        {/* Split into two separate touchables wrapped in view */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }}>
+                            <TouchableOpacity style={{ padding: 5 }} onPress={onLikePress}>
+                                <Ionicons
+                                    name={hasLiked ? "heart" : "heart-outline"}
+                                    size={26}
+                                    color={hasLiked ? theme.colors.error : "white"}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={{ paddingVertical: 5, paddingHorizontal: 2 }} onPress={onLikesCountPress}>
+                                <Text style={styles.actionText}>{likes}</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <TouchableOpacity style={[styles.actionButton, { marginRight: 15 }]} onPress={onCommentPress}>
                             <Ionicons name="chatbubble-outline" size={24} color="white" />
                             {commentsCount > 0 && <Text style={styles.actionText}>{commentsCount}</Text>}
                         </TouchableOpacity>
+
                         <TouchableOpacity style={styles.actionButton} onPress={onSharePress}>
                             <Ionicons name="share-outline" size={24} color="white" />
                         </TouchableOpacity>
