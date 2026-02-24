@@ -23,9 +23,11 @@ interface CommentsModalProps {
     onClose: () => void;
     postId: number | null;
     currentUserId?: number; // Pass this if available
+    onCommentAdded?: (postId: number) => void;
+    onCommentDeleted?: (postId: number) => void;
 }
 
-const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId, currentUserId }) => {
+const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId, currentUserId, onCommentAdded, onCommentDeleted }) => {
     const { theme } = useTheme();
     const styles = createStyles(theme);
     const insets = useSafeAreaInsets();
@@ -91,6 +93,9 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId,
             const addedComment = await commentService.addComment(postId, newComment.trim(), currentUserId);
             setComments(prev => [addedComment, ...prev]);
             setNewComment('');
+            if (onCommentAdded) {
+                onCommentAdded(postId);
+            }
             // Scroll to top logic if needed
         } catch (error) {
             Alert.alert('Error', 'Failed to post comment. Please try again.');
@@ -114,6 +119,9 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId,
                         try {
                             await commentService.deleteComment(postId, commentId);
                             setComments(prev => prev.filter(c => c.id !== commentId));
+                            if (onCommentDeleted) {
+                                onCommentDeleted(postId);
+                            }
                         } catch (error) {
                             Alert.alert('Error', 'Failed to delete comment.');
                         }

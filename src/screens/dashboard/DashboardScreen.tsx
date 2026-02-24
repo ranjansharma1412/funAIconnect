@@ -52,20 +52,7 @@ const DashboardScreen: React.FC = () => {
             const response = await postService.getPosts(1, 10, currentUserId);
             console.log('Posts:', response.posts);
 
-            // Fetch comment counts for each post
-            const postsWithComments = await Promise.all(
-                response.posts.map(async (post) => {
-                    try {
-                        const commentsResponse = await commentService.getComments(post.id, 1, 1);
-                        return { ...post, commentsCount: commentsResponse.total };
-                    } catch (error) {
-                        console.error(`Failed to fetch comments for post ${post.id}`, error);
-                        return { ...post, commentsCount: 0 };
-                    }
-                })
-            );
-
-            setPosts(postsWithComments);
+            setPosts(response.posts);
         } catch (error) {
             console.error('Failed to fetch posts:', error);
             // Alert.alert(t('common.error'), t('dashboard.fetch_error'));
@@ -178,6 +165,22 @@ const DashboardScreen: React.FC = () => {
         }
     };
 
+    const handleCommentAdded = useCallback((postId: number) => {
+        setPosts(prevPosts => prevPosts.map(post =>
+            post.id === postId
+                ? { ...post, commentsCount: (post.commentsCount || 0) + 1 }
+                : post
+        ));
+    }, []);
+
+    const handleCommentDeleted = useCallback((postId: number) => {
+        setPosts(prevPosts => prevPosts.map(post =>
+            post.id === postId
+                ? { ...post, commentsCount: Math.max(0, (post.commentsCount || 0) - 1) }
+                : post
+        ));
+    }, []);
+
     // Need to pass localized data to StoriesRail too
     const localizedStoriesData = React.useMemo(() => {
         return STORIES_DATA.map(user => ({
@@ -252,6 +255,8 @@ const DashboardScreen: React.FC = () => {
                 onClose={() => setIsCommentsVisible(false)}
                 postId={selectedPostId}
                 currentUserId={user ? parseInt(user.id) : undefined}
+                onCommentAdded={handleCommentAdded}
+                onCommentDeleted={handleCommentDeleted}
             />
         </View>
     );
