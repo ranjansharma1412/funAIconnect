@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, RefreshControl, ActivityIndicator, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
-import DashboardHeader from '../../components/molecules/DashboardHeader';
-import StoriesRail from '../../components/organisms/StoriesRail';
-import PostCard from '../../components/organisms/PostCard';
-import StatusViewerModal from '../../components/organisms/StatusViewerModal';
-import CommentsModal from '../../components/organisms/CommentsModal';
+import DashboardHeader from '../../components/molecules/dashboardHeader/DashboardHeader';
+import StoriesRail from '../../components/organisms/storiesRail/StoriesRail';
+import PostCard from '../../components/organisms/postCard/PostCard';
+import StatusViewerModal from '../../components/organisms/statusViewerModal/StatusViewerModal';
+import CommentsModal from '../../components/organisms/commentsModal/CommentsModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './DashboardScreenStyle';
 import { postService, Post } from '../../services/postService';
@@ -13,7 +13,7 @@ import { commentService } from '../../services/commentService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { sharePost } from '../../utils/shareUtils';
-import EmptyPostsState from '../../components/molecules/EmptyPostsState';
+import EmptyPostsState from '../../components/molecules/emptyPostsState/EmptyPostsState';
 
 // Dummy Stories Data (Keep for now)
 const STORIES_DATA = [
@@ -52,20 +52,7 @@ const DashboardScreen: React.FC = () => {
             const response = await postService.getPosts(1, 10, currentUserId);
             console.log('Posts:', response.posts);
 
-            // Fetch comment counts for each post
-            const postsWithComments = await Promise.all(
-                response.posts.map(async (post) => {
-                    try {
-                        const commentsResponse = await commentService.getComments(post.id, 1, 1);
-                        return { ...post, commentsCount: commentsResponse.total };
-                    } catch (error) {
-                        console.error(`Failed to fetch comments for post ${post.id}`, error);
-                        return { ...post, commentsCount: 0 };
-                    }
-                })
-            );
-
-            setPosts(postsWithComments);
+            setPosts(response.posts);
         } catch (error) {
             console.error('Failed to fetch posts:', error);
             // Alert.alert(t('common.error'), t('dashboard.fetch_error'));
@@ -178,6 +165,22 @@ const DashboardScreen: React.FC = () => {
         }
     };
 
+    const handleCommentAdded = useCallback((postId: number) => {
+        setPosts(prevPosts => prevPosts.map(post =>
+            post.id === postId
+                ? { ...post, commentsCount: (post.commentsCount || 0) + 1 }
+                : post
+        ));
+    }, []);
+
+    const handleCommentDeleted = useCallback((postId: number) => {
+        setPosts(prevPosts => prevPosts.map(post =>
+            post.id === postId
+                ? { ...post, commentsCount: Math.max(0, (post.commentsCount || 0) - 1) }
+                : post
+        ));
+    }, []);
+
     // Need to pass localized data to StoriesRail too
     const localizedStoriesData = React.useMemo(() => {
         return STORIES_DATA.map(user => ({
@@ -216,7 +219,7 @@ const DashboardScreen: React.FC = () => {
 
                 {/* FlatList for optimize scrolling */}
                 {isLoading && !isRefreshing ? (
-                    <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 20 }} />
+                    <ActivityIndicator size="large" color={theme.colors.primary} style={styles.loadingIndicator} />
                 ) : (
                     <FlatList
                         data={posts}
@@ -252,6 +255,8 @@ const DashboardScreen: React.FC = () => {
                 onClose={() => setIsCommentsVisible(false)}
                 postId={selectedPostId}
                 currentUserId={user ? parseInt(user.id) : undefined}
+                onCommentAdded={handleCommentAdded}
+                onCommentDeleted={handleCommentDeleted}
             />
         </View>
     );

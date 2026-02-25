@@ -113,4 +113,14 @@ export const postService = {
             throw error;
         }
     },
+
+    getPostLikes: async (postId: number): Promise<{ likes: any[]; count: number }> => {
+        try {
+            const response = await apiClient.get(`/api/posts/${postId}/likes`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching post likes:', error);
+            throw error;
+        }
+    }
 };

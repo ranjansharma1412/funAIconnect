@@ -134,7 +134,7 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         elevation: 5,
     },
     saveButtonText: {
-        color: '#FFFFFF',
+        color: theme.colors.buttonTextPrimary,
         fontSize: 16,
         fontWeight: 'bold',
     },
@@ -144,11 +144,11 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         borderRadius: 10,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: theme.colors.error || '#FF3B30',
+        borderColor: theme.colors.error,
         marginBottom: 20,
     },
     logoutButtonText: {
-        color: theme.colors.error || '#FF3B30',
+        color: theme.colors.error,
         fontSize: 16,
         fontWeight: '600',
     },

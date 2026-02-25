@@ -143,7 +143,7 @@ const AccountScreen = () => {
                         />
                         {isEditing && (
                             <View style={styles.editIconBadge}>
-                                <Ionicons name="camera" size={16} color="#FFF" />
+                                <Ionicons name="camera" size={16} color={theme.colors.white} />
                             </View>
                         )}
                     </TouchableOpacity>

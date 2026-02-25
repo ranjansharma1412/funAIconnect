@@ -4,23 +4,23 @@ import { useTheme } from '../../theme/ThemeContext';
 import { styles } from './FriendCircleScreenStyles';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Avatar from '../../components/atoms/Avatar';
+import Avatar from '../../components/atoms/avatar/Avatar';
 import TextButton from '../../components/atoms/button/TextButton';
-import PostCard from '../../components/organisms/PostCard';
-import GridPostCard from '../../components/organisms/GridPostCard';
+import PostCard from '../../components/organisms/postCard/PostCard';
+import GridPostCard from '../../components/organisms/gridPostCard/GridPostCard';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { friendService, FriendRequestDto } from '../../services/friendService';
 import { postService, Post } from '../../services/postService';
-
+import { useNavigation } from '@react-navigation/native';
 const { width } = Dimensions.get('window');
 
 const FriendCircleScreen = () => {
     const { theme } = useTheme();
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
-
+    const navigation = useNavigation<any>();
     // 0 = Discover, 1 = Friends, 2 = My Posts
     const [activeTab, setActiveTab] = useState(0);
 
@@ -282,7 +282,7 @@ const FriendCircleScreen = () => {
                         commentsCount={item.commentsCount}
                         description={item.description}
                         hasLiked={item.hasLiked}
-                        onPress={() => { }}
+                        onPress={() => navigation.navigate('PostDetails', { post: item })}
                         onSharePress={() => { }}
                     />
                 )}

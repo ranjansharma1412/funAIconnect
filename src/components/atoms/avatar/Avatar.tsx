@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Image, StyleSheet, ViewStyle } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { View, Image, ViewStyle } from 'react-native';
+import { useTheme } from '../../../theme/ThemeContext';
+import { createStyles } from './AvatarStyle';
 
 interface AvatarProps {
     source: { uri: string } | number;
@@ -18,6 +19,7 @@ const Avatar: React.FC<AvatarProps> = ({
     style
 }) => {
     const { theme } = useTheme();
+    const styles = createStyles(theme);
 
     // Ensure we handle null/undefined uri gracefully
     const validSource = (typeof source === 'object' && source !== null && 'uri' in source && !source.uri)
@@ -47,34 +49,5 @@ const Avatar: React.FC<AvatarProps> = ({
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        position: 'relative',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    image: {
-        backgroundColor: '#E1E1E1',
-    },
-    liveBadge: {
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        borderWidth: 2,
-        borderColor: '#FFFFFF',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    liveDot: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: '#FFFFFF',
-    }
-});
 
 export default Avatar;
