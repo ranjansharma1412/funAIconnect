@@ -14,15 +14,9 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { sharePost } from '../../utils/shareUtils';
 import EmptyPostsState from '../../components/molecules/emptyPostsState/EmptyPostsState';
+import { storyService } from '../../services/storyService';
 
-// Dummy Stories Data (Keep for now)
-const STORIES_DATA = [
-    { id: '1', name: 'You', image: 'https://i.pravatar.cc/150?u=1', isLive: false },
-    { id: '2', name: 'Irma', image: 'https://i.pravatar.cc/150?u=2', isLive: true },
-    { id: '3', name: 'Amanda', image: 'https://i.pravatar.cc/150?u=3', isLive: true },
-    { id: '4', name: 'John', image: 'https://i.pravatar.cc/150?u=4', isLive: false },
-    { id: '5', name: 'Sarah', image: 'https://i.pravatar.cc/150?u=5', isLive: false },
-];
+// Dummy Stories Data (Removed, using dynamic API)
 
 import { useTranslation } from 'react-i18next';
 
@@ -35,6 +29,7 @@ const DashboardScreen: React.FC = () => {
     const { user } = useSelector((state: RootState) => state.auth);
 
     const [posts, setPosts] = useState<Post[]>([]);
+    const [stories, setStories] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -46,15 +41,22 @@ const DashboardScreen: React.FC = () => {
     const [isCommentsVisible, setIsCommentsVisible] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
-    const fetchPosts = useCallback(async () => {
+    const fetchDashboardData = useCallback(async () => {
         try {
             const currentUserId = user?.id ? String(user.id) : undefined;
-            const response = await postService.getPosts(1, 10, currentUserId);
-            console.log('Posts:', response.posts);
+            // Fetch posts and stories concurrently
+            const [postsResponse, storiesResponse] = await Promise.all([
+                postService.getPosts(1, 10, currentUserId),
+                storyService.getStories(1, 10, currentUserId)
+            ]);
 
-            setPosts(response.posts);
+            console.log('Posts:', postsResponse.posts);
+            console.log('Stories:', storiesResponse.stories);
+
+            setPosts(postsResponse.posts);
+            setStories(storiesResponse.stories);
         } catch (error) {
-            console.error('Failed to fetch posts:', error);
+            console.error('Failed to fetch dashboard data:', error);
             // Alert.alert(t('common.error'), t('dashboard.fetch_error'));
         } finally {
             setIsLoading(false);
@@ -63,43 +65,29 @@ const DashboardScreen: React.FC = () => {
     }, [t, user?.id]);
 
     useEffect(() => {
-        fetchPosts();
-    }, [fetchPosts]);
+        fetchDashboardData();
+    }, [fetchDashboardData]);
 
     const onRefresh = useCallback(() => {
         setIsRefreshing(true);
-        fetchPosts();
-    }, [fetchPosts]);
+        fetchDashboardData();
+    }, [fetchDashboardData]);
 
-    // Prepare mock stories data
     const userStories = React.useMemo(() => {
-        return STORIES_DATA.map((user, index) => ({
-            id: user.id,
-            username: user.name === 'You' ? t('dashboard.you') : user.name,
-            avatar: user.image,
-            stories: [
-                // ... same stories structure
-                {
-                    id: `story-${user.id}-1`,
-                    url: `https://picsum.photos/seed/${user.id}1/500/900`,
-                    type: 'image' as const,
-                    duration: 3000
-                },
-                {
-                    id: `story-${user.id}-2`,
-                    url: `https://picsum.photos/seed/${user.id}2/500/900`,
-                    type: 'image' as const,
-                    duration: 3000
-                },
-                {
-                    id: `story-${user.id}-3`,
-                    url: `https://picsum.photos/seed/${user.id}3/500/900`,
-                    type: 'image' as const,
-                    duration: 3000
-                },
-            ]
-        }));
-    }, [t]);
+        return stories.map((group) => {
+            const u = user as any;
+            const isCurrentUser = u && (u.username === group.id || u.handle === group.id);
+            return {
+                id: group.id,
+                username: isCurrentUser ? t('dashboard.you') : group.name,
+                avatar: group.image || 'https://via.placeholder.com/150',
+                stories: group.stories.map((s: any) => ({
+                    ...s,
+                    date: s.createdAt // Assuming backend returns createdAt
+                }))
+            };
+        });
+    }, [stories, user, t]);
 
     const handleStoryPress = (id: string, index: number) => {
         setSelectedStatusUserIndex(index);
@@ -181,17 +169,27 @@ const DashboardScreen: React.FC = () => {
         ));
     }, []);
 
-    // Need to pass localized data to StoriesRail too
     const localizedStoriesData = React.useMemo(() => {
-        return STORIES_DATA.map(user => ({
-            ...user,
-            name: user.name === 'You' ? t('dashboard.you') : user.name,
-        }));
-    }, [t]);
+        return stories.map(group => {
+            const u = user as any;
+            const isCurrentUser = u && (u.username === group.id || u.handle === group.id);
+            return {
+                id: group.id,
+                name: isCurrentUser ? t('dashboard.you') : group.name,
+                image: group.image || 'https://via.placeholder.com/150',
+                isLive: group.isLive
+            };
+        });
+    }, [stories, user, t]);
 
-    const renderHeader = () => (
-        <StoriesRail data={localizedStoriesData} onPressItem={handleStoryPress} />
-    );
+    const renderHeader = () => {
+        if (!stories || stories.length === 0) {
+            return null; // Return nothing if no stories
+        }
+        return (
+            <StoriesRail data={localizedStoriesData} onPressItem={handleStoryPress} />
+        );
+    };
 
     // ... renderItem and return
 
