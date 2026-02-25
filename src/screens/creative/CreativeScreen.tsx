@@ -13,6 +13,7 @@ import {
 import Button from '../../components/atoms/button/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { postService } from '../../services/postService';
+import { storyService } from '../../services/storyService';
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './CreativeScreenStyle';
 import { launchImageLibrary, ImageLibraryOptions, Asset } from 'react-native-image-picker';
@@ -29,6 +30,7 @@ const CreativeScreen = () => {
     const [description, setDescription] = useState('');
     const [hashtags, setHashtags] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [postType, setPostType] = useState<'post' | 'story'>('post');
 
     useEffect(() => {
         if (route.params) {
@@ -126,11 +128,22 @@ const CreativeScreen = () => {
                 }
             };
 
-            console.log('Sending post payload:', JSON.stringify(payload, null, 2)); // Debug log
-            const response = await postService.createPost(payload);
-            console.log('Post created successfully:', response);
+            console.log(`Sending ${postType} payload:`, JSON.stringify(payload, null, 2)); // Debug log
 
-            Alert.alert(t('creative.success_title'), t('creative.post_created'), [
+            let response;
+            if (postType === 'story') {
+                response = await storyService.createStory(payload);
+            } else {
+                response = await postService.createPost(payload);
+            }
+
+            console.log(`${postType} created successfully:`, response);
+
+            const successMessage = postType === 'story'
+                ? t('creative.story_created', 'Story created successfully')
+                : t('creative.post_created');
+
+            Alert.alert(t('creative.success_title'), successMessage, [
                 {
                     text: t('common.okay'),
                     onPress: () => {
@@ -143,7 +156,7 @@ const CreativeScreen = () => {
                 },
             ]);
         } catch (error: any) {
-            Alert.alert(t('common.error'), error.message || t('creative.fetch_error') || 'Failed to create post');
+            Alert.alert(t('common.error'), error.message || t('creative.fetch_error') || `Failed to create ${postType}`);
             console.error('Post creation error:', error);
         } finally {
             setIsPosting(false);
@@ -183,6 +196,25 @@ const CreativeScreen = () => {
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <Text style={styles.header}>{t('creative.header_title')}</Text>
+
+                <View style={styles.toggleContainer}>
+                    <TouchableOpacity
+                        style={[styles.toggleButton, postType === 'post' && styles.toggleButtonActive]}
+                        onPress={() => setPostType('post')}
+                    >
+                        <Text style={[styles.toggleText, postType === 'post' && styles.toggleTextActive]}>
+                            {t('creative.post_type_post', 'Post')}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.toggleButton, postType === 'story' && styles.toggleButtonActive]}
+                        onPress={() => setPostType('story')}
+                    >
+                        <Text style={[styles.toggleText, postType === 'story' && styles.toggleTextActive]}>
+                            {t('creative.post_type_story', 'Story')}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity style={styles.imagePreview} onPress={handleGalleryPick}>
                     {selectedImage ? (
@@ -231,7 +263,9 @@ const CreativeScreen = () => {
                 </View>
 
                 <Button
-                    title={isPosting ? t('creative.posting_button') : t('creative.post_button')}
+                    title={isPosting ?
+                        (postType === 'story' ? t('creative.posting_story', 'Creating Story...') : t('creative.posting_button')) :
+                        (postType === 'story' ? t('creative.post_story', 'Add to Story') : t('creative.post_button'))}
                     onPress={handlePost}
                     useGradient={true}
                     style={{ marginTop: 20, opacity: isPosting ? 0.7 : 1 }}

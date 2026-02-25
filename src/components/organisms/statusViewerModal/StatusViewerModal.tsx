@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from './StatusViewerModalStyle';
+import { timeAgo } from '../../../utils/dateUtils';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Replaced with Text since vector icons might not be installed or configured
 
 const { width, height } = Dimensions.get('window');
@@ -183,7 +184,7 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
                     <View style={styles.userInfo}>
                         <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
                         <Text style={styles.username}>{currentUser.username}</Text>
-                        <Text style={styles.timeAgo}>2h</Text>
+                        <Text style={styles.timeAgo}>{currentStory.date ? timeAgo(currentStory.date) : ''}</Text>
                     </View>
                     <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                         <Text style={{ color: 'white', fontSize: 20 }}>X</Text>

@@ -18,6 +18,32 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         marginBottom: 20,
         color: theme.colors.text,
     },
+    toggleContainer: {
+        flexDirection: 'row',
+        marginBottom: 20,
+        backgroundColor: theme.colors.card,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        overflow: 'hidden',
+    },
+    toggleButton: {
+        flex: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    toggleButtonActive: {
+        backgroundColor: theme.colors.primary,
+    },
+    toggleText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: theme.colors.textSecondary,
+    },
+    toggleTextActive: {
+        color: theme.colors.buttonTextPrimary || '#FFF',
+    },
     imagePreview: {
         width: '100%',
         height: 300,
