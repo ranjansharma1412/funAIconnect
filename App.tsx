@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import BootSplash from 'react-native-bootsplash';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
@@ -15,7 +16,10 @@ import { checkAuthStatus } from './src/store/slices/authSlice';
 const App = () => {
   useEffect(() => {
     // Check local storage for persistent auth
-    store.dispatch(checkAuthStatus());
+    store.dispatch(checkAuthStatus()).then(() => {
+      // Hide the splash screen after checking auth status is completed
+      BootSplash.hide({ fade: true });
+    });
 
     const unsubscribe = startNetworkMonitoring();
     return () => {
