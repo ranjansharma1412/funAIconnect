@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, Platform, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from '../../../theme/ThemeContext';
 import Avatar from '../../atoms/avatar/Avatar';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -22,6 +22,8 @@ interface PostCardProps {
     onSharePress?: () => void;
     onLikePress?: () => void;
     onLikesCountPress?: () => void;
+    isShowHeaderView?: boolean;
+    customMediaContainerStyle?: StyleProp<ViewStyle>;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -36,7 +38,9 @@ const PostCard: React.FC<PostCardProps> = ({
     onSharePress,
     onLikePress,
     onLikesCountPress,
-    commentsCount = 0
+    commentsCount = 0,
+    isShowHeaderView = true,
+    customMediaContainerStyle
 }) => {
     const { theme } = useTheme();
     const styles = createStyles(theme);
@@ -101,7 +105,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
     return (
         <View style={styles.container}>
-            <View style={styles.mediaContainer}>
+            <View style={[styles.mediaContainer, customMediaContainerStyle]}>
                 <Image
                     source={{ uri: validPostImage }}
                     style={styles.postImage}
@@ -109,7 +113,7 @@ const PostCard: React.FC<PostCardProps> = ({
                 />
 
                 <View style={styles.headerWrapper}>
-                    {renderGlassHeader()}
+                    {isShowHeaderView ? renderGlassHeader() : null}
                 </View>
 
                 <View style={styles.footerOverlay}>

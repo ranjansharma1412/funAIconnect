@@ -123,6 +123,8 @@ const PostDetailsScreen = () => {
                         onCommentPress={() => setIsCommentsVisible(true)}
                         onLikesCountPress={() => setIsLikesVisible(true)}
                         onSharePress={() => { }}
+                        isShowHeaderView={false}
+                        customMediaContainerStyle={styles.mediaContainer}
                     />
                 </View>
             </ScrollView>

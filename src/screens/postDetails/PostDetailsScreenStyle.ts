@@ -1,12 +1,12 @@
 import { StyleSheet, Dimensions } from 'react-native';
 import { Theme } from '../../theme/theme';
 
-const { height } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 export const createStyles = (theme: Theme) => StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: theme.colors.background,
+        // backgroundColor: theme.colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -31,5 +31,9 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
     postWrapper: {
         height: height * 0.8, // Adjust as needed to look like full screen
         backgroundColor: '#000',
-    }
+        justifyContent: 'center',
+    },
+    mediaContainer: {
+        height: width * 1.5, // Taller aspect ratio
+    },
 });
