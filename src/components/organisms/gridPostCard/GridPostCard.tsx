@@ -60,7 +60,7 @@ const GridPostCard: React.FC<GridPostCardProps> = ({
                     </View>
                 </View>
                 {description && (
-                    <Text style={styles.descriptionText} numberOfLines={2}>
+                    <Text style={styles.descriptionText} numberOfLines={1} ellipsizeMode='tail'>
                         {description}
                     </Text>
                 )}
