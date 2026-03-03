@@ -11,8 +11,9 @@ import { Post, postService } from '../../services/postService';
 import PostCard from '../../components/organisms/postCard/PostCard';
 import CommentsModal from '../../components/organisms/commentsModal/CommentsModal';
 import LikesModal from '../../components/organisms/likesModal/LikesModal';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../store';
+import { updatePost } from '../../store/slices/postSlice';
 
 const PostDetailsScreen = () => {
     const route = useRoute<any>();
@@ -23,6 +24,7 @@ const PostDetailsScreen = () => {
     const insets = useSafeAreaInsets();
 
     const { user } = useSelector((state: RootState) => state.auth);
+    const dispatch = useDispatch<AppDispatch>();
 
     // Initial post passed from navigation params
     const initialPost = route.params?.post as Post;
@@ -58,10 +60,18 @@ const PostDetailsScreen = () => {
         const isCurrentlyLiked = post.hasLiked;
 
         // 1. Optimistic UI update
+        const newLikesCount = isCurrentlyLiked ? Math.max(0, post.likes - 1) : post.likes + 1;
+
         setPost(prev => ({
             ...prev,
             hasLiked: !isCurrentlyLiked,
-            likes: isCurrentlyLiked ? Math.max(0, prev.likes - 1) : prev.likes + 1
+            likes: newLikesCount
+        }));
+
+        dispatch(updatePost({
+            id: post.id,
+            hasLiked: !isCurrentlyLiked,
+            likes: newLikesCount
         }));
 
         // 2. Make API Call
@@ -73,31 +83,54 @@ const PostDetailsScreen = () => {
                 hasLiked: response.liked,
                 likes: response.likes
             }));
+
+            dispatch(updatePost({
+                id: post.id,
+                hasLiked: response.liked,
+                likes: response.likes
+            }));
         } catch (error) {
             // 4. Revert UI on failure
             console.error('Failed to toggle like:', error);
+            const revertedLikes = isCurrentlyLiked ? post.likes + 1 : Math.max(0, post.likes - 1);
+
             setPost(prev => ({
                 ...prev,
                 hasLiked: isCurrentlyLiked,
-                likes: isCurrentlyLiked ? prev.likes + 1 : Math.max(0, prev.likes - 1)
+                likes: revertedLikes
             }));
+
+            dispatch(updatePost({
+                id: post.id,
+                hasLiked: isCurrentlyLiked,
+                likes: revertedLikes
+            }));
+
             Alert.alert(t('common.error', 'Error'), t('api.something_went_wrong', 'Could not process like action.'));
         }
     };
 
     const handleCommentAdded = useCallback((postId: number) => {
-        setPost(prev => ({
-            ...prev,
-            commentsCount: (prev.commentsCount || 0) + 1
-        }));
-    }, []);
+        setPost(prev => {
+            const newCount = (prev.commentsCount || 0) + 1;
+            dispatch(updatePost({ id: postId, commentsCount: newCount }));
+            return {
+                ...prev,
+                commentsCount: newCount
+            };
+        });
+    }, [dispatch]);
 
     const handleCommentDeleted = useCallback((postId: number) => {
-        setPost(prev => ({
-            ...prev,
-            commentsCount: Math.max(0, (prev.commentsCount || 0) - 1)
-        }));
-    }, []);
+        setPost(prev => {
+            const newCount = Math.max(0, (prev.commentsCount || 0) - 1);
+            dispatch(updatePost({ id: postId, commentsCount: newCount }));
+            return {
+                ...prev,
+                commentsCount: newCount
+            };
+        });
+    }, [dispatch]);
 
     return (
         <View style={[styles.safeArea, { paddingTop: insets.top }]}>
