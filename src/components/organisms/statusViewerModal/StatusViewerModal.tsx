@@ -15,16 +15,23 @@ import { useTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { createStyles } from './StatusViewerModalStyle';
 import { timeAgo } from '../../../utils/dateUtils';
-// import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Replaced with Text since vector icons might not be installed or configured
+import StoryLikesModal from '../storyLikesModal/StoryLikesModal';
+import { storyService } from '../../../services/storyService';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const { width, height } = Dimensions.get('window');
 
 export interface StoryItem {
     id: string;
+    raw_id?: number | string; // ID for API Calls
     url: string;
     type: 'image' | 'video';
     duration?: number;
     date?: string;
+    hasLiked?: boolean;
+    likesCount?: number;
 }
 
 export interface UserStory {
@@ -56,7 +63,18 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
     const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
     const [progress] = useState(new Animated.Value(0));
 
-    const currentUser = userStories[currentUserIndex];
+    // Story Like State
+    const [isLikesVisible, setIsLikesVisible] = useState(false);
+    const [isLiking, setIsLiking] = useState(false);
+    const { user } = useSelector((state: RootState) => state.auth);
+    const [localStories, setLocalStories] = useState<UserStory[]>([]);
+
+    // Sync external props
+    useEffect(() => {
+        setLocalStories(userStories);
+    }, [userStories]);
+
+    const currentUser = localStories[currentUserIndex];
     const currentStory = currentUser?.stories[currentStoryIndex];
 
     const progressAnim = useRef<Animated.CompositeAnimation | null>(null);
@@ -129,6 +147,80 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
             } else {
                 onClose();
             }
+        }
+    };
+
+    const isCurrentUserStory = () => {
+        if (!user || !currentUser) return false;
+        const u = user as any;
+        return String(currentUser.id) === String(u.username) || String(currentUser.id) === String(u.handle);
+    };
+
+    const handleHeartPress = async () => {
+        if (!currentStory?.raw_id || !user?.id) return;
+
+        if (isCurrentUserStory()) {
+            // Owner opens modal to see who liked it
+            if (progressAnim.current) {
+                // Pause auto-play
+                progressAnim.current.stop();
+            }
+            setIsLikesVisible(true);
+            return;
+        }
+
+        // Toggle Like logic for other users
+        if (isLiking) return;
+        setIsLiking(true);
+
+        const isCurrentlyLiked = currentStory.hasLiked;
+        const currentUserId = String(user.id);
+        const storyIdRaw = Number(currentStory.raw_id);
+
+        try {
+            // Optimistic Update
+            setLocalStories(prev => {
+                const newStories = [...prev];
+                const userGroup = { ...newStories[currentUserIndex] };
+                const storiesList = [...userGroup.stories];
+
+                storiesList[currentStoryIndex] = {
+                    ...storiesList[currentStoryIndex],
+                    hasLiked: !isCurrentlyLiked,
+                    likesCount: isCurrentlyLiked
+                        ? Math.max(0, (storiesList[currentStoryIndex].likesCount || 0) - 1)
+                        : (storiesList[currentStoryIndex].likesCount || 0) + 1
+                };
+
+                userGroup.stories = storiesList;
+                newStories[currentUserIndex] = userGroup;
+                return newStories;
+            });
+
+            // API Call
+            await storyService.toggleStoryLike(storyIdRaw, currentUserId);
+        } catch (error) {
+            console.error("Failed to like story:", error);
+            // Revert on failure
+            setLocalStories(prev => {
+                const newStories = [...prev];
+                const userGroup = { ...newStories[currentUserIndex] };
+                const storiesList = [...userGroup.stories];
+
+                storiesList[currentStoryIndex] = {
+                    ...storiesList[currentStoryIndex],
+                    hasLiked: isCurrentlyLiked,
+                    likesCount: isCurrentlyLiked
+                        ? (storiesList[currentStoryIndex].likesCount || 0) + 1
+                        : Math.max(0, (storiesList[currentStoryIndex].likesCount || 0) - 1)
+                };
+
+                userGroup.stories = storiesList;
+                newStories[currentUserIndex] = userGroup;
+                return newStories;
+            });
+        } finally {
+            setIsLiking(false);
         }
     };
 
@@ -213,15 +305,38 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
                     <View style={styles.replyInput}>
                         <Text style={styles.replyPlaceholder}>{t('dashboard.send_message')}</Text>
                     </View>
-                    <TouchableOpacity>
-                        <Text style={{ color: 'white', fontSize: 24 }}>♡</Text>
+
+                    <TouchableOpacity onPress={handleHeartPress}>
+                        {isCurrentUserStory() ? (
+                            <Ionicons
+                                name={currentStory.likesCount && currentStory.likesCount > 0 ? "heart" : "heart-outline"}
+                                size={30}
+                                color={currentStory.likesCount && currentStory.likesCount > 0 ? theme.colors.primary : 'white'}
+                            />
+                        ) : (
+                            <Ionicons
+                                name={currentStory.hasLiked ? "heart" : "heart-outline"}
+                                size={30}
+                                color={currentStory.hasLiked ? theme.colors.primary : 'white'}
+                            />
+                        )}
                     </TouchableOpacity>
+
                     <TouchableOpacity style={{ marginLeft: 15 }}>
-                        <Text style={{ color: 'white', fontSize: 24 }}>➤</Text>
+                        <Ionicons name="paper-plane-outline" size={30} color="white" />
                     </TouchableOpacity>
                 </View>
 
             </View>
+
+            <StoryLikesModal
+                visible={isLikesVisible}
+                storyId={currentStory.raw_id ? currentStory.raw_id : null}
+                onClose={() => {
+                    setIsLikesVisible(false);
+                    startProgress(); // Resume auto-play
+                }}
+            />
         </Modal>
     );
 };

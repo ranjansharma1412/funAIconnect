@@ -9,8 +9,9 @@ import TextButton from '../../components/atoms/button/TextButton';
 import PostCard from '../../components/organisms/postCard/PostCard';
 import GridPostCard from '../../components/organisms/gridPostCard/GridPostCard';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../store';
+import { setMyPosts } from '../../store/slices/postSlice';
 import { friendService, FriendRequestDto } from '../../services/friendService';
 import { postService, Post } from '../../services/postService';
 import { useNavigation } from '@react-navigation/native';
@@ -30,7 +31,8 @@ const FriendCircleScreen = () => {
     const [requests, setRequests] = useState<FriendRequestDto[]>([]);
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [friends, setFriends] = useState<any[]>([]);
-    const [myPosts, setMyPosts] = useState<Post[]>([]);
+    const dispatch = useDispatch<AppDispatch>();
+    const myPosts = useSelector((state: RootState) => state.posts.myPosts);
     const [loading, setLoading] = useState(false);
 
     const fetchDiscoverData = useCallback(async () => {
@@ -70,7 +72,7 @@ const FriendCircleScreen = () => {
         setLoading(true);
         try {
             const response = await postService.getUserPosts(currentUserId, 1, 50, currentUserId);
-            setMyPosts(response.posts);
+            dispatch(setMyPosts(response.posts));
         } catch (error) {
             console.error('Failed to fetch API data for My Posts tab', error);
         } finally {

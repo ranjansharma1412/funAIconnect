@@ -10,8 +10,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './DashboardScreenStyle';
 import { postService, Post } from '../../services/postService';
 import { commentService } from '../../services/commentService';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../store';
+import { setDashboardPosts, updatePost } from '../../store/slices/postSlice';
 import { sharePost } from '../../utils/shareUtils';
 import EmptyPostsState from '../../components/molecules/emptyPostsState/EmptyPostsState';
 import { storyService } from '../../services/storyService';
@@ -28,7 +29,8 @@ const DashboardScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const { user } = useSelector((state: RootState) => state.auth);
 
-    const [posts, setPosts] = useState<Post[]>([]);
+    const dispatch = useDispatch<AppDispatch>();
+    const posts = useSelector((state: RootState) => state.posts.dashboardPosts);
     const [stories, setStories] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -53,7 +55,7 @@ const DashboardScreen: React.FC = () => {
             console.log('Posts:', postsResponse.posts);
             console.log('Stories:', storiesResponse.stories);
 
-            setPosts(postsResponse.posts);
+            dispatch(setDashboardPosts(postsResponse.posts));
             setStories(storiesResponse.stories);
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
@@ -117,17 +119,14 @@ const DashboardScreen: React.FC = () => {
         const currentUserId = String(user.id);
 
         // 1. Optimistic UI update
-        const originalPosts = [...posts];
-        setPosts(prevPosts => prevPosts.map(p => {
-            if (p.id === post.id) {
-                const isCurrentlyLiked = p.hasLiked;
-                return {
-                    ...p,
-                    hasLiked: !isCurrentlyLiked,
-                    likes: isCurrentlyLiked ? Math.max(0, p.likes - 1) : p.likes + 1
-                };
-            }
-            return p;
+        const originalPost = posts.find(p => p.id === post.id);
+        const isCurrentlyLiked = originalPost?.hasLiked || false;
+        const newLikesCount = isCurrentlyLiked ? Math.max(0, (originalPost?.likes || 0) - 1) : (originalPost?.likes || 0) + 1;
+
+        dispatch(updatePost({
+            id: post.id,
+            hasLiked: !isCurrentlyLiked,
+            likes: newLikesCount
         }));
 
         // 2. Make API Call
@@ -135,39 +134,46 @@ const DashboardScreen: React.FC = () => {
             const response = await postService.toggleLike(post.id, currentUserId);
 
             // 3. Sync strictly with server response just in case
-            setPosts(prevPosts => prevPosts.map(p => {
-                if (p.id === post.id) {
-                    return {
-                        ...p,
-                        hasLiked: response.liked,
-                        likes: response.likes
-                    };
-                }
-                return p;
+            dispatch(updatePost({
+                id: post.id,
+                hasLiked: response.liked,
+                likes: response.likes
             }));
         } catch (error) {
             // 4. Revert UI on failure
             console.error('Failed to toggle like:', error);
-            setPosts(originalPosts);
+
+            if (originalPost) {
+                dispatch(updatePost({
+                    id: post.id,
+                    hasLiked: originalPost.hasLiked,
+                    likes: originalPost.likes
+                }));
+            }
+
             Alert.alert(t('common.error', 'Error'), t('api.something_went_wrong', 'Could not process like action.'));
         }
     };
 
     const handleCommentAdded = useCallback((postId: number) => {
-        setPosts(prevPosts => prevPosts.map(post =>
-            post.id === postId
-                ? { ...post, commentsCount: (post.commentsCount || 0) + 1 }
-                : post
-        ));
-    }, []);
+        const post = posts.find(p => p.id === postId);
+        if (post) {
+            dispatch(updatePost({
+                id: postId,
+                commentsCount: (post.commentsCount || 0) + 1
+            }));
+        }
+    }, [dispatch, posts]);
 
     const handleCommentDeleted = useCallback((postId: number) => {
-        setPosts(prevPosts => prevPosts.map(post =>
-            post.id === postId
-                ? { ...post, commentsCount: Math.max(0, (post.commentsCount || 0) - 1) }
-                : post
-        ));
-    }, []);
+        const post = posts.find(p => p.id === postId);
+        if (post) {
+            dispatch(updatePost({
+                id: postId,
+                commentsCount: Math.max(0, (post.commentsCount || 0) - 1)
+            }));
+        }
+    }, [dispatch, posts]);
 
     const localizedStoriesData = React.useMemo(() => {
         return stories.map(group => {

@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import modalReducer from './slices/modalSlice';
 import networkReducer from './slices/networkSlice';
 import authReducer from './slices/authSlice';
+import postReducer from './slices/postSlice';
 
 export const store = configureStore({
     reducer: {
         modal: modalReducer,
         network: networkReducer,
         auth: authReducer,
+        posts: postReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
