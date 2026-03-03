@@ -21,7 +21,20 @@ export interface Story {
     hashtags: string;
     storyImage: string;
     isVerified: boolean;
+    likesCount?: number;
+    hasLiked?: boolean;
     createdAt: string;
+}
+
+export interface StoryLikeResponse {
+    liked: boolean;
+    likes: number;
+    message: string;
+}
+
+export interface GetStoryLikesResponse {
+    likes: any[];
+    count: number;
 }
 
 export interface GetStoriesResponse {
@@ -81,6 +94,26 @@ export const storyService = {
             return response.data;
         } catch (error) {
             console.error('Error fetching stories:', error);
+            throw error;
+        }
+    },
+
+    toggleStoryLike: async (storyId: number, userId: string): Promise<StoryLikeResponse> => {
+        try {
+            const response = await apiClient.post(`/api/stories/${storyId}/like`, { userId });
+            return response.data;
+        } catch (error) {
+            console.error('Error toggling story like:', error);
+            throw error;
+        }
+    },
+
+    getStoryLikes: async (storyId: number): Promise<GetStoryLikesResponse> => {
+        try {
+            const response = await apiClient.get(`/api/stories/${storyId}/likes`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching story likes:', error);
             throw error;
         }
     },
