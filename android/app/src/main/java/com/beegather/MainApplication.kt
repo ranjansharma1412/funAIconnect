@@ -1,4 +1,4 @@
-package com.funaiconnect
+package com.beegather
 
 import android.app.Application
 import com.facebook.react.PackageList
