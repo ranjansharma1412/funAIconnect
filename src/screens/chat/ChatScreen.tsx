@@ -9,6 +9,11 @@ import { RouteProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ChatBubble, { MessageProps } from '../../components/organisms/chatBubble/ChatBubble';
 import ChatInput from '../../components/organisms/chatInput/ChatInput';
+import socketService from '../../services/SocketService';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
+
+const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5001' : 'http://localhost:5001';
 
 type RootStackParamList = {
     Chat: { chatId: string; userId: string; userName: string; userImage: string };
@@ -20,58 +25,6 @@ interface Props {
     navigation: NativeStackNavigationProp<any>;
     route: ChatScreenRouteProp;
 }
-
-const INITIAL_MESSAGES: MessageProps[] = [
-    {
-        id: '1',
-        text: 'Hey there! How have you been?',
-        type: 'text',
-        time: '14:20',
-        isOwnMessage: false,
-        status: 'read',
-    },
-    {
-        id: '2',
-        text: 'I am doing great, thanks for asking!',
-        type: 'text',
-        time: '14:22',
-        isOwnMessage: true,
-        status: 'read',
-    },
-    {
-        id: '3',
-        type: 'image',
-        mediaUrl: 'https://picsum.photos/id/1015/400/300',
-        time: '14:23',
-        isOwnMessage: false,
-        status: 'read',
-    },
-    {
-        id: '4',
-        text: 'Wow, that looks amazing! Did you take that video?',
-        type: 'text',
-        time: '14:25',
-        isOwnMessage: true,
-        status: 'read',
-    },
-    {
-        id: '5',
-        type: 'video',
-        mediaUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
-        time: '14:26',
-        isOwnMessage: false,
-        status: 'read',
-    },
-    {
-        id: '6',
-        text: 'Yeah, I just recorded it. Want me to send the original file?',
-        type: 'text',
-        time: '14:27',
-        isOwnMessage: false,
-        status: 'delivered',
-    },
-];
-
 const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     const { userName, userImage } = route.params || {
         userName: 'Alex Johnson',
@@ -80,11 +33,73 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
 
     const { theme } = useTheme();
     const styles = createStyles(theme);
-    const [messages, setMessages] = useState<MessageProps[]>(INITIAL_MESSAGES);
+    const [messages, setMessages] = useState<MessageProps[]>([]);
     const [selectedMedia, setSelectedMedia] = useState<MessageProps | null>(null);
     const [isPlaying, setIsPlaying] = useState(true);
     const [progress, setProgress] = useState({ currentTime: 0, seekableDuration: 0 });
+    
+    const currentUser = useSelector((state: RootState) => state.auth.user);
+    const currentUserId = currentUser?.id?.toString();
     const flatListRef = useRef<FlatList>(null);
+
+    const friendId = route.params?.userId || '2'; // Ensure friend ID falls back if missing
+
+    React.useEffect(() => {
+        if (!currentUserId || !friendId) return;
+
+        socketService.connect(currentUserId);
+        socketService.joinChat(currentUserId, friendId);
+
+        const fetchHistory = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/chat/${friendId}/messages?user_id=${currentUserId}`);
+                const data = await res.json();
+                if (data.messages) {
+                    const mapped = data.messages.map((m: any) => ({
+                        id: String(m.id),
+                        text: m.text,
+                        type: m.mediaType || 'text',
+                        time: m.time || '00:00',
+                        isOwnMessage: String(m.senderId) === currentUserId,
+                        status: m.status,
+                        mediaUrl: m.mediaUrl
+                    }));
+                    setMessages(mapped);
+                    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 300);
+                }
+            } catch (e) {
+                console.log('Error fetching history:', e);
+            }
+        };
+        fetchHistory();
+
+        socketService.onReceiveMessage((m: any) => {
+            const incomingMsg: MessageProps = {
+                id: String(m.id),
+                text: m.text,
+                type: m.mediaType || 'text',
+                time: m.time || 'Just now',
+                isOwnMessage: String(m.senderId) === currentUserId,
+                status: m.status,
+                mediaUrl: m.mediaUrl
+            };
+            setMessages(prev => [...prev, incomingMsg]);
+            setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+            
+            // Send read receipt if received msg isn't our own
+            if(String(m.senderId) !== currentUserId) {
+                socketService.readMessage({ messageId: m.id, userId: currentUserId, friendId });
+            }
+        });
+        
+        socketService.onMessageStatusUpdate((data: any) => {
+            setMessages(prev => prev.map(msg => msg.id === data.messageId ? { ...msg, status: data.status as any } : msg));
+        });
+
+        return () => {
+            socketService.leaveChat(currentUserId, friendId);
+        };
+    }, [currentUserId, friendId]);
 
     const formatTime = (seconds: number) => {
         if (isNaN(seconds) || seconds < 0) return '00:00';
@@ -94,29 +109,12 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     };
 
     const handleSend = (text: string) => {
-        const newMessage: MessageProps = {
-            id: Date.now().toString(),
+        socketService.sendMessage({
+            userId: currentUserId || '',
+            friendId: friendId,
             text,
-            type: 'text',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            isOwnMessage: true,
-            status: 'sent', // Initially sent
-        };
-
-        setMessages((prev) => [...prev, newMessage]);
-        setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
-
-        // Mock delivery/read status updates
-        setTimeout(() => {
-            setMessages((prev) =>
-                prev.map(msg => msg.id === newMessage.id ? { ...msg, status: 'delivered' } : msg)
-            );
-            setTimeout(() => {
-                setMessages((prev) =>
-                    prev.map(msg => msg.id === newMessage.id ? { ...msg, status: 'read' } : msg)
-                );
-            }, 2000);
-        }, 1000);
+            mediaType: 'text'
+        });
     };
 
     const handleAttachCamera = async () => {
@@ -124,16 +122,12 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             const result = await launchCamera({ mediaType: 'mixed', cameraType: 'back' });
             if (result.assets && result.assets.length > 0) {
                 const asset = result.assets[0];
-                const newMessage: MessageProps = {
-                    id: Date.now().toString(),
-                    type: asset.type?.includes('video') ? 'video' : 'image',
+                socketService.sendMessage({
+                    userId: currentUserId || '',
+                    friendId: friendId,
                     mediaUrl: asset.uri,
-                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    isOwnMessage: true,
-                    status: 'sent',
-                };
-                setMessages((prev) => [...prev, newMessage]);
-                setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+                    mediaType: asset.type?.includes('video') ? 'video' : 'image'
+                });
             }
         } catch (error) {
             console.log('Camera Error: ', error);
@@ -145,16 +139,12 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             const result = await launchImageLibrary({ mediaType: 'mixed', selectionLimit: 1 });
             if (result.assets && result.assets.length > 0) {
                 const asset = result.assets[0];
-                const newMessage: MessageProps = {
-                    id: Date.now().toString(),
-                    type: asset.type?.includes('video') ? 'video' : 'image',
+                socketService.sendMessage({
+                    userId: currentUserId || '',
+                    friendId: friendId,
                     mediaUrl: asset.uri,
-                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    isOwnMessage: true,
-                    status: 'sent',
-                };
-                setMessages((prev) => [...prev, newMessage]);
-                setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+                    mediaType: asset.type?.includes('video') ? 'video' : 'image'
+                });
             }
         } catch (error) {
             console.log('Gallery Error: ', error);
@@ -165,8 +155,6 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
         Alert.alert('Not Supported', 'Document picking is temporarily disabled due to library incompatibility.');
     };
 
-    // Note: in older react-native, 3 minutes is 3 * 60 * 1000 = 180,000ms. 
-    // For static demo purposes, any "own" message that is not already deleted can be deleted.
     const handleLongPressMsg = (msg: MessageProps) => {
         if (!msg.isOwnMessage || msg.status === 'deleted') return;
 
@@ -178,10 +166,15 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                 {
                     text: 'Delete',
                     style: 'destructive',
-                    onPress: () => {
-                        setMessages((prev) =>
-                            prev.map(m => m.id === msg.id ? { ...m, status: 'deleted', text: undefined, mediaUrl: undefined } : m)
-                        );
+                    onPress: async () => {
+                        try {
+                            const res = await fetch(`${API_URL}/api/chat/messages/${msg.id}?user_id=${currentUserId}`, { method: 'DELETE' });
+                            if (res.ok) {
+                                setMessages((prev) =>
+                                    prev.map(m => m.id === msg.id ? { ...m, status: 'deleted', text: undefined, mediaUrl: undefined } : m)
+                                );
+                            }
+                        } catch(e) { console.log(e) }
                     }
                 }
             ]

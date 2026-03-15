@@ -17,6 +17,14 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, onAttachCamera, onAttachG
     const styles = createStyles(theme);
     const [message, setMessage] = useState('');
     const [isAttachmentModalVisible, setAttachmentModalVisible] = useState(false);
+    const [pendingAction, setPendingAction] = useState<'camera' | 'gallery' | 'document' | null>(null);
+
+    const handleModalHide = () => {
+        if (pendingAction === 'camera') onAttachCamera?.();
+        else if (pendingAction === 'gallery') onAttachGallery?.();
+        else if (pendingAction === 'document') onAttachDocument?.();
+        setPendingAction(null);
+    };
 
     const handleSend = () => {
         if (message.trim().length > 0) {
@@ -62,6 +70,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, onAttachCamera, onAttachG
                 isVisible={isAttachmentModalVisible}
                 onBackdropPress={() => setAttachmentModalVisible(false)}
                 onBackButtonPress={() => setAttachmentModalVisible(false)}
+                onModalHide={handleModalHide}
                 style={styles.modal}
             >
                 <View style={[styles.bottomSheet, { backgroundColor: theme.colors.card }]}>
@@ -70,8 +79,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, onAttachCamera, onAttachG
                         <TouchableOpacity 
                             style={styles.attachmentOptionBtn}
                             onPress={() => {
+                                setPendingAction('camera');
                                 setAttachmentModalVisible(false);
-                                onAttachCamera?.();
                             }}
                         >
                             <View style={[styles.attachmentIconContainer, { backgroundColor: '#FF5722' }]}>
@@ -83,8 +92,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, onAttachCamera, onAttachG
                         <TouchableOpacity 
                             style={styles.attachmentOptionBtn}
                             onPress={() => {
+                                setPendingAction('gallery');
                                 setAttachmentModalVisible(false);
-                                onAttachGallery?.();
                             }}
                         >
                             <View style={[styles.attachmentIconContainer, { backgroundColor: '#4CAF50' }]}>
@@ -96,8 +105,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, onAttachCamera, onAttachG
                         <TouchableOpacity 
                             style={styles.attachmentOptionBtn}
                             onPress={() => {
+                                setPendingAction('document');
                                 setAttachmentModalVisible(false);
-                                onAttachDocument?.();
                             }}
                         >
                             <View style={[styles.attachmentIconContainer, { backgroundColor: '#007AFF' }]}>
