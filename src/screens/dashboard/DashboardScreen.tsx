@@ -103,7 +103,7 @@ const DashboardScreen: React.FC = () => {
 
     const handleSharePress = async (post: Post) => {
         await sharePost({
-            message: `${post.description}\n\nCheck out this post on FunAIconnect!`,
+            message: `${post.description}\n\nCheck out this post on BeeGather!`,
             url: post.postImage, // iOS supports url
             title: 'Share Post', // Android
         });

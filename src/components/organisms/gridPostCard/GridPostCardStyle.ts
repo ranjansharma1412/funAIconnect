@@ -33,14 +33,16 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         left: 0,
-        right: 0,
-        padding: 12,
-        paddingTop: 30, // Gradients stretch up for smooth transition
+        width: '100%',
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
     },
     actionRow: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 6,
+        paddingHorizontal: 16,
+        paddingBottom: 8,
     },
     actionItem: {
         flexDirection: 'row',
@@ -57,6 +59,8 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         color: theme.colors.textOnImageSecondary,
         fontSize: 12,
         lineHeight: 16,
+        paddingBottom: 16,
+        paddingHorizontal: 16,
     },
     shareButton: {
         position: 'absolute',
