@@ -10,11 +10,14 @@ import RegisterScreen from '../screens/register/RegisterScreen';
 import ChangePasswordScreen from '../screens/changePassword/ChangePasswordScreen';
 import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import PostDetailsScreen from '../screens/postDetails/PostDetailsScreen';
+import ChatListScreen from '../screens/chat/ChatListScreen';
+// import ChatScreen from '../screens/chat/ChatScreen';
 import { useTheme } from '../theme/ThemeContext';
 
 import ForgotPasswordScreen from '../screens/login/ForgotPasswordScreen';
 import ResetPasswordScreen from '../screens/login/ResetPasswordScreen';
 import { LinkingOptions } from '@react-navigation/native';
+import ChatScreen from '../screens/chat/ChatScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -71,6 +74,8 @@ const AppNavigator = () => {
                         <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
                         <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
                         <Stack.Screen name="PostDetails" component={PostDetailsScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="ChatList" component={ChatListScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="Chat" component={ChatScreen} options={{ headerShown: false }} />
                     </>
                 ) : (
                     <>

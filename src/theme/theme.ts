@@ -31,6 +31,8 @@ export const lightTheme = {
     disabled: '#E1E1E1',
     divider: '#EEEEEE',
     skeletonBackground: '#DDDDDD',
+    lighterOrange: '#fff4ecff',
+    lighterBlack: '#F0F0F0'
   },
   fonts: {
     regular: 'System',
@@ -73,6 +75,8 @@ export const darkTheme = {
     disabled: '#333333',
     divider: '#333333',
     skeletonBackground: '#2A2A2A',
+    lighterOrange: '#3b170592',
+    lighterBlack: '#242424ff'
   },
   fonts: {
     regular: 'System',
