@@ -9,7 +9,8 @@
     "pod:install": "cd ios && pod install && cd ..",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "release:android": "cd android && ./gradlew assembleRelease && cd .."
   },
   "dependencies": {
     "@callstack/liquid-glass": "^0.7.0",
