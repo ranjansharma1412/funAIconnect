@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 // Using generic shapes for icons since we might not have a specific icon library installed yet. 
 // In a real app we'd use react-native-vector-icons or SVGs.
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useTranslation } from 'react-i18next';
 import { createStyles } from './DashboardHeaderStyle';
@@ -19,14 +20,9 @@ const DashboardHeader: React.FC = () => {
 
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            {/* Left: Menu Icon Placeholder */}
-            <TouchableOpacity style={styles.iconButton}>
-                <View style={styles.menuGrid}>
-                    <View style={[styles.menuDot, { backgroundColor: theme.colors.text }]} />
-                    <View style={[styles.menuDot, { backgroundColor: theme.colors.text }]} />
-                    <View style={[styles.menuDot, { backgroundColor: theme.colors.text }]} />
-                    <View style={[styles.menuDot, { backgroundColor: theme.colors.text }]} />
-                </View>
+            {/* Left: Chat Icon linking to ChatList */}
+            <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('ChatList')}>
+                <Icon name="chatbubble-ellipses-outline" size={26} color={theme.colors.text} />
             </TouchableOpacity>
 
             {/* Center: Brand Logo */}

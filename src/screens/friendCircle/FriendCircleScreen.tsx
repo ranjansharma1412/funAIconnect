@@ -246,7 +246,15 @@ const FriendCircleScreen = () => {
                                 <Text style={[styles.userName, { color: theme.colors.text }]} numberOfLines={1}>{displayName}</Text>
                                 <Text style={[styles.userHandle, { color: theme.colors.textSecondary }]}>{displayHandle}</Text>
                             </View>
-                            <TouchableOpacity style={styles.actionButtons}>
+                            <TouchableOpacity
+                                style={styles.actionButtons}
+                                onPress={() => navigation.navigate('Chat', {
+                                    chatId: '', // Chat ID will be resolved implicitly
+                                    userId: item.id.toString(),
+                                    userName: displayName,
+                                    userImage: isValidImage
+                                })}
+                            >
                                 <Ionicons name="chatbubble-ellipses-outline" size={24} color={theme.colors.textSecondary} />
                             </TouchableOpacity>
                         </View>
