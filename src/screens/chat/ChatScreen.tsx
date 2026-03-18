@@ -117,15 +117,39 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
         });
     };
 
+    const uploadMedia = async (uri: string, type: string) => {
+        const formData = new FormData();
+        formData.append('file', {
+            uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
+            type: type || 'image/jpeg',
+            name: `upload_${Date.now()}.${type?.includes('video') ? 'mp4' : 'jpg'}`
+        } as any);
+
+        const res = await fetch(`${API_URL}/api/chat/upload`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        const data = await res.json();
+        if (data.url) return data.url;
+        throw new Error('Upload failed');
+    };
+
     const handleAttachCamera = async () => {
         try {
             const result = await launchCamera({ mediaType: 'mixed', cameraType: 'back' });
             if (result.assets && result.assets.length > 0) {
                 const asset = result.assets[0];
+                if (!asset.uri) return;
+
+                const uploadedUrl = await uploadMedia(asset.uri, asset.type || 'image/jpeg');
+
                 socketService.sendMessage({
                     userId: currentUserId || '',
                     friendId: friendId,
-                    mediaUrl: asset.uri,
+                    mediaUrl: uploadedUrl,
                     mediaType: asset.type?.includes('video') ? 'video' : 'image'
                 });
             }
@@ -139,10 +163,14 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             const result = await launchImageLibrary({ mediaType: 'mixed', selectionLimit: 1 });
             if (result.assets && result.assets.length > 0) {
                 const asset = result.assets[0];
+                if (!asset.uri) return;
+
+                const uploadedUrl = await uploadMedia(asset.uri, asset.type || 'image/jpeg');
+
                 socketService.sendMessage({
                     userId: currentUserId || '',
                     friendId: friendId,
-                    mediaUrl: asset.uri,
+                    mediaUrl: uploadedUrl,
                     mediaType: asset.type?.includes('video') ? 'video' : 'image'
                 });
             }

@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, TextInput, SafeAreaView } from 
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './ChatListScreenStyle';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Avatar from '../../components/atoms/avatar/Avatar';
@@ -70,39 +71,43 @@ const ChatListScreen: React.FC<Props> = ({ navigation }) => {
     const currentUser = useSelector((state: RootState) => state.auth.user);
     const currentUserId = currentUser?.id?.toString();
 
+    const fetchConversations = React.useCallback(async () => {
+        if (!currentUserId) return;
+        try {
+            const res = await fetch(`${API_URL}/api/chat/conversations?user_id=${currentUserId}`);
+            const data = await res.json();
+            if (data.conversations) {
+                const formattedChats = data.conversations.map((conv: any) => {
+                    // determine who the friend is
+                    const friendStr = String(conv.user1.id) === currentUserId ? conv.user2 : conv.user1;
+                    return {
+                        id: String(conv.id),
+                        userId: String(friendStr.id),
+                        userName: friendStr.fullName || friendStr.username,
+                        userImage: friendStr.userImage || 'https://picsum.photos/id/1025/150/150', // placeholder
+                        lastMessage: conv.latestMessage?.text || (conv.latestMessage?.mediaType ? `Sent a ${conv.latestMessage.mediaType}` : 'No messages yet'),
+                        time: conv.latestMessage?.time || 'Just now',
+                        unreadCount: 0, // Compute if tracked
+                        isOnline: false 
+                    };
+                });
+                setChats(formattedChats);
+            }
+        } catch(e) {
+            console.log('Error fetching convos', e);
+        }
+    }, [currentUserId]);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchConversations();
+        }, [fetchConversations])
+    );
+
     React.useEffect(() => {
         if (!currentUserId) return;
         
         socketService.connect(currentUserId);
-        
-        const fetchConversations = async () => {
-            try {
-                const res = await fetch(`${API_URL}/api/chat/conversations?user_id=${currentUserId}`);
-                const data = await res.json();
-                if (data.conversations) {
-                    const formattedChats = data.conversations.map((conv: any) => {
-                        // determine who the friend is
-                        const friendStr = String(conv.user1.id) === currentUserId ? conv.user2 : conv.user1;
-                        return {
-                            id: String(conv.id),
-                            userId: String(friendStr.id),
-                            userName: friendStr.fullName || friendStr.username,
-                            userImage: friendStr.userImage || 'https://picsum.photos/id/1025/150/150', // placeholder
-                            lastMessage: conv.latestMessage?.text || (conv.latestMessage?.mediaType ? `Sent a ${conv.latestMessage.mediaType}` : 'No messages yet'),
-                            time: conv.latestMessage?.time || 'Just now',
-                            unreadCount: 0, // Compute if tracked
-                            isOnline: false 
-                        };
-                    });
-                    setChats(formattedChats);
-                }
-            } catch(e) {
-                console.log('Error fetching convos', e);
-            }
-        };
-        
-        // Initial fetch
-        fetchConversations();
         
         // Real-time update listener
         socketService.onChatListUpdate((conv: any) => {
