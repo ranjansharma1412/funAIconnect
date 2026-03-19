@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, FlatList, RefreshControl, ActivityIndicator, Alert } from 'react-native';
+import { View, RefreshControl, ActivityIndicator, Alert } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useTheme } from '../../theme/ThemeContext';
 import DashboardHeader from '../../components/molecules/dashboardHeader/DashboardHeader';
 import StoriesRail from '../../components/organisms/storiesRail/StoriesRail';
@@ -225,7 +226,7 @@ const DashboardScreen: React.FC = () => {
                 {isLoading && !isRefreshing ? (
                     <ActivityIndicator size="large" color={theme.colors.primary} style={styles.loadingIndicator} />
                 ) : (
-                    <FlatList
+                    <FlashList
                         data={posts}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={renderItem}

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, Platform, StyleProp, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Platform, StyleProp, ViewStyle } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { useTheme } from '../../../theme/ThemeContext';
 import Avatar from '../../atoms/avatar/Avatar';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -106,10 +107,10 @@ const PostCard: React.FC<PostCardProps> = ({
     return (
         <View style={styles.container}>
             <View style={[styles.mediaContainer, customMediaContainerStyle]}>
-                <Image
+                <FastImage
                     source={{ uri: validPostImage }}
                     style={styles.postImage}
-                    resizeMode="cover"
+                    resizeMode={FastImage.resizeMode.cover}
                 />
 
                 <View style={styles.headerWrapper}>
