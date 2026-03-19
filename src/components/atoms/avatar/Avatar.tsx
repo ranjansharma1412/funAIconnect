@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Image, ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { useTheme } from '../../../theme/ThemeContext';
 import { createStyles } from './AvatarStyle';
 
@@ -28,7 +29,7 @@ const Avatar: React.FC<AvatarProps> = ({
 
     return (
         <View style={[styles.container, { width: size, height: size }, style]}>
-            <Image
+            <FastImage
                 source={validSource}
                 style={[
                     styles.image,

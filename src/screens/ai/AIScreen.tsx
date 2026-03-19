@@ -4,11 +4,11 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    Image,
     ScrollView,
     ActivityIndicator,
     Alert
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './AIScreenStyle';
 import Button from '../../components/atoms/button/Button';
@@ -116,7 +116,7 @@ const AIScreen = () => {
                 {generatedContent && (
                     <View style={styles.resultContainer}>
                         <View style={styles.generatedImageContainer}>
-                            <Image source={{ uri: generatedContent.uri }} style={styles.generatedImage} />
+                            <FastImage source={{ uri: generatedContent.uri }} style={styles.generatedImage as any} />
                             {isLoading && (
                                 <View style={styles.loadingOverlay}>
                                     <ActivityIndicator size="large" color={theme.colors.white} />
@@ -162,7 +162,7 @@ const AIScreen = () => {
                                 style={styles.trendingItem}
                                 onPress={() => handleUseTrending(item)}
                             >
-                                <Image source={{ uri: item.uri }} style={styles.trendingImage} />
+                                <FastImage source={{ uri: item.uri }} style={styles.trendingImage as any} />
                             </TouchableOpacity>
                         ))}
                     </View>

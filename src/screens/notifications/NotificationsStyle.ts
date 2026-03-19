@@ -67,7 +67,7 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         gap: 10,
     },
     actionButton: {
-        paddingVertical: 8,
+        paddingVertical: 6,
         paddingHorizontal: 16,
         borderRadius: 8,
         alignItems: 'center',
@@ -77,9 +77,8 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         backgroundColor: theme.colors.primary,
     },
     secondaryButton: {
-        backgroundColor: theme.colors.background,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
+        paddingVertical: 6,
+        paddingHorizontal: 8,
     },
     actionButtonText: {
         fontSize: 14,
@@ -89,7 +88,8 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         color: theme.colors.buttonTextPrimary,
     },
     secondaryButtonText: {
-        color: theme.colors.text,
+        color: '#FFFFFF',
+        fontWeight: 'bold',
     },
     unreadIndicator: {
         width: 10,

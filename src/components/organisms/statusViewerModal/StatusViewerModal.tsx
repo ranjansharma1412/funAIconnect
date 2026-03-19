@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
-    Image,
     TouchableOpacity,
     Dimensions,
     Animated,
     StatusBar,
     TouchableWithoutFeedback,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import Modal from 'react-native-modal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../../theme/ThemeContext';
@@ -274,7 +274,7 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
                 {/* Header */}
                 <View style={[styles.header, { top: insets.top + 25 }]}>
                     <View style={styles.userInfo}>
-                        <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
+                        <FastImage source={{ uri: currentUser.avatar }} style={styles.avatar as any} />
                         <Text style={styles.username}>{currentUser.username}</Text>
                         <Text style={styles.timeAgo}>{currentStory.date ? timeAgo(currentStory.date) : ''}</Text>
                     </View>
@@ -284,10 +284,10 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
                 </View>
 
                 {/* Content Image */}
-                <Image
+                <FastImage
                     source={{ uri: currentStory.url }}
-                    style={styles.storyImage}
-                    resizeMode="cover"
+                    style={styles.storyImage as any}
+                    resizeMode={FastImage.resizeMode.cover}
                 />
 
                 {/* Navigation Touch Areas */}

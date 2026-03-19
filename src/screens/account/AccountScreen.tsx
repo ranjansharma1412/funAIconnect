@@ -4,13 +4,13 @@ import {
     Text,
     ScrollView,
     TouchableOpacity,
-    Image,
     TextInput,
     Alert,
     Platform,
     ActivityIndicator,
     Linking
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './AccountScreenStyle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -137,9 +137,9 @@ const AccountScreen = () => {
                 {/* Header / Profile Section */}
                 <View style={styles.header}>
                     <TouchableOpacity onPress={handleProfileImagePick} style={styles.avatarContainer} disabled={!isEditing}>
-                        <Image
+                        <FastImage
                             source={{ uri: avatar || 'https://i.pravatar.cc/300' }}
-                            style={styles.avatar}
+                            style={styles.avatar as any}
                         />
                         {isEditing && (
                             <View style={styles.editIconBadge}>

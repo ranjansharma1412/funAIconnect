@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { useTheme } from '../../../theme/ThemeContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
@@ -13,10 +14,10 @@ const EmptyPostsState = () => {
         <View style={styles.container}>
             <View style={styles.imageContainer}>
                 {/* A creative illustrative placeholder image */}
-                <Image
+                <FastImage
                     source={{ uri: 'https://cdn3d.iconscout.com/3d/premium/thumb/empty-box-4860010-4050731.png' }}
-                    style={styles.image}
-                    resizeMode="contain"
+                    style={styles.image as any}
+                    resizeMode={FastImage.resizeMode.contain}
                 />
             </View>
 

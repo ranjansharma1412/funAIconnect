@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, TouchableOpacity, FlatList, Image, ActivityIndicator } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../theme/ThemeContext';
 // Reuse styling from general CommentsModal or similar if none exists
@@ -56,7 +57,7 @@ const StoryLikesModal: React.FC<StoryLikesModalProps> = ({ visible, onClose, sto
 
         return (
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
-                <Image source={{ uri: isValidImage }} style={{ width: 44, height: 44, borderRadius: 22, marginRight: 12 }} />
+                <FastImage source={{ uri: isValidImage }} style={{ width: 44, height: 44, borderRadius: 22, marginRight: 12 } as any} />
                 <View style={{ flex: 1 }}>
                     <Text style={{ fontWeight: '600', color: theme.colors.text, fontSize: 16 }}>{displayName}</Text>
                     <Text style={{ color: theme.colors.textSecondary, fontSize: 13, marginTop: 2 }}>{displayHandle}</Text>

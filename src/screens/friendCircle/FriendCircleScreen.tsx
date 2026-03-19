@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Image, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import FastImage from 'react-native-fast-image';
+import { FlashList } from '@shopify/flash-list';
 import { useTheme } from '../../theme/ThemeContext';
 import { styles } from './FriendCircleScreenStyles';
 import { useTranslation } from 'react-i18next';
@@ -143,7 +145,7 @@ const FriendCircleScreen = () => {
 
         return (
             <View style={[styles.userCard, { backgroundColor: theme.colors.card }]}>
-                <Image source={{ uri: isValidImage }} style={styles.userAvatar} />
+                <FastImage source={{ uri: isValidImage }} style={styles.userAvatar as any} />
                 <View style={styles.userInfo}>
                     <Text style={[styles.userName, { color: theme.colors.text }]} numberOfLines={1}>{displayName}</Text>
                     {item.mutualFriends ? (
@@ -241,7 +243,7 @@ const FriendCircleScreen = () => {
 
                     return (
                         <View style={[styles.userCard, { backgroundColor: theme.colors.card }]}>
-                            <Image source={{ uri: isValidImage }} style={styles.userAvatar} />
+                            <FastImage source={{ uri: isValidImage }} style={styles.userAvatar as any} />
                             <View style={styles.userInfo}>
                                 <Text style={[styles.userName, { color: theme.colors.text }]} numberOfLines={1}>{displayName}</Text>
                                 <Text style={[styles.userHandle, { color: theme.colors.textSecondary }]}>{displayHandle}</Text>
@@ -279,7 +281,7 @@ const FriendCircleScreen = () => {
         }
 
         return (
-            <FlatList
+            <FlashList
                 data={myPosts}
                 keyExtractor={(item) => item.id.toString()}
                 numColumns={2}
