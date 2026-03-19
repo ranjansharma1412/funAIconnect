@@ -97,21 +97,8 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         right: 0,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 15,
-        zIndex: 10,
-    },
-    replyInput: {
-        flex: 1,
-        height: 44,
-        borderRadius: 22,
-        borderWidth: 1,
-        borderColor: theme.colors.textOnImageSecondary,
         justifyContent: 'center',
         paddingHorizontal: 15,
-        marginRight: 15,
-    },
-    replyPlaceholder: {
-        color: theme.colors.white,
-        fontSize: 14,
+        zIndex: 10,
     }
 });

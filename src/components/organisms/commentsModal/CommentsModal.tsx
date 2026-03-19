@@ -14,6 +14,7 @@ import {
 import { useTheme } from '../../../theme/ThemeContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { commentService, Comment } from '../../../services/commentService';
+import { storyService } from '../../../services/storyService';
 import CommentItem from '../../molecules/commentItem/CommentItem';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createStyles } from './CommentsModalStyle';
@@ -21,13 +22,14 @@ import { createStyles } from './CommentsModalStyle';
 interface CommentsModalProps {
     visible: boolean;
     onClose: () => void;
-    postId: number | null;
+    postId?: number | null;
+    storyId?: number | null;
     currentUserId?: number; // Pass this if available
-    onCommentAdded?: (postId: number) => void;
-    onCommentDeleted?: (postId: number) => void;
+    onCommentAdded?: (id: number, type: 'post' | 'story') => void;
+    onCommentDeleted?: (id: number, type: 'post' | 'story') => void;
 }
 
-const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId, currentUserId, onCommentAdded, onCommentDeleted }) => {
+const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId, storyId, currentUserId, onCommentAdded, onCommentDeleted }) => {
     const { theme } = useTheme();
     const styles = createStyles(theme);
     const insets = useSafeAreaInsets();
@@ -39,7 +41,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId,
     const [hasMore, setHasMore] = useState(true);
 
     const fetchComments = useCallback(async (reset = false) => {
-        if (!postId) return;
+        if (!postId && !storyId) return;
 
         if (reset) {
             setIsLoading(true);
@@ -48,7 +50,15 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId,
 
         try {
             const currentPage = reset ? 1 : page;
-            const response = await commentService.getComments(postId, currentPage);
+            let response;
+            
+            if (postId) {
+                response = await commentService.getComments(postId, currentPage);
+            } else if (storyId) {
+                response = await storyService.getStoryComments(storyId, currentPage);
+            }
+
+            if (!response) return;
 
             if (reset) {
                 setComments(response.comments);
@@ -69,19 +79,19 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId,
         } finally {
             setIsLoading(false);
         }
-    }, [postId, page]);
+    }, [postId, storyId, page]);
 
     useEffect(() => {
-        if (visible && postId) {
+        if (visible && (postId || storyId)) {
             fetchComments(true);
         } else {
             setComments([]);
             setNewComment('');
         }
-    }, [visible, postId]);
+    }, [visible, postId, storyId]);
 
     const handleAddComment = async () => {
-        if (!newComment.trim() || !postId) return;
+        if (!newComment.trim() || (!postId && !storyId)) return;
 
         if (!currentUserId) {
             Alert.alert('Error', 'You must be logged in to comment.');
@@ -90,13 +100,19 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId,
 
         setIsPosting(true);
         try {
-            const addedComment = await commentService.addComment(postId, newComment.trim(), currentUserId);
-            setComments(prev => [addedComment, ...prev]);
-            setNewComment('');
-            if (onCommentAdded) {
-                onCommentAdded(postId);
+            let addedComment;
+            if (postId) {
+                addedComment = await commentService.addComment(postId, newComment.trim(), currentUserId);
+                if (onCommentAdded) onCommentAdded(postId, 'post');
+            } else if (storyId) {
+                addedComment = await storyService.addStoryComment(storyId, newComment.trim(), currentUserId);
+                if (onCommentAdded) onCommentAdded(storyId, 'story');
             }
-            // Scroll to top logic if needed
+            
+            if (addedComment) {
+                setComments(prev => [addedComment, ...prev]);
+                setNewComment('');
+            }
         } catch (error) {
             Alert.alert('Error', 'Failed to post comment. Please try again.');
         } finally {
@@ -105,7 +121,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId,
     };
 
     const handleDeleteComment = async (commentId: number) => {
-        if (!postId) return;
+        if (!postId && !storyId) return;
 
         Alert.alert(
             'Delete Comment',
@@ -117,11 +133,14 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId,
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            await commentService.deleteComment(postId, commentId);
-                            setComments(prev => prev.filter(c => c.id !== commentId));
-                            if (onCommentDeleted) {
-                                onCommentDeleted(postId);
+                            if (postId) {
+                                await commentService.deleteComment(postId, commentId);
+                                if (onCommentDeleted) onCommentDeleted(postId, 'post');
+                            } else if (storyId) {
+                                await storyService.deleteStoryComment(storyId, commentId);
+                                if (onCommentDeleted) onCommentDeleted(storyId, 'story');
                             }
+                            setComments(prev => prev.filter(c => c.id !== commentId));
                         } catch (error) {
                             Alert.alert('Error', 'Failed to delete comment.');
                         }

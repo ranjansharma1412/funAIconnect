@@ -156,21 +156,23 @@ const DashboardScreen: React.FC = () => {
         }
     };
 
-    const handleCommentAdded = useCallback((postId: number) => {
-        const post = posts.find(p => p.id === postId);
+    const handleCommentAdded = useCallback((id: number, type: 'post' | 'story') => {
+        if (type !== 'post') return;
+        const post = posts.find(p => p.id === id);
         if (post) {
             dispatch(updatePost({
-                id: postId,
+                id: id,
                 commentsCount: (post.commentsCount || 0) + 1
             }));
         }
     }, [dispatch, posts]);
 
-    const handleCommentDeleted = useCallback((postId: number) => {
-        const post = posts.find(p => p.id === postId);
+    const handleCommentDeleted = useCallback((id: number, type: 'post' | 'story') => {
+        if (type !== 'post') return;
+        const post = posts.find(p => p.id === id);
         if (post) {
             dispatch(updatePost({
-                id: postId,
+                id: id,
                 commentsCount: Math.max(0, (post.commentsCount || 0) - 1)
             }));
         }
