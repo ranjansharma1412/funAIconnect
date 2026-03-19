@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, Alert, ImageBackground, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ImageBackground, Modal } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
+import { FlashList } from '@shopify/flash-list';
 import { launchCamera, launchImageLibrary, MediaType } from 'react-native-image-picker';
 import Video from 'react-native-video';
 import { useTheme } from '../../theme/ThemeContext';
@@ -42,7 +44,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
 
     const currentUser = useSelector((state: RootState) => state.auth.user);
     const currentUserId = currentUser?.id?.toString();
-    const flatListRef = useRef<FlatList>(null);
+    const flashListRef = useRef<any>(null);
 
     const friendId = route.params?.userId || '2'; // Ensure friend ID falls back if missing
 
@@ -67,7 +69,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                         mediaUrl: m.mediaUrl
                     }));
                     setMessages(mapped);
-                    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 300);
+                    setTimeout(() => flashListRef.current?.scrollToEnd({ animated: true }), 300);
                 }
             } catch (e) {
                 console.log('Error fetching history:', e);
@@ -86,7 +88,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                 mediaUrl: m.mediaUrl
             };
             setMessages(prev => [...prev, incomingMsg]);
-            setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+            setTimeout(() => flashListRef.current?.scrollToEnd({ animated: true }), 100);
 
             // Send read receipt if received msg isn't our own
             if (String(m.senderId) !== currentUserId) {
@@ -256,21 +258,22 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     );
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            {renderHeader()}
+        <KeyboardAvoidingView
+            style={{ flex: 1, backgroundColor: theme.colors.background }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        >
+            <SafeAreaView style={styles.safeArea}>
+                {renderHeader()}
 
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            >
                 <ImageBackground
                     source={{ uri: 'https://user-images.githubusercontent.com/15071540/59552788-37227300-8fa1-11e9-89d5-db22bfcc37ac.png' }}
                     style={{ flex: 1 }}
                     imageStyle={{ opacity: theme.mode === 'dark' ? 0.15 : 0.4 }}
                     resizeMode="repeat"
                 >
-                    <FlatList
-                        ref={flatListRef}
+                    <FlashList
+                        ref={flashListRef}
                         data={messages}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
@@ -284,8 +287,8 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                         )}
                         contentContainerStyle={styles.listContent}
                         showsVerticalScrollIndicator={false}
-                        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-                        onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                        onContentSizeChange={() => flashListRef.current?.scrollToEnd({ animated: true })}
+                        onLayout={() => flashListRef.current?.scrollToEnd({ animated: true })}
                         ListEmptyComponent={() => (
                             <View style={styles.emptyStateContainer}>
                                 <Text style={styles.emptyStateText}>Say hi to {userName}!</Text>
@@ -300,7 +303,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                     onAttachGallery={handleAttachGallery}
                     onAttachDocument={handleAttachDocument}
                 />
-            </KeyboardAvoidingView>
+            </SafeAreaView>
 
             <Modal
                 visible={!!selectedMedia}
@@ -360,7 +363,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                     )}
                 </View>
             </Modal>
-        </SafeAreaView>
+        </KeyboardAvoidingView>
     );
 };
 
