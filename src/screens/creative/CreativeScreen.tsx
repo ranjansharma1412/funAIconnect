@@ -4,12 +4,12 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    Image,
-    Alert,
     ScrollView,
     Linking,
-    StyleSheet
+    StyleSheet,
+    Alert
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import Button from '../../components/atoms/button/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { postService } from '../../services/postService';
@@ -218,7 +218,7 @@ const CreativeScreen = () => {
 
                 <TouchableOpacity style={styles.imagePreview} onPress={handleGalleryPick}>
                     {selectedImage ? (
-                        <Image source={{ uri: selectedImage }} style={styles.fullImage} />
+                        <FastImage source={{ uri: selectedImage }} style={styles.fullImage as any} />
                     ) : (
                         <Text style={styles.placeholderText}>{t('creative.tap_to_select')}</Text>
                     )}

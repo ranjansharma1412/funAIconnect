@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ViewStyle, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ViewStyle, ActivityIndicator } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { createStyles } from './ChatBubbleStyle';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '../../../theme/ThemeContext';
@@ -64,10 +65,10 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onLongPress, onPressMe
                             <ActivityIndicator size="small" color={theme.colors.primary} />
                         </View>
                     )}
-                    <Image 
+                    <FastImage 
                         source={{ uri: message.mediaUrl }} 
-                        style={styles.image} 
-                        resizeMode="cover" 
+                        style={styles.image as any} 
+                        resizeMode={FastImage.resizeMode.cover} 
                         onLoadStart={() => setIsLoading(true)}
                         onLoadEnd={() => setIsLoading(false)}
                     />

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
 import { createStyles } from './GridPostCardStyle';
@@ -35,10 +36,10 @@ const GridPostCard: React.FC<GridPostCardProps> = ({
             activeOpacity={0.9}
             onPress={onPress}
         >
-            <Image
+            <FastImage
                 source={{ uri: validPostImage }}
-                style={styles.postImage}
-                resizeMode="cover"
+                style={styles.postImage as any}
+                resizeMode={FastImage.resizeMode.cover}
             />
 
             <LinearGradient

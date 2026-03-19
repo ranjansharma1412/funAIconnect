@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, SafeAreaView, KeyboardAvoidingView, Platform, Alert, ImageBackground, Modal } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, Alert, ImageBackground, Modal } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { launchCamera, launchImageLibrary, MediaType } from 'react-native-image-picker';
 import Video from 'react-native-video';
 import { useTheme } from '../../theme/ThemeContext';
@@ -233,7 +234,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             </TouchableOpacity>
 
             <View style={styles.headerProfile}>
-                <Image source={{ uri: userImage }} style={styles.avatar} />
+                <FastImage source={{ uri: userImage }} style={styles.avatar as any} />
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.headerName}>{userName}</Text>
                     <Text style={styles.headerStatus}>Online</Text>
@@ -316,10 +317,10 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                     </TouchableOpacity>
 
                     {selectedMedia?.type === 'image' && (
-                        <Image
+                        <FastImage
                             source={{ uri: selectedMedia.mediaUrl }}
                             style={{ width: '100%', height: '100%' }}
-                            resizeMode="contain"
+                            resizeMode={FastImage.resizeMode.contain}
                         />
                     )}
                     {selectedMedia?.type === 'video' && (

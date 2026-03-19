@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, StatusBar } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StatusBar } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import Button from '../../components/atoms/button/Button';
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './NotificationsStyle';
@@ -108,7 +109,7 @@ const NotificationsScreen = () => {
         return (
             <TouchableOpacity style={styles.notificationItem} onPress={handlePress} activeOpacity={0.7}>
                 <View style={styles.avatarContainer}>
-                    <Image source={{ uri: item.user.avatar }} style={styles.avatar} />
+                    <FastImage source={{ uri: item.user.avatar }} style={styles.avatar as any} />
                 </View>
 
                 <View style={styles.contentContainer}>
