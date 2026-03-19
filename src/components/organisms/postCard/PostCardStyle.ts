@@ -120,5 +120,17 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
     captionName: {
         fontWeight: 'bold',
         color: theme.colors.textOnImage,
+    },
+    collapsedHeaderContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    },
+    expandedHeaderWrapper: {
+        position: 'absolute',
+        zIndex: 100,
     }
 });

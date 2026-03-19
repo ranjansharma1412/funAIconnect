@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Platform, StyleProp, ViewStyle } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Platform, StyleProp, ViewStyle, Modal, Animated } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useTheme } from '../../../theme/ThemeContext';
 import Avatar from '../../atoms/avatar/Avatar';
@@ -7,6 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass';
 import { BlurView } from '@react-native-community/blur';
 import { createStyles } from './PostCardStyle';
+import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
@@ -45,14 +46,55 @@ const PostCard: React.FC<PostCardProps> = ({
 }) => {
     const { theme } = useTheme();
     const styles = createStyles(theme);
+    const navigation = useNavigation<any>();
+
+    const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
+    const [headerLayout, setHeaderLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const headerWrapperRef = useRef<View>(null);
 
     // Default processing code...
     const validPostImage = postImage || 'https://via.placeholder.com/500?text=No+Image';
     const validUserImage = userImage || 'https://i.pravatar.cc/300';
 
-    const renderGlassHeader = () => {
+    const openExpandedHeader = () => {
+        if (headerWrapperRef.current) {
+            headerWrapperRef.current.measure((fx, fy, width, height, px, py) => {
+                setHeaderLayout({ x: px, y: py, width, height });
+                setIsHeaderExpanded(true);
+                Animated.timing(fadeAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }).start();
+            });
+        }
+    };
+
+    const closeExpandedHeader = () => {
+        Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => setIsHeaderExpanded(false));
+    };
+
+    const handleGlassHeaderClick = () => {
+        closeExpandedHeader();
+        navigation.navigate('FriendCircle', { initialTab: 1 });
+    };
+
+    const renderCollapsedHeader = () => (
+        <View style={styles.collapsedHeaderContainer}>
+            <TouchableOpacity style={styles.moreButton} onPress={openExpandedHeader}>
+                <Ionicons name="ellipsis-vertical" size={20} color="white" />
+            </TouchableOpacity>
+        </View>
+    );
+
+    const renderExpandedHeader = () => {
         const headerContent = (
-            <View style={styles.glassHeaderInner}>
+            <TouchableOpacity activeOpacity={0.9} onPress={handleGlassHeaderClick} style={styles.glassHeaderInner}>
                 <View style={styles.userInfo}>
                     <Avatar source={{ uri: validUserImage }} size={40} />
                     <View style={styles.textContainer}>
@@ -69,17 +111,18 @@ const PostCard: React.FC<PostCardProps> = ({
                         </Text>
                     </View>
                 </View>
-                <TouchableOpacity style={styles.moreButton}>
+                <TouchableOpacity style={styles.moreButton} onPress={closeExpandedHeader}>
                     <Ionicons name="ellipsis-vertical" size={20} color="white" />
                 </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
         );
 
+        let glassBackground;
         if (Platform.OS === 'ios' && isLiquidGlassSupported) {
             const LiquidGlassViewAny = LiquidGlassView as any;
-            return (
+            glassBackground = (
                 <LiquidGlassViewAny
-                    style={styles.glassHeaderContainer}
+                    style={[styles.glassHeaderContainer, { width: headerLayout.width }]}
                     blurRadius={15}
                     glassColor="rgba(255, 255, 255, 0.2)"
                     borderWidth={1}
@@ -88,19 +131,51 @@ const PostCard: React.FC<PostCardProps> = ({
                     {headerContent}
                 </LiquidGlassViewAny>
             );
+        } else {
+            glassBackground = (
+                <View style={[styles.glassHeaderContainer, { width: headerLayout.width }]}>
+                    <BlurView
+                        blurType="light"
+                        blurAmount={20}
+                        reducedTransparencyFallbackColor="white"
+                        overlayColor='transparent'
+                        style={StyleSheet.absoluteFillObject}
+                    />
+                    <View style={styles.androidGlassOverlay} />
+                    {headerContent}
+                </View>
+            );
         }
 
         return (
-            <View style={styles.glassHeaderContainer}>
-                <BlurView
-                    blurType="light"
-                    blurAmount={20}
-                    reducedTransparencyFallbackColor="white"
-                    overlayColor='transparent'
-                />
-                <View style={styles.androidGlassOverlay} />
-                {headerContent}
-            </View>
+            <Modal transparent visible={isHeaderExpanded} animationType="none">
+                <Animated.View style={[styles.modalOverlay, { opacity: fadeAnim }]}>
+                    <BlurView
+                        blurType="dark"
+                        blurAmount={5}
+                        style={StyleSheet.absoluteFillObject}
+                    />
+                    <TouchableOpacity 
+                        style={StyleSheet.absoluteFillObject} 
+                        activeOpacity={1} 
+                        onPress={closeExpandedHeader} 
+                    />
+                    <Animated.View style={[
+                        styles.expandedHeaderWrapper,
+                        {
+                            top: headerLayout.y,
+                            left: headerLayout.x,
+                            width: headerLayout.width,
+                            opacity: fadeAnim,
+                            transform: [
+                                { scale: fadeAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }
+                            ]
+                        }
+                    ]}>
+                        {glassBackground}
+                    </Animated.View>
+                </Animated.View>
+            </Modal>
         );
     };
 
@@ -113,9 +188,10 @@ const PostCard: React.FC<PostCardProps> = ({
                     resizeMode={FastImage.resizeMode.cover}
                 />
 
-                <View style={styles.headerWrapper}>
-                    {isShowHeaderView ? renderGlassHeader() : null}
+                <View style={styles.headerWrapper} ref={headerWrapperRef}>
+                    {isShowHeaderView ? renderCollapsedHeader() : null}
                 </View>
+                {isShowHeaderView && renderExpandedHeader()}
 
                 <View style={styles.footerOverlay}>
                     <View style={styles.actionRow}>

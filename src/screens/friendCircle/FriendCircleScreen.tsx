@@ -16,7 +16,7 @@ import { RootState, AppDispatch } from '../../store';
 import { setMyPosts } from '../../store/slices/postSlice';
 import { friendService, FriendRequestDto } from '../../services/friendService';
 import { postService, Post } from '../../services/postService';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 const { width } = Dimensions.get('window');
 
 const FriendCircleScreen = () => {
@@ -24,8 +24,18 @@ const FriendCircleScreen = () => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
     const navigation = useNavigation<any>();
+    const route = useRoute<any>();
+
     // 0 = Discover, 1 = Friends, 2 = My Posts
-    const [activeTab, setActiveTab] = useState(0);
+    const initialTabFromRoute = route.params?.initialTab !== undefined ? route.params.initialTab : 0;
+    const [activeTab, setActiveTab] = useState(initialTabFromRoute);
+
+    useEffect(() => {
+        if (route.params?.initialTab !== undefined) {
+            setActiveTab(route.params.initialTab);
+        }
+    }, [route.params?.initialTab]);
+
 
     const currentUser = useSelector((state: RootState) => state.auth.user);
     const currentUserId = currentUser?.id?.toString();
