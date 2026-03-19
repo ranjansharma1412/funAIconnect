@@ -3,8 +3,9 @@ import { io, Socket } from 'socket.io-client';
 // Use your computer's local IP Address mapped to the Flask port, example: 'http://192.168.1.x:5001'
 // Since testing on Emulator, 10.0.2.2 usually maps to localhost on Android, and 'localhost' for iOS
 import { Platform } from 'react-native';
+import { API_CONFIG } from './apiClient';
 
-const SOCKET_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5001' : 'http://localhost:5001';
+const SOCKET_URL = API_CONFIG.BASE_URL
 
 class SocketService {
     private socket: Socket | null = null;

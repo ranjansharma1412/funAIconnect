@@ -12,8 +12,9 @@ import ChatInput from '../../components/organisms/chatInput/ChatInput';
 import socketService from '../../services/SocketService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { API_CONFIG } from '../../services/apiClient';
 
-const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5001' : 'http://localhost:5001';
+const API_URL = API_CONFIG.BASE_URL
 
 type RootStackParamList = {
     Chat: { chatId: string; userId: string; userName: string; userImage: string };
@@ -37,7 +38,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     const [selectedMedia, setSelectedMedia] = useState<MessageProps | null>(null);
     const [isPlaying, setIsPlaying] = useState(true);
     const [progress, setProgress] = useState({ currentTime: 0, seekableDuration: 0 });
-    
+
     const currentUser = useSelector((state: RootState) => state.auth.user);
     const currentUserId = currentUser?.id?.toString();
     const flatListRef = useRef<FlatList>(null);
@@ -85,13 +86,13 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             };
             setMessages(prev => [...prev, incomingMsg]);
             setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
-            
+
             // Send read receipt if received msg isn't our own
-            if(String(m.senderId) !== currentUserId) {
+            if (String(m.senderId) !== currentUserId) {
                 socketService.readMessage({ messageId: m.id, userId: currentUserId, friendId });
             }
         });
-        
+
         socketService.onMessageStatusUpdate((data: any) => {
             setMessages(prev => prev.map(msg => msg.id === data.messageId ? { ...msg, status: data.status as any } : msg));
         });
@@ -109,6 +110,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     };
 
     const handleSend = (text: string) => {
+        console.log('Sending message:', text);
         socketService.sendMessage({
             userId: currentUserId || '',
             friendId: friendId,
@@ -202,7 +204,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                                     prev.map(m => m.id === msg.id ? { ...m, status: 'deleted', text: undefined, mediaUrl: undefined } : m)
                                 );
                             }
-                        } catch(e) { console.log(e) }
+                        } catch (e) { console.log(e) }
                     }
                 }
             ]

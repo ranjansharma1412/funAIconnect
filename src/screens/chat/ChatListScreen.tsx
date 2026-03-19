@@ -11,8 +11,9 @@ import socketService from '../../services/SocketService';
 import { Platform } from 'react-native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { API_CONFIG } from '../../services/apiClient';
 
-const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5001' : 'http://localhost:5001';
+const API_URL = API_CONFIG.BASE_URL
 
 interface Props {
     navigation: NativeStackNavigationProp<any>;
@@ -88,12 +89,12 @@ const ChatListScreen: React.FC<Props> = ({ navigation }) => {
                         lastMessage: conv.latestMessage?.text || (conv.latestMessage?.mediaType ? `Sent a ${conv.latestMessage.mediaType}` : 'No messages yet'),
                         time: conv.latestMessage?.time || 'Just now',
                         unreadCount: 0, // Compute if tracked
-                        isOnline: false 
+                        isOnline: false
                     };
                 });
                 setChats(formattedChats);
             }
-        } catch(e) {
+        } catch (e) {
             console.log('Error fetching convos', e);
         }
     }, [currentUserId]);
@@ -106,30 +107,30 @@ const ChatListScreen: React.FC<Props> = ({ navigation }) => {
 
     React.useEffect(() => {
         if (!currentUserId) return;
-        
+
         socketService.connect(currentUserId);
-        
+
         // Real-time update listener
         socketService.onChatListUpdate((conv: any) => {
-             const friendStr = String(conv.user1.id) === currentUserId ? conv.user2 : conv.user1;
-             const updatedChat = {
-                 id: String(conv.id),
-                 userId: String(friendStr.id),
-                 userName: friendStr.fullName || friendStr.username,
-                 userImage: friendStr.userImage || 'https://picsum.photos/id/1025/150/150',
-                 lastMessage: conv.latestMessage?.text || (conv.latestMessage?.mediaType ? `Sent a ${conv.latestMessage.mediaType}` : 'No messages yet'),
-                 time: conv.latestMessage?.time || 'Just now',
-                 unreadCount: 0,
-                 isOnline: false 
-             };
-             
-             setChats(prev => {
-                 const exists = prev.find(c => c.id === updatedChat.id);
-                 if (exists) {
-                     return prev.map(c => c.id === updatedChat.id ? {...c, lastMessage: updatedChat.lastMessage, time: updatedChat.time} : c);
-                 }
-                 return [updatedChat, ...prev];
-             });
+            const friendStr = String(conv.user1.id) === currentUserId ? conv.user2 : conv.user1;
+            const updatedChat = {
+                id: String(conv.id),
+                userId: String(friendStr.id),
+                userName: friendStr.fullName || friendStr.username,
+                userImage: friendStr.userImage || 'https://picsum.photos/id/1025/150/150',
+                lastMessage: conv.latestMessage?.text || (conv.latestMessage?.mediaType ? `Sent a ${conv.latestMessage.mediaType}` : 'No messages yet'),
+                time: conv.latestMessage?.time || 'Just now',
+                unreadCount: 0,
+                isOnline: false
+            };
+
+            setChats(prev => {
+                const exists = prev.find(c => c.id === updatedChat.id);
+                if (exists) {
+                    return prev.map(c => c.id === updatedChat.id ? { ...c, lastMessage: updatedChat.lastMessage, time: updatedChat.time } : c);
+                }
+                return [updatedChat, ...prev];
+            });
         });
 
     }, [currentUserId]);
