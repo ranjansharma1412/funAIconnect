@@ -9,6 +9,7 @@ import { BlurView } from '@react-native-community/blur';
 import { createStyles } from './PostCardStyle';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableWithoutFeedback } from 'react-native';
+import GradientHeartIcon from '../../atoms/gradientHeartIcon/GradientHeartIcon';
 
 const { width } = Dimensions.get('window');
 
@@ -249,7 +250,7 @@ const PostCard: React.FC<PostCardProps> = ({
                         }]
                     }
                 ]}>
-                    <Ionicons name="heart" size={100} color={theme.colors.error || "red"} />
+                    <GradientHeartIcon size={100} />
                 </Animated.View>
 
                 <View style={styles.headerWrapper} ref={headerWrapperRef}>
@@ -262,11 +263,11 @@ const PostCard: React.FC<PostCardProps> = ({
                         {/* Split into two separate touchables wrapped in view */}
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }}>
                             <TouchableOpacity style={{ padding: 5 }} onPress={handleLikeButtonPress}>
-                                <Ionicons
-                                    name={hasLiked ? "heart" : "heart-outline"}
-                                    size={26}
-                                    color={hasLiked ? theme.colors.error : "white"}
-                                />
+                                {hasLiked ? (
+                                    <GradientHeartIcon size={26} />
+                                ) : (
+                                    <Ionicons name="heart-outline" size={26} color="white" />
+                                )}
                             </TouchableOpacity>
                             <TouchableOpacity style={{ paddingVertical: 5, paddingHorizontal: 2 }} onPress={onLikesCountPress}>
                                 <Text style={styles.actionText}>{likes}</Text>

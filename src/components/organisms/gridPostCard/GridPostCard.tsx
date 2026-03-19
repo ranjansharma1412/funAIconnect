@@ -5,6 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
 import { createStyles } from './GridPostCardStyle';
 import { useTheme } from '../../../theme/ThemeContext';
+import GradientHeartIcon from '../../atoms/gradientHeartIcon/GradientHeartIcon';
 
 interface GridPostCardProps {
     postImage: string;
@@ -48,11 +49,11 @@ const GridPostCard: React.FC<GridPostCardProps> = ({
             >
                 <View style={styles.actionRow}>
                     <View style={styles.actionItem}>
-                        <Ionicons
-                            name={hasLiked ? "heart" : "heart-outline"}
-                            size={18}
-                            color={hasLiked ? "#ff4040" : "white"}
-                        />
+                        {hasLiked ? (
+                            <GradientHeartIcon size={18} />
+                        ) : (
+                            <Ionicons name="heart-outline" size={18} color="white" />
+                        )}
                         <Text style={styles.actionText}>{likes}</Text>
                     </View>
                     <View style={styles.actionItem}>
