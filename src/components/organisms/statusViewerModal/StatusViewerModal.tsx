@@ -21,6 +21,7 @@ import { storyService } from '../../../services/storyService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import GradientHeartIcon from '../../atoms/gradientHeartIcon/GradientHeartIcon';
 
 const { width, height } = Dimensions.get('window');
 
@@ -327,11 +328,11 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
                         </TouchableOpacity>
                     ) : (
                         <TouchableOpacity onPress={handleHeartPress} style={{ marginHorizontal: 15 }}>
-                            <Ionicons
-                                name={currentStory.hasLiked ? "heart" : "heart-outline"}
-                                size={30}
-                                color={currentStory.hasLiked ? theme.colors.primary : 'white'}
-                            />
+                            {currentStory.hasLiked ? (
+                                <GradientHeartIcon size={30} />
+                            ) : (
+                                <Ionicons name="heart-outline" size={30} color="white" />
+                            )}
                         </TouchableOpacity>
                     )}
                 </View>
