@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StatusBar } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import Button from '../../components/atoms/button/Button';
+import TextButton from '../../components/atoms/button/TextButton';
 import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './NotificationsStyle';
 import { useNavigation } from '@react-navigation/native';
@@ -123,12 +123,10 @@ const NotificationsScreen = () => {
                     {/* Contextual Actions */}
                     {item.type === 'follow' && item.isRequest && (
                         <View style={styles.actionsContainer}>
-                            <Button
+                            <TextButton
                                 title={t('notifications.confirm')}
                                 onPress={handlePrimaryAction}
-                                useGradient={false}
-                                style={[styles.actionButton, styles.primaryButton]}
-                                textStyle={styles.primaryButtonText}
+                                style={styles.actionButton}
                             />
                             <TouchableOpacity
                                 style={[styles.actionButton, styles.secondaryButton]}
@@ -141,12 +139,10 @@ const NotificationsScreen = () => {
 
                     {item.type === 'follow' && !item.isRequest && (
                         <View style={styles.actionsContainer}>
-                            <Button
+                            <TextButton
                                 title={t('notifications.follow_back')}
                                 onPress={() => console.log('Follow back')}
-                                useGradient={false}
-                                style={[styles.actionButton, styles.primaryButton]}
-                                textStyle={styles.primaryButtonText}
+                                style={styles.actionButton}
                             />
                         </View>
                     )}
