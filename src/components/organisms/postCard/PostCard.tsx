@@ -8,6 +8,7 @@ import { isLiquidGlassSupported, LiquidGlassView } from '@callstack/liquid-glass
 import { BlurView } from '@react-native-community/blur';
 import { createStyles } from './PostCardStyle';
 import { useNavigation } from '@react-navigation/native';
+import { TouchableWithoutFeedback } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -51,11 +52,51 @@ const PostCard: React.FC<PostCardProps> = ({
     const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
     const [headerLayout, setHeaderLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
     const fadeAnim = useRef(new Animated.Value(0)).current;
+    const heartBeatAnim = useRef(new Animated.Value(0)).current;
+    const lastTap = useRef<number | null>(null);
     const headerWrapperRef = useRef<View>(null);
 
     // Default processing code...
     const validPostImage = postImage || 'https://via.placeholder.com/500?text=No+Image';
     const validUserImage = userImage || 'https://i.pravatar.cc/300';
+
+    const triggerHeartBeat = () => {
+        Animated.sequence([
+            Animated.timing(heartBeatAnim, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: true,
+            }),
+            Animated.timing(heartBeatAnim, {
+                toValue: 0,
+                duration: 200,
+                delay: 400,
+                useNativeDriver: true,
+            })
+        ]).start();
+    };
+
+    const handleDoubleTap = () => {
+        const now = Date.now();
+        const DOUBLE_PRESS_DELAY = 300;
+        if (lastTap.current && now - lastTap.current < DOUBLE_PRESS_DELAY) {
+            triggerHeartBeat();
+            if (!hasLiked && onLikePress) {
+                onLikePress();
+            }
+        } else {
+            lastTap.current = now;
+        }
+    };
+
+    const handleLikeButtonPress = () => {
+        if (!hasLiked) {
+            triggerHeartBeat(); // Only animate if we are liking it, not unliking
+        }
+        if (onLikePress) {
+            onLikePress();
+        }
+    };
 
     const openExpandedHeader = () => {
         if (headerWrapperRef.current) {
@@ -182,11 +223,34 @@ const PostCard: React.FC<PostCardProps> = ({
     return (
         <View style={styles.container}>
             <View style={[styles.mediaContainer, customMediaContainerStyle]}>
-                <FastImage
-                    source={{ uri: validPostImage }}
-                    style={styles.postImage}
-                    resizeMode={FastImage.resizeMode.cover}
-                />
+                <TouchableWithoutFeedback onPress={handleDoubleTap}>
+                    <View>
+                        <FastImage
+                            source={{ uri: validPostImage }}
+                            style={styles.postImage}
+                            resizeMode={FastImage.resizeMode.cover}
+                        />
+                    </View>
+                </TouchableWithoutFeedback>
+
+                <Animated.View style={[
+                    StyleSheet.absoluteFillObject,
+                    { justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', zIndex: 5 },
+                    {
+                        opacity: heartBeatAnim.interpolate({
+                            inputRange: [0, 0.2, 1],
+                            outputRange: [0, 1, 1]
+                        }),
+                        transform: [{
+                            scale: heartBeatAnim.interpolate({
+                                inputRange: [0, 0.5, 1],
+                                outputRange: [0, 1.2, 1]
+                            })
+                        }]
+                    }
+                ]}>
+                    <Ionicons name="heart" size={100} color={theme.colors.error || "red"} />
+                </Animated.View>
 
                 <View style={styles.headerWrapper} ref={headerWrapperRef}>
                     {isShowHeaderView ? renderCollapsedHeader() : null}
@@ -197,7 +261,7 @@ const PostCard: React.FC<PostCardProps> = ({
                     <View style={styles.actionRow}>
                         {/* Split into two separate touchables wrapped in view */}
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }}>
-                            <TouchableOpacity style={{ padding: 5 }} onPress={onLikePress}>
+                            <TouchableOpacity style={{ padding: 5 }} onPress={handleLikeButtonPress}>
                                 <Ionicons
                                     name={hasLiked ? "heart" : "heart-outline"}
                                     size={26}

@@ -16,7 +16,11 @@ import { RootState, AppDispatch } from '../../store';
 import { setMyPosts } from '../../store/slices/postSlice';
 import { friendService, FriendRequestDto } from '../../services/friendService';
 import { postService, Post } from '../../services/postService';
+import { storyService } from '../../services/storyService';
+import StoriesRail from '../../components/organisms/storiesRail/StoriesRail';
+import StatusViewerModal, { UserStory } from '../../components/organisms/statusViewerModal/StatusViewerModal';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { ActivityIndicator } from 'react-native';
 const { width } = Dimensions.get('window');
 
 const FriendCircleScreen = () => {
@@ -43,6 +47,9 @@ const FriendCircleScreen = () => {
     const [requests, setRequests] = useState<FriendRequestDto[]>([]);
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [friends, setFriends] = useState<any[]>([]);
+    const [myStories, setMyStories] = useState<UserStory[]>([]);
+    const [isStoryModalVisible, setIsStoryModalVisible] = useState(false);
+    const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
     const dispatch = useDispatch<AppDispatch>();
     const myPosts = useSelector((state: RootState) => state.posts.myPosts);
     const [loading, setLoading] = useState(false);
@@ -83,14 +90,28 @@ const FriendCircleScreen = () => {
         if (!currentUserId) return;
         setLoading(true);
         try {
-            const response = await postService.getUserPosts(currentUserId, 1, 50, currentUserId);
+            const [response, storiesResponse] = await Promise.all([
+                postService.getUserPosts(currentUserId, 1, 50, currentUserId),
+                storyService.getStories(1, 10, currentUserId)
+            ]);
             dispatch(setMyPosts(response.posts));
+            
+            const u = currentUser as any;
+            const myHandle = u?.username || u?.handle;
+            const myGroup = storiesResponse.stories.find(g => g.id === myHandle) as any;
+            if (myGroup) {
+                // Ensure date property maps to createdAt for timeAgo calculation
+                myGroup.stories = myGroup.stories.map((s: any) => ({ ...s, date: s.createdAt }));
+                setMyStories([myGroup]);
+            } else {
+                setMyStories([]);
+            }
         } catch (error) {
             console.error('Failed to fetch API data for My Posts tab', error);
         } finally {
             setLoading(false);
         }
-    }, [currentUserId]);
+    }, [currentUserId, currentUser, dispatch]);
 
     useEffect(() => {
         if (activeTab === 0) {
@@ -281,39 +302,75 @@ const FriendCircleScreen = () => {
         );
     };
 
+    const handleMyStoryPress = (id: string, index: number) => {
+        setSelectedStoryIndex(index);
+        setIsStoryModalVisible(true);
+    };
+
     const renderMyPostsTab = () => {
-        if (loading && myPosts.length === 0) {
+        if (loading && myPosts.length === 0 && myStories.length === 0) {
             return (
                 <View style={styles.emptyContainer}>
-                    <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>Loading...</Text>
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
                 </View>
             );
         }
 
+        const myGroup = myStories.length > 0 ? myStories[0] : null;
+        const railData = myGroup ? myGroup.stories.map((s: any, idx: number) => ({
+             id: s.id,
+             name: `Story ${idx + 1}`,
+             image: s.url,
+             isLive: true
+        })) : [];
+
+        const renderHeader = () => {
+             if (railData.length > 0) {
+                 return (
+                     <View style={{ marginBottom: 16 }}>
+                         <Text style={[styles.sectionHeader, { color: theme.colors.text, paddingHorizontal: 16, marginBottom: 8 }]}>My Stories</Text>
+                         <StoriesRail data={railData} onPressItem={handleMyStoryPress} />
+                     </View>
+                 );
+             }
+             return null;
+        };
+
         return (
-            <FlashList
-                data={myPosts}
-                keyExtractor={(item) => item.id.toString()}
-                numColumns={2}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 4, paddingTop: 16 }}
-                renderItem={({ item }) => (
-                    <GridPostCard
-                        postImage={item.postImage}
-                        likes={item.likes}
-                        commentsCount={item.commentsCount}
-                        description={item.description}
-                        hasLiked={item.hasLiked}
-                        onPress={() => navigation.navigate('PostDetails', { post: item })}
-                        onSharePress={() => { }}
-                    />
-                )}
-                ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                        <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>No posts found.</Text>
-                    </View>
-                }
-            />
+            <>
+                <FlashList
+                    data={myPosts}
+                    keyExtractor={(item) => item.id.toString()}
+                    numColumns={2}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 4, paddingTop: 16 }}
+                    ListHeaderComponent={renderHeader}
+                    renderItem={({ item }) => (
+                        <GridPostCard
+                            postImage={item.postImage}
+                            likes={item.likes}
+                            commentsCount={item.commentsCount}
+                            description={item.description}
+                            hasLiked={item.hasLiked}
+                            onPress={() => navigation.navigate('PostDetails', { post: item })}
+                            onSharePress={() => { }}
+                        />
+                    )}
+                    ListEmptyComponent={
+                        <View style={styles.emptyContainer}>
+                            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>No posts found.</Text>
+                        </View>
+                    }
+                />
+                
+                <StatusViewerModal
+                    visible={isStoryModalVisible}
+                    userStories={myStories}
+                    initialUserIndex={0}
+                    initialStoryIndex={selectedStoryIndex}
+                    onClose={() => setIsStoryModalVisible(false)}
+                />
+            </>
         );
     };
 

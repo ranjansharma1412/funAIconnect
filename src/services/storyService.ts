@@ -45,6 +45,16 @@ export interface GetStoriesResponse {
     pages: number;
 }
 
+export interface StoryCommentResponse {
+    comments: any[]; // Or reuse Comment interface from commentService if identical
+    has_next: boolean;
+    has_prev: boolean;
+    total: number;
+    pages: number;
+    page: number;
+}
+
+
 export const storyService = {
     createStory: async (payload: CreateStoryPayload): Promise<Story> => {
         const formData = new FormData();
@@ -114,6 +124,37 @@ export const storyService = {
             return response.data;
         } catch (error) {
             console.error('Error fetching story likes:', error);
+            throw error;
+        }
+    },
+
+    getStoryComments: async (storyId: number, page: number = 1, perPage: number = 20): Promise<StoryCommentResponse> => {
+        try {
+            const response = await apiClient.get(`/api/stories/${storyId}/comments`, {
+                params: { page, per_page: perPage }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching story comments:', error);
+            throw error;
+        }
+    },
+
+    addStoryComment: async (storyId: number, content: string, userId: number): Promise<any> => {
+        try {
+            const response = await apiClient.post(`/api/stories/${storyId}/comments`, { content, userId });
+            return response.data;
+        } catch (error) {
+            console.error('Error adding story comment:', error);
+            throw error;
+        }
+    },
+
+    deleteStoryComment: async (storyId: number, commentId: number): Promise<void> => {
+        try {
+            await apiClient.delete(`/api/stories/${storyId}/comments/${commentId}`);
+        } catch (error) {
+            console.error('Error deleting story comment:', error);
             throw error;
         }
     },

@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { createStyles } from './StatusViewerModalStyle';
 import { timeAgo } from '../../../utils/dateUtils';
 import StoryLikesModal from '../storyLikesModal/StoryLikesModal';
+import CommentsModal from '../commentsModal/CommentsModal';
 import { storyService } from '../../../services/storyService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
@@ -45,6 +46,7 @@ interface StatusViewerModalProps {
     visible: boolean;
     userStories: UserStory[];
     initialUserIndex?: number;
+    initialStoryIndex?: number;
     onClose: () => void;
 }
 
@@ -52,6 +54,7 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
     visible,
     userStories,
     initialUserIndex = 0,
+    initialStoryIndex = 0,
     onClose,
 }) => {
     const { theme } = useTheme();
@@ -65,6 +68,7 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
 
     // Story Like State
     const [isLikesVisible, setIsLikesVisible] = useState(false);
+    const [isCommentsVisible, setIsCommentsVisible] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
     const { user } = useSelector((state: RootState) => state.auth);
     const [localStories, setLocalStories] = useState<UserStory[]>([]);
@@ -82,12 +86,12 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
     useEffect(() => {
         if (visible) {
             setCurrentUserIndex(initialUserIndex);
-            setCurrentStoryIndex(0);
+            setCurrentStoryIndex(initialStoryIndex);
         } else {
             progress.setValue(0);
             setCurrentStoryIndex(0);
         }
-    }, [visible, initialUserIndex]);
+    }, [visible, initialUserIndex, initialStoryIndex]);
 
     useEffect(() => {
         if (visible && currentUser && currentStory) {
@@ -156,18 +160,24 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
         return String(currentUser.id) === String(u.username) || String(currentUser.id) === String(u.handle);
     };
 
-    const handleHeartPress = async () => {
+    const handleEyePress = async () => {
         if (!currentStory?.raw_id || !user?.id) return;
 
-        if (isCurrentUserStory()) {
-            // Owner opens modal to see who liked it
-            if (progressAnim.current) {
-                // Pause auto-play
-                progressAnim.current.stop();
-            }
-            setIsLikesVisible(true);
-            return;
+        if (progressAnim.current) {
+            progressAnim.current.stop();
         }
+        setIsLikesVisible(true);
+    };
+
+    const handleCommentPress = () => {
+        if (progressAnim.current) {
+            progressAnim.current.stop();
+        }
+        setIsCommentsVisible(true);
+    };
+
+    const handleHeartPress = async () => {
+        if (!currentStory?.raw_id || !user?.id) return;
 
         // Toggle Like logic for other users
         if (isLiking) return;
@@ -300,31 +310,30 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
                     </TouchableWithoutFeedback>
                 </View>
 
-                {/* Footer / Reply (Visual only for now) */}
+                {/* Footer / Comments / Likes */}
                 <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
-                    <View style={styles.replyInput}>
-                        <Text style={styles.replyPlaceholder}>{t('dashboard.send_message')}</Text>
-                    </View>
+                    <TouchableOpacity style={{ marginHorizontal: 15 }} onPress={handleCommentPress}>
+                        <Ionicons name="chatbubble-outline" size={30} color="white" />
+                    </TouchableOpacity>
 
-                    <TouchableOpacity onPress={handleHeartPress}>
-                        {isCurrentUserStory() ? (
-                            <Ionicons
-                                name={currentStory.likesCount && currentStory.likesCount > 0 ? "heart" : "heart-outline"}
-                                size={30}
-                                color={currentStory.likesCount && currentStory.likesCount > 0 ? theme.colors.primary : 'white'}
-                            />
-                        ) : (
+                    {isCurrentUserStory() ? (
+                        <TouchableOpacity onPress={handleEyePress} style={{ marginHorizontal: 15 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Ionicons name="eye-outline" size={30} color="white" />
+                                {currentStory.likesCount ? (
+                                    <Text style={{ color: 'white', marginLeft: 4 }}>{currentStory.likesCount}</Text>
+                                ) : null}
+                            </View>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity onPress={handleHeartPress} style={{ marginHorizontal: 15 }}>
                             <Ionicons
                                 name={currentStory.hasLiked ? "heart" : "heart-outline"}
                                 size={30}
                                 color={currentStory.hasLiked ? theme.colors.primary : 'white'}
                             />
-                        )}
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={{ marginLeft: 15 }}>
-                        <Ionicons name="paper-plane-outline" size={30} color="white" />
-                    </TouchableOpacity>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
             </View>
@@ -336,6 +345,16 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
                     setIsLikesVisible(false);
                     startProgress(); // Resume auto-play
                 }}
+            />
+
+            <CommentsModal
+                visible={isCommentsVisible}
+                onClose={() => {
+                    setIsCommentsVisible(false);
+                    startProgress(); // Resume auto-play
+                }}
+                storyId={currentStory.raw_id ? (typeof currentStory.raw_id === 'string' ? parseInt(currentStory.raw_id) : currentStory.raw_id) : null}
+                currentUserId={user ? parseInt(user.id) : undefined}
             />
         </Modal>
     );
