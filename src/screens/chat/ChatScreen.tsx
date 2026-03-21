@@ -108,7 +108,13 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                         if (tempMessages.length > 0) {
                             const targetTempId = tempMessages[tempMessages.length - 1].id;
                             const newPrev = prev.filter(p => p.id !== targetTempId);
-                            if (newPrev.some(p => p.id === actualId)) return newPrev;
+                            
+                            const existingIdx = newPrev.findIndex(p => p.id === actualId);
+                            if (existingIdx !== -1) {
+                                const copy = [...newPrev];
+                                copy[existingIdx] = incomingMsg;
+                                return copy;
+                            }
                             return [incomingMsg, ...newPrev];
                         }
                     } else if (incomingMsg.type === 'image' || incomingMsg.type === 'video') {
@@ -116,28 +122,49 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                         if (tempMessages.length > 0) {
                             const targetTempId = tempMessages[tempMessages.length - 1].id;
                             const newPrev = prev.filter(p => p.id !== targetTempId);
-                            if (newPrev.some(p => p.id === actualId)) return newPrev;
+                            
+                            const existingIdx = newPrev.findIndex(p => p.id === actualId);
+                            if (existingIdx !== -1) {
+                                const copy = [...newPrev];
+                                copy[existingIdx] = incomingMsg;
+                                return copy;
+                            }
                             return [incomingMsg, ...newPrev];
                         }
                     }
                 }
 
-                // Standard echo deduplication
-                if (prev.some(p => p.id === actualId)) return prev;
+                // Standard echo update or prepend
+                const existingIndex = prev.findIndex(p => p.id === actualId);
+                if (existingIndex !== -1) {
+                    const copy = [...prev];
+                    copy[existingIndex] = incomingMsg;
+                    return copy;
+                }
+                
                 return [incomingMsg, ...prev];
             });
 
-            if (String(m.senderId) === currentUserId) {
-                setTimeout(() => flashListRef.current?.scrollToOffset({ offset: 0, animated: true }), 100);
-            } else {
+            // Always scroll to end whenever ANY new message arrives
+            setTimeout(() => flashListRef.current?.scrollToOffset({ offset: 0, animated: true }), 100);
+
+            if (String(m.senderId) !== currentUserId) {
                 // Send read receipt if received msg isn't our own
                 socketService.readMessage({ messageId: m.id, userId: currentUserId, friendId });
             }
         });
 
         socketService.onMessageStatusUpdate((data: any) => {
-            setMessages(prev => prev.map(msg => msg.id === data.messageId ? { ...msg, status: data.status as any } : msg));
+            setMessages(prev => prev.map(msg => String(msg.id) === String(data.messageId) ? { ...msg, status: data.status as any } : msg));
         });
+
+        // Add wildcard listener for 'message_deleted' just in case the backend uses a dedicated event
+        if ((socketService as any).socket) {
+            (socketService as any).socket.off('message_deleted');
+            (socketService as any).socket.on('message_deleted', (data: any) => {
+                setMessages(prev => prev.map(msg => String(msg.id) === String(data.messageId) ? { ...msg, status: 'deleted', text: undefined, mediaUrl: undefined } : msg));
+            });
+        }
 
         return () => {
             socketService.leaveChat(currentUserId, friendId);
@@ -339,6 +366,11 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                                 setMessages((prev) =>
                                     prev.map(m => m.id === msg.id ? { ...m, status: 'deleted', text: undefined, mediaUrl: undefined } : m)
                                 );
+                                // Attempt to force socket sync of deletion to the friend's side
+                                if ((socketService as any).socket) {
+                                    (socketService as any).socket.emit('message_status_update', { messageId: msg.id, status: 'deleted', friendId });
+                                    (socketService as any).socket.emit('delete_message', { messageId: msg.id, userId: currentUserId, friendId });
+                                }
                             }
                         } catch (e) { console.log(e) }
                     }
@@ -386,12 +418,14 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             </View>
 
             <View style={styles.headerActions}>
+                {/* Audio/Video Call features disabled for future implementation
                 <TouchableOpacity style={styles.actionButton}>
                     <Icon name="call-outline" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionButton}>
                     <Icon name="videocam-outline" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
+                */}
                 <TouchableOpacity style={styles.actionButton} onPress={handleClearHistory}>
                     <Icon name="trash-outline" size={24} color={theme.colors.accentRed} />
                 </TouchableOpacity>
@@ -402,7 +436,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     return (
         <KeyboardAvoidingView
             style={{ flex: 1, backgroundColor: theme.colors.background }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
             <SafeAreaView style={styles.safeArea}>
