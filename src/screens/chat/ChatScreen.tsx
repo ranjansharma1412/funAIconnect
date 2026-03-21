@@ -17,6 +17,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { API_CONFIG } from '../../services/apiClient';
 import { ImagesAssets } from '../../assets/images';
+import { timeAgo } from '../../utils/dateUtils';
 
 const API_URL = API_CONFIG.BASE_URL
 
@@ -42,6 +43,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     const [selectedMedia, setSelectedMedia] = useState<MessageProps | null>(null);
     const [isPlaying, setIsPlaying] = useState(true);
     const [progress, setProgress] = useState({ currentTime: 0, seekableDuration: 0 });
+    const [friendStatus, setFriendStatus] = useState({ isOnline: false, lastSeen: null as string | null });
 
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -62,6 +64,14 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
 
         socketService.connect(currentUserId);
         socketService.joinChat(currentUserId, friendId);
+
+        socketService.onUserStatusUpdate((data) => {
+            if (String(data.userId) === String(friendId)) {
+                setFriendStatus({ isOnline: data.isOnline, lastSeen: data.lastSeen });
+            }
+        });
+
+        socketService.checkOnlineStatus(friendId);
 
         const fetchInitialHistory = async () => {
             try {
@@ -413,7 +423,9 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                 <FastImage source={{ uri: userImage }} style={styles.avatar as any} />
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.headerName} numberOfLines={1} ellipsizeMode='tail'>{userName}</Text>
-                    <Text style={styles.headerStatus}>Online</Text>
+                    <Text style={styles.headerStatus}>
+                        {friendStatus.isOnline ? 'Online' : (friendStatus.lastSeen ? `Last seen ${timeAgo(friendStatus.lastSeen)}` : 'Offline')}
+                    </Text>
                 </View>
             </View>
 
