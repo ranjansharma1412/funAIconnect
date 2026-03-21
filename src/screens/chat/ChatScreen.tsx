@@ -76,7 +76,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                         status: m.status,
                         mediaUrl: m.mediaUrl
                     })).reverse();
-                    
+
                     setMessages(mapped);
                     if (data.messages.length < 20) {
                         setHasMore(false);
@@ -89,23 +89,47 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
         fetchInitialHistory();
 
         socketService.onReceiveMessage((m: any) => {
+            const actualId = m.id ? String(m.id) : `sock_${Date.now()}_${Math.random()}`;
             const incomingMsg: MessageProps = {
-                id: String(m.id),
+                id: actualId,
                 text: m.text,
                 type: m.mediaType || 'text',
                 time: m.time || 'Just now',
                 isOwnMessage: String(m.senderId) === currentUserId,
-                status: m.status,
+                status: m.status || 'delivered',
                 mediaUrl: m.mediaUrl
             };
-            
+
             setMessages(prev => {
-                 if (prev.some(p => p.id === String(m.id))) return prev;
-                 return [incomingMsg, ...prev];
+                if (incomingMsg.isOwnMessage) {
+                    if (incomingMsg.type === 'text') {
+                        const tempMessages = prev.filter(p => p.id.startsWith('temp_text_') && p.text === incomingMsg.text);
+                        if (tempMessages.length > 0) {
+                            const targetTempId = tempMessages[tempMessages.length - 1].id;
+                            const newPrev = prev.filter(p => p.id !== targetTempId);
+                            if (newPrev.some(p => p.id === actualId)) return newPrev;
+                            return [incomingMsg, ...newPrev];
+                        }
+                    } else if (incomingMsg.type === 'image' || incomingMsg.type === 'video') {
+                        const tempMessages = prev.filter(p => p.id.startsWith('temp_') && p.type === incomingMsg.type);
+                        if (tempMessages.length > 0) {
+                            const targetTempId = tempMessages[tempMessages.length - 1].id;
+                            const newPrev = prev.filter(p => p.id !== targetTempId);
+                            if (newPrev.some(p => p.id === actualId)) return newPrev;
+                            return [incomingMsg, ...newPrev];
+                        }
+                    }
+                }
+
+                // Standard echo deduplication
+                if (prev.some(p => p.id === actualId)) return prev;
+                return [incomingMsg, ...prev];
             });
 
-            // Send read receipt if received msg isn't our own
-            if (String(m.senderId) !== currentUserId) {
+            if (String(m.senderId) === currentUserId) {
+                setTimeout(() => flashListRef.current?.scrollToOffset({ offset: 0, animated: true }), 100);
+            } else {
+                // Send read receipt if received msg isn't our own
                 socketService.readMessage({ messageId: m.id, userId: currentUserId, friendId });
             }
         });
@@ -136,7 +160,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                     status: m.status,
                     mediaUrl: m.mediaUrl
                 })).reverse();
-                
+
                 let uniqueCount = 0;
                 setMessages(prev => {
                     const existingIds = new Set(prev.map(msg => msg.id));
@@ -144,7 +168,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                     uniqueCount = uniqueMapped.length;
                     return [...prev, ...uniqueMapped];
                 });
-                
+
                 if (uniqueCount === 0 || data.messages.length < 20) {
                     setHasMore(false);
                 } else {
@@ -168,6 +192,24 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     };
 
     const handleSend = (text: string) => {
+        if (!text.trim()) return;
+
+        const tempId = 'temp_text_' + Date.now();
+        const now = new Date();
+        const formattedTime = `${now.getHours() < 10 ? '0' : ''}${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+
+        const tempMsg: MessageProps = {
+            id: tempId,
+            text,
+            type: 'text',
+            time: formattedTime,
+            isOwnMessage: true,
+            status: 'sent',
+            mediaUrl: undefined
+        };
+
+        setMessages(prev => [tempMsg, ...prev]);
+
         console.log('Sending message:', text);
         socketService.sendMessage({
             userId: currentUserId || '',
@@ -175,14 +217,18 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             text,
             mediaType: 'text'
         });
+        setTimeout(() => flashListRef.current?.scrollToOffset({ offset: 0, animated: true }), 100);
     };
 
-    const uploadMedia = async (uri: string, type: string) => {
+    const uploadMedia = async (uri: string, type: string | undefined, isVideo: boolean) => {
         const formData = new FormData();
+        const fileType = type || (isVideo ? 'video/mp4' : 'image/jpeg');
+        const extension = isVideo ? 'mp4' : 'jpg';
+
         formData.append('file', {
             uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
-            type: type || 'image/jpeg',
-            name: `upload_${Date.now()}.${type?.includes('video') ? 'mp4' : 'jpg'}`
+            type: fileType,
+            name: `upload_${Date.now()}.${extension}`
         } as any);
 
         const res = await fetch(`${API_URL}/api/chat/upload`, {
@@ -193,25 +239,64 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             },
         });
         const data = await res.json();
-        if (data.url) return data.url;
+        let finalUrl = data.url;
+        if (finalUrl && finalUrl.startsWith('http://')) {
+            finalUrl = finalUrl.replace('http://', 'https://');
+        }
+        if (finalUrl) return finalUrl;
         throw new Error('Upload failed');
+    };
+
+    const processMediaUpload = async (asset: any) => {
+        const isVideo = asset.type?.includes('video') || asset.uri?.endsWith('.mp4') || asset.uri?.endsWith('.mov');
+        const mediaType = isVideo ? 'video' : 'image';
+        const tempId = 'temp_' + Date.now();
+
+        const tempMsg: MessageProps = {
+            id: tempId,
+            type: mediaType,
+            time: 'Sending...',
+            isOwnMessage: true,
+            status: 'sending',
+            mediaUrl: asset.uri
+        };
+
+        setMessages(prev => [tempMsg, ...prev]);
+        setTimeout(() => flashListRef.current?.scrollToOffset({ offset: 0, animated: true }), 100);
+
+        try {
+            const uploadedUrl = await uploadMedia(asset.uri, asset.type, isVideo);
+
+            const now = new Date();
+            const formattedTime = `${now.getHours() < 10 ? '0' : ''}${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+
+            // Update temp message with resulting URL and mark sent instantly
+            setMessages(prev => prev.map(m => m.id === tempId ? {
+                ...m,
+                mediaUrl: uploadedUrl,
+                status: 'sent',
+                time: formattedTime
+            } : m));
+
+            socketService.sendMessage({
+                userId: currentUserId || '',
+                friendId: friendId,
+                mediaUrl: uploadedUrl,
+                mediaType: mediaType
+            });
+        } catch (error) {
+            console.log('Upload/Send Error: ', error);
+            setMessages(prev => prev.map(m => m.id === tempId ? { ...m, status: 'failed' } : m));
+        }
     };
 
     const handleAttachCamera = async () => {
         try {
-            const result = await launchCamera({ mediaType: 'mixed', cameraType: 'back' });
+            const result = await launchCamera({ mediaType: 'photo', cameraType: 'back' });
             if (result.assets && result.assets.length > 0) {
                 const asset = result.assets[0];
                 if (!asset.uri) return;
-
-                const uploadedUrl = await uploadMedia(asset.uri, asset.type || 'image/jpeg');
-
-                socketService.sendMessage({
-                    userId: currentUserId || '',
-                    friendId: friendId,
-                    mediaUrl: uploadedUrl,
-                    mediaType: asset.type?.includes('video') ? 'video' : 'image'
-                });
+                await processMediaUpload(asset);
             }
         } catch (error) {
             console.log('Camera Error: ', error);
@@ -224,15 +309,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             if (result.assets && result.assets.length > 0) {
                 const asset = result.assets[0];
                 if (!asset.uri) return;
-
-                const uploadedUrl = await uploadMedia(asset.uri, asset.type || 'image/jpeg');
-
-                socketService.sendMessage({
-                    userId: currentUserId || '',
-                    friendId: friendId,
-                    mediaUrl: uploadedUrl,
-                    mediaType: asset.type?.includes('video') ? 'video' : 'image'
-                });
+                await processMediaUpload(asset);
             }
         } catch (error) {
             console.log('Gallery Error: ', error);
