@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ImageBackground, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ImageBackground, Modal, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
 import { FlashList } from '@shopify/flash-list';
@@ -42,6 +42,10 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     const [isPlaying, setIsPlaying] = useState(true);
     const [progress, setProgress] = useState({ currentTime: 0, seekableDuration: 0 });
 
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
     const currentUser = useSelector((state: RootState) => state.auth.user);
     const currentUserId = currentUser?.id?.toString();
     const flashListRef = useRef<any>(null);
@@ -51,12 +55,16 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     React.useEffect(() => {
         if (!currentUserId || !friendId) return;
 
+        setPage(1);
+        setHasMore(true);
+        setMessages([]);
+
         socketService.connect(currentUserId);
         socketService.joinChat(currentUserId, friendId);
 
-        const fetchHistory = async () => {
+        const fetchInitialHistory = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/chat/${friendId}/messages?user_id=${currentUserId}`);
+                const res = await fetch(`${API_URL}/api/chat/${friendId}/messages?user_id=${currentUserId}&page=1&limit=20`);
                 const data = await res.json();
                 if (data.messages) {
                     const mapped = data.messages.map((m: any) => ({
@@ -67,15 +75,18 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                         isOwnMessage: String(m.senderId) === currentUserId,
                         status: m.status,
                         mediaUrl: m.mediaUrl
-                    }));
+                    })).reverse();
+                    
                     setMessages(mapped);
-                    setTimeout(() => flashListRef.current?.scrollToEnd({ animated: true }), 300);
+                    if (data.messages.length < 20) {
+                        setHasMore(false);
+                    }
                 }
             } catch (e) {
                 console.log('Error fetching history:', e);
             }
         };
-        fetchHistory();
+        fetchInitialHistory();
 
         socketService.onReceiveMessage((m: any) => {
             const incomingMsg: MessageProps = {
@@ -87,8 +98,11 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                 status: m.status,
                 mediaUrl: m.mediaUrl
             };
-            setMessages(prev => [...prev, incomingMsg]);
-            setTimeout(() => flashListRef.current?.scrollToEnd({ animated: true }), 100);
+            
+            setMessages(prev => {
+                 if (prev.some(p => p.id === String(m.id))) return prev;
+                 return [incomingMsg, ...prev];
+            });
 
             // Send read receipt if received msg isn't our own
             if (String(m.senderId) !== currentUserId) {
@@ -104,6 +118,47 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             socketService.leaveChat(currentUserId, friendId);
         };
     }, [currentUserId, friendId]);
+
+    const loadMoreMessages = async () => {
+        if (isLoadingMore || !hasMore) return;
+        setIsLoadingMore(true);
+        try {
+            const nextPage = page + 1;
+            const res = await fetch(`${API_URL}/api/chat/${friendId}/messages?user_id=${currentUserId}&page=${nextPage}&limit=20`);
+            const data = await res.json();
+            if (data.messages && data.messages.length > 0) {
+                const mapped = data.messages.map((m: any) => ({
+                    id: String(m.id),
+                    text: m.text,
+                    type: m.mediaType || 'text',
+                    time: m.time || '00:00',
+                    isOwnMessage: String(m.senderId) === currentUserId,
+                    status: m.status,
+                    mediaUrl: m.mediaUrl
+                })).reverse();
+                
+                let uniqueCount = 0;
+                setMessages(prev => {
+                    const existingIds = new Set(prev.map(msg => msg.id));
+                    const uniqueMapped = mapped.filter((msg: any) => !existingIds.has(msg.id));
+                    uniqueCount = uniqueMapped.length;
+                    return [...prev, ...uniqueMapped];
+                });
+                
+                if (uniqueCount === 0 || data.messages.length < 20) {
+                    setHasMore(false);
+                } else {
+                    setPage(nextPage);
+                }
+            } else {
+                setHasMore(false);
+            }
+        } catch (e) {
+            console.log('Error fetching more history:', e);
+        } finally {
+            setIsLoadingMore(false);
+        }
+    };
 
     const formatTime = (seconds: number) => {
         if (isNaN(seconds) || seconds < 0) return '00:00';
@@ -275,6 +330,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                     <FlashList
                         ref={flashListRef}
                         data={messages}
+                        inverted={true}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <ChatBubble message={item} onLongPress={handleLongPressMsg} onPressMedia={(msg) => {
@@ -287,10 +343,11 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                         )}
                         contentContainerStyle={styles.listContent}
                         showsVerticalScrollIndicator={false}
-                        onContentSizeChange={() => flashListRef.current?.scrollToEnd({ animated: true })}
-                        onLayout={() => flashListRef.current?.scrollToEnd({ animated: true })}
+                        onEndReached={loadMoreMessages}
+                        onEndReachedThreshold={0.5}
+                        ListFooterComponent={() => isLoadingMore ? <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginVertical: 10 }} /> : null}
                         ListEmptyComponent={() => (
-                            <View style={styles.emptyStateContainer}>
+                            <View style={[styles.emptyStateContainer, { transform: [{ scaleY: -1 }] }]}>
                                 <Text style={styles.emptyStateText}>Say hi to {userName}!</Text>
                             </View>
                         )}
