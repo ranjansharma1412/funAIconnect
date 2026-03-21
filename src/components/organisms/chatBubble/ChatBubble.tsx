@@ -36,11 +36,11 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onLongPress, onPressMe
         if (!message.isOwnMessage || isDeleted) return null;
         switch (message.status) {
             case 'sending':
-                return <Icon name="time-outline" size={14} color="rgba(255, 255, 255, 0.7)" style={styles.statusIcon} />;
+                return <Icon name="time-outline" size={14} color={theme.colors.textSecondary} style={styles.statusIcon} />;
             case 'sent':
-                return <Icon name="checkmark-done" size={14} color="rgba(255, 255, 255, 0.7)" style={styles.statusIcon} />;
+                return <Icon name="checkmark-done" size={14} color={theme.colors.textSecondary} style={styles.statusIcon} />;
             case 'delivered':
-                return <Icon name="checkmark-done" size={14} color="rgba(255, 255, 255, 0.7)" style={styles.statusIcon} />;
+                return <Icon name="checkmark-done" size={14} color={theme.colors.textSecondary} style={styles.statusIcon} />;
             case 'read':
                 return <Icon name="checkmark-done" size={14} color={theme.colors.primaryGradient[1]} style={styles.statusIcon} />;
             case 'failed':

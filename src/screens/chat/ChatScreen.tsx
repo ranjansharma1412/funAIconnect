@@ -118,7 +118,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                         if (tempMessages.length > 0) {
                             const targetTempId = tempMessages[tempMessages.length - 1].id;
                             const newPrev = prev.filter(p => p.id !== targetTempId);
-                            
+
                             const existingIdx = newPrev.findIndex(p => p.id === actualId);
                             if (existingIdx !== -1) {
                                 const copy = [...newPrev];
@@ -132,7 +132,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                         if (tempMessages.length > 0) {
                             const targetTempId = tempMessages[tempMessages.length - 1].id;
                             const newPrev = prev.filter(p => p.id !== targetTempId);
-                            
+
                             const existingIdx = newPrev.findIndex(p => p.id === actualId);
                             if (existingIdx !== -1) {
                                 const copy = [...newPrev];
@@ -151,7 +151,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                     copy[existingIndex] = incomingMsg;
                     return copy;
                 }
-                
+
                 return [incomingMsg, ...prev];
             });
 
@@ -330,10 +330,20 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
 
     const handleAttachCamera = async () => {
         try {
-            const result = await launchCamera({ mediaType: 'photo', cameraType: 'back' });
+            const result = await launchCamera({
+                mediaType: 'photo',
+                cameraType: 'back',
+                quality: 0.7,
+                maxWidth: 1280,
+                maxHeight: 1280
+            });
             if (result.assets && result.assets.length > 0) {
                 const asset = result.assets[0];
                 if (!asset.uri) return;
+                if (asset.fileSize && asset.fileSize > 2 * 1024 * 1024) {
+                    Alert.alert('File Too Large', 'The selected file exceeds the 2MB limit after compression. Please choose a smaller file.');
+                    return;
+                }
                 await processMediaUpload(asset);
             }
         } catch (error) {
@@ -343,10 +353,21 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
 
     const handleAttachGallery = async () => {
         try {
-            const result = await launchImageLibrary({ mediaType: 'mixed', selectionLimit: 1 });
+            const result = await launchImageLibrary({
+                mediaType: 'mixed',
+                selectionLimit: 1,
+                quality: 0.7,
+                maxWidth: 1280,
+                maxHeight: 1280,
+                videoQuality: 'low'
+            });
             if (result.assets && result.assets.length > 0) {
                 const asset = result.assets[0];
                 if (!asset.uri) return;
+                if (asset.fileSize && asset.fileSize > 2 * 1024 * 1024) {
+                    Alert.alert('File Too Large', 'The selected file exceeds the 2MB limit after compression. Please choose a smaller file.');
+                    return;
+                }
                 await processMediaUpload(asset);
             }
         } catch (error) {
