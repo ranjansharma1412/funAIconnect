@@ -350,13 +350,22 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     const handleClearHistory = () => {
         Alert.alert(
             'Clear History',
-            'Are you sure you want to clear all messages in this chat?',
+            'Are you sure you want to clear all messages in this chat? This cannot be undone.',
             [
                 { text: 'Cancel', style: 'cancel' },
                 {
                     text: 'Clear',
                     style: 'destructive',
-                    onPress: () => setMessages([])
+                    onPress: async () => {
+                        try {
+                            // Clear locally immediately for responsive UI
+                            setMessages([]);
+                            // Hit backend to clear permanently
+                            await fetch(`${API_URL}/api/chat/${friendId}/messages?user_id=${currentUserId}`, { method: 'DELETE' });
+                        } catch (e) {
+                            console.log('Error clearing history:', e);
+                        }
+                    }
                 }
             ]
         );
