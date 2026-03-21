@@ -23,6 +23,7 @@ const RegisterScreen = ({ navigation }: any) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const [gender, setGender] = useState('Male');
 
     // Username availability states
     const [usernameError, setUsernameError] = useState('');
@@ -184,8 +185,8 @@ const RegisterScreen = ({ navigation }: any) => {
 
         // API Call
         try {
-            console.log('Registering with data:', { name: fullName, username, email, password });
-            const resultAction = await dispatch(registerUser({ name: fullName, username, email, password }));
+            console.log('Registering with data:', { name: fullName, username, email, password, gender });
+            const resultAction = await dispatch(registerUser({ name: fullName, username, email, password, gender }));
             if (registerUser.fulfilled.match(resultAction)) {
                 navigation.navigate('Login');
             }
@@ -219,6 +220,20 @@ const RegisterScreen = ({ navigation }: any) => {
             {usernameError ? (
                 <Text style={[styles.errorText, { color: theme.colors.error }]}>{usernameError}</Text>
             ) : null}
+
+            <Text style={{color: theme.colors.text, fontSize: 16, fontWeight: 'bold', marginLeft: 10, marginTop: 10, marginBottom: 5}}>{t('auth.gender_label', 'Gender')}</Text>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15, paddingHorizontal: 10}}>
+                {['Male', 'Female', 'Other'].map(g => (
+                    <TouchableOpacity 
+                        key={g} 
+                        style={{flex: 1, padding: 12, borderWidth: 1, borderColor: gender === g ? theme.colors.primary : theme.colors.border, borderRadius: 8, marginRight: g !== 'Other' ? 10 : 0, alignItems: 'center', backgroundColor: gender === g ? (theme.colors.primary + '20') : 'transparent'}}
+                        onPress={() => setGender(g)}
+                    >
+                        <Text style={{color: gender === g ? theme.colors.primary : theme.colors.text}}>{t(`auth.gender_${g.toLowerCase()}`, g)}</Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+
             <TextInput
                 label={t('auth.email_label')}
                 placeholder={t('auth.email_placeholder')}

@@ -22,7 +22,7 @@ import { timeAgo } from '../../utils/dateUtils';
 const API_URL = API_CONFIG.BASE_URL
 
 type RootStackParamList = {
-    Chat: { chatId: string; userId: string; userName: string; userImage: string };
+    Chat: { chatId: string; userId: string; userName: string; userImage: string; gender?: string };
 };
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
@@ -32,10 +32,21 @@ interface Props {
     route: ChatScreenRouteProp;
 }
 const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
-    const { userName, userImage } = route.params || {
+    const { userName, userImage, gender } = route.params || {
         userName: 'Alex Johnson',
         userImage: 'https://picsum.photos/id/1025/150/150'
     };
+
+    let validUserImage: any = { uri: 'https://i.pravatar.cc/300' };
+    if (userImage && userImage.trim() !== '' && !userImage.includes('pravatar') && !userImage.includes('ui-avatars') && !userImage.includes('via.placeholder') && !userImage.includes('picsum.photos')) {
+        validUserImage = { uri: userImage };
+    } else {
+        if (gender?.toLowerCase() === 'female') {
+            validUserImage = ImagesAssets.profile_placeholder_female;
+        } else {
+            validUserImage = ImagesAssets.profile_placeholder_male;
+        }
+    }
 
     const { theme } = useTheme();
     const styles = createStyles(theme);
@@ -441,7 +452,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             </TouchableOpacity>
 
             <View style={styles.headerProfile}>
-                <FastImage source={{ uri: userImage }} style={styles.avatar as any} />
+                <FastImage source={validUserImage as any} style={styles.avatar as any} />
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.headerName} numberOfLines={1} ellipsizeMode='tail'>{userName}</Text>
                     <Text style={styles.headerStatus}>

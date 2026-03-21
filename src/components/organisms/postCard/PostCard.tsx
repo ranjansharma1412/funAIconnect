@@ -10,6 +10,7 @@ import { createStyles } from './PostCardStyle';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableWithoutFeedback } from 'react-native';
 import GradientHeartIcon from '../../atoms/gradientHeartIcon/GradientHeartIcon';
+import { ImagesAssets } from '../../../assets/images';
 
 const { width } = Dimensions.get('window');
 
@@ -28,6 +29,7 @@ interface PostCardProps {
     onLikesCountPress?: () => void;
     isShowHeaderView?: boolean;
     customMediaContainerStyle?: StyleProp<ViewStyle>;
+    gender?: string | null;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -44,7 +46,8 @@ const PostCard: React.FC<PostCardProps> = ({
     onLikesCountPress,
     commentsCount = 0,
     isShowHeaderView = true,
-    customMediaContainerStyle
+    customMediaContainerStyle,
+    gender
 }) => {
     const { theme } = useTheme();
     const styles = createStyles(theme);
@@ -59,7 +62,17 @@ const PostCard: React.FC<PostCardProps> = ({
 
     // Default processing code...
     const validPostImage = postImage || 'https://via.placeholder.com/500?text=No+Image';
-    const validUserImage = userImage || 'https://i.pravatar.cc/300';
+    
+    let validUserImage: any = { uri: 'https://i.pravatar.cc/300' };
+    if (userImage && userImage.trim() !== '' && !userImage.includes('pravatar') && !userImage.includes('ui-avatars') && !userImage.includes('via.placeholder')) {
+        validUserImage = { uri: userImage };
+    } else {
+        if (gender?.toLowerCase() === 'female') {
+            validUserImage = ImagesAssets.profile_placeholder_female;
+        } else {
+            validUserImage = ImagesAssets.profile_placeholder_male;
+        }
+    }
 
     const triggerHeartBeat = () => {
         Animated.sequence([
@@ -138,7 +151,7 @@ const PostCard: React.FC<PostCardProps> = ({
         const headerContent = (
             <TouchableOpacity activeOpacity={0.9} onPress={handleGlassHeaderClick} style={styles.glassHeaderInner}>
                 <View style={styles.userInfo}>
-                    <Avatar source={{ uri: validUserImage }} size={40} />
+                    <Avatar source={validUserImage} size={40} />
                     <View style={styles.textContainer}>
                         <View style={styles.nameRow}>
                             <Text style={styles.glassName}>

@@ -21,6 +21,7 @@ import { authService } from '../../services/authService';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { useNavigation } from '@react-navigation/native';
+import { ImagesAssets } from '../../assets/images';
 
 const AccountScreen = () => {
     const { theme } = useTheme();
@@ -138,7 +139,7 @@ const AccountScreen = () => {
                 <View style={styles.header}>
                     <TouchableOpacity onPress={handleProfileImagePick} style={styles.avatarContainer} disabled={!isEditing}>
                         <FastImage
-                            source={{ uri: avatar || 'https://i.pravatar.cc/300' }}
+                            source={avatar ? { uri: avatar } : user?.gender?.toLowerCase() === 'female' ? ImagesAssets.profile_placeholder_female : ImagesAssets.profile_placeholder_male}
                             style={styles.avatar as any}
                         />
                         {isEditing && (
