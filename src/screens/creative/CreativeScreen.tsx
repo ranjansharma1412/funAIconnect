@@ -9,6 +9,7 @@ import {
     StyleSheet,
     Alert
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
 import Button from '../../components/atoms/button/Button';
 import { useDispatch, useSelector } from 'react-redux';
@@ -102,10 +103,6 @@ const CreativeScreen = () => {
             Alert.alert(t('creative.validation_title'), t('creative.select_image_error'));
             return;
         }
-        if (!description) {
-            Alert.alert(t('creative.validation_title'), t('creative.add_description_error'));
-            return;
-        }
 
         setIsPosting(true);
         try {
@@ -193,27 +190,29 @@ const CreativeScreen = () => {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                <Text style={styles.header}>{t('creative.header_title')}</Text>
+                <View style={styles.headerRow}>
+                    <Text style={styles.header}>{t('creative.header_title')}</Text>
 
-                <View style={styles.toggleContainer}>
-                    <TouchableOpacity
-                        style={[styles.toggleButton, postType === 'post' && styles.toggleButtonActive]}
-                        onPress={() => setPostType('post')}
-                    >
-                        <Text style={[styles.toggleText, postType === 'post' && styles.toggleTextActive]}>
-                            {t('creative.post_type_post', 'Post')}
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.toggleButton, postType === 'story' && styles.toggleButtonActive]}
-                        onPress={() => setPostType('story')}
-                    >
-                        <Text style={[styles.toggleText, postType === 'story' && styles.toggleTextActive]}>
-                            {t('creative.post_type_story', 'Story')}
-                        </Text>
-                    </TouchableOpacity>
+                    <View style={styles.toggleContainer}>
+                        <TouchableOpacity
+                            style={[styles.toggleButton, postType === 'post' && styles.toggleButtonActive]}
+                            onPress={() => setPostType('post')}
+                        >
+                            <Text style={[styles.toggleText, postType === 'post' && styles.toggleTextActive]}>
+                                {t('creative.post_type_post', 'Post')}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.toggleButton, postType === 'story' && styles.toggleButtonActive]}
+                            onPress={() => setPostType('story')}
+                        >
+                            <Text style={[styles.toggleText, postType === 'story' && styles.toggleTextActive]}>
+                                {t('creative.post_type_story', 'Story')}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 <TouchableOpacity style={styles.imagePreview} onPress={handleGalleryPick}>
@@ -272,7 +271,7 @@ const CreativeScreen = () => {
                     disabled={isPosting}
                 />
             </ScrollView>
-        </View>
+        </SafeAreaView>
     );
 };
 

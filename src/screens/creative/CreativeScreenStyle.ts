@@ -12,15 +12,20 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
     scrollContent: {
         paddingBottom: 80, // Space for bottom tab bar and buttons
     },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
     header: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 20,
         color: theme.colors.text,
     },
     toggleContainer: {
         flexDirection: 'row',
-        marginBottom: 20,
+        width: 140,
         backgroundColor: theme.colors.card,
         borderRadius: 8,
         borderWidth: 1,
@@ -29,7 +34,7 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
     },
     toggleButton: {
         flex: 1,
-        paddingVertical: 12,
+        paddingVertical: 8,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -46,12 +51,12 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
     },
     imagePreview: {
         width: '100%',
-        height: 300,
-        borderRadius: 12,
+        height: width * 1.2,
+        borderRadius: 32,
         backgroundColor: theme.colors.card, // OR a specific placeholder color
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 12,
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: theme.colors.border,
@@ -66,7 +71,7 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         resizeMode: 'cover',
     },
     inputContainer: {
-        marginBottom: 20,
+        marginBottom: 12,
     },
     label: {
         fontSize: 16,
@@ -80,18 +85,18 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
-        minHeight: 100,
+        minHeight: 60,
         textAlignVertical: 'top',
         color: theme.colors.text,
         backgroundColor: theme.colors.card,
     },
     hashtagsInput: {
-        minHeight: 50,
+        minHeight: 40,
     },
     buttonsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 20,
+        marginBottom: 12,
     },
     actionButton: {
         flex: 1,
