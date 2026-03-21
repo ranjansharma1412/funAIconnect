@@ -16,6 +16,7 @@ import socketService from '../../services/SocketService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { API_CONFIG } from '../../services/apiClient';
+import { ImagesAssets } from '../../assets/images';
 
 const API_URL = API_CONFIG.BASE_URL
 
@@ -370,7 +371,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             <View style={styles.headerProfile}>
                 <FastImage source={{ uri: userImage }} style={styles.avatar as any} />
                 <View style={styles.headerTextContainer}>
-                    <Text style={styles.headerName}>{userName}</Text>
+                    <Text style={styles.headerName} numberOfLines={1} ellipsizeMode='tail'>{userName}</Text>
                     <Text style={styles.headerStatus}>Online</Text>
                 </View>
             </View>
@@ -399,10 +400,10 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                 {renderHeader()}
 
                 <ImageBackground
-                    source={{ uri: 'https://user-images.githubusercontent.com/15071540/59552788-37227300-8fa1-11e9-89d5-db22bfcc37ac.png' }}
+                    source={ImagesAssets.chat_image_bg_dark}
                     style={{ flex: 1 }}
                     imageStyle={{ opacity: theme.mode === 'dark' ? 0.15 : 0.4 }}
-                    resizeMode="repeat"
+                // resizeMode="repeat"
                 >
                     <FlashList
                         ref={flashListRef}
