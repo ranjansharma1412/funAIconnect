@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "release:android": "cd android && ./gradlew assembleRelease && cd .."
+    "android:release": "cd android && ./gradlew assembleRelease && cd ..",
+    "android:bundle": "cd android && ./gradlew bundleRelease && cd .."
   },
   "dependencies": {
     "@callstack/liquid-glass": "^0.7.0",
