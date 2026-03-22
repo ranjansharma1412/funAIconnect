@@ -21,6 +21,7 @@ import StoriesRail from '../../components/organisms/storiesRail/StoriesRail';
 import StatusViewerModal, { UserStory } from '../../components/organisms/statusViewerModal/StatusViewerModal';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ActivityIndicator } from 'react-native';
+import { sharePost } from '../../utils/shareUtils';
 const { width } = Dimensions.get('window');
 
 const FriendCircleScreen = () => {
@@ -353,7 +354,13 @@ const FriendCircleScreen = () => {
                             description={item.description}
                             hasLiked={item.hasLiked}
                             onPress={() => navigation.navigate('PostDetails', { post: item })}
-                            onSharePress={() => { }}
+                            onSharePress={async () => {
+                                await sharePost({
+                                    message: `${item.description}\n\nCheck out this post on BeeGather!`,
+                                    url: item.postImage,
+                                    title: 'Share Post',
+                                });
+                            }}
                         />
                     )}
                     ListEmptyComponent={

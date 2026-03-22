@@ -14,6 +14,7 @@ import LikesModal from '../../components/organisms/likesModal/LikesModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../store';
 import { updatePost } from '../../store/slices/postSlice';
+import { sharePost } from '../../utils/shareUtils';
 
 const PostDetailsScreen = () => {
     const route = useRoute<any>();
@@ -155,7 +156,13 @@ const PostDetailsScreen = () => {
                         onLikePress={handleLikePress}
                         onCommentPress={() => setIsCommentsVisible(true)}
                         onLikesCountPress={() => setIsLikesVisible(true)}
-                        onSharePress={() => { }}
+                        onSharePress={async () => {
+                            await sharePost({
+                                message: `${post.description}\n\nCheck out this post on BeeGather!`,
+                                url: post.postImage,
+                                title: 'Share Post',
+                            });
+                        }}
                         isShowHeaderView={false}
                         customMediaContainerStyle={styles.mediaContainer}
                     />
