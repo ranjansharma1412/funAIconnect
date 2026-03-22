@@ -13,7 +13,7 @@ import { postService, Post } from '../../services/postService';
 import { commentService } from '../../services/commentService';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../store';
-import { setDashboardPosts, updatePost } from '../../store/slices/postSlice';
+import { setDashboardPosts, appendDashboardPosts, updatePost } from '../../store/slices/postSlice';
 import { sharePost } from '../../utils/shareUtils';
 import EmptyPostsState from '../../components/molecules/emptyPostsState/EmptyPostsState';
 import { storyService } from '../../services/storyService';
@@ -35,6 +35,11 @@ const DashboardScreen: React.FC = () => {
     const [stories, setStories] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // Pagination State
+    const [page, setPage] = useState(1);
+    const [hasNextPage, setHasNextPage] = useState(true);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
 
     // Status Viewer State
     const [isStatusModalVisible, setIsStatusModalVisible] = React.useState(false);
@@ -58,6 +63,8 @@ const DashboardScreen: React.FC = () => {
 
             dispatch(setDashboardPosts(postsResponse.posts));
             setStories(storiesResponse.stories);
+            setPage(1);
+            setHasNextPage(postsResponse.has_next);
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
             // Alert.alert(t('common.error'), t('dashboard.fetch_error'));
@@ -65,7 +72,26 @@ const DashboardScreen: React.FC = () => {
             setIsLoading(false);
             setIsRefreshing(false);
         }
-    }, [t, user?.id]);
+    }, [t, user?.id, dispatch]);
+
+    const loadMorePosts = useCallback(async () => {
+        if (!hasNextPage || isFetchingMore || isLoading || isRefreshing) return;
+
+        try {
+            setIsFetchingMore(true);
+            const currentUserId = user?.id ? String(user.id) : undefined;
+            const nextPage = page + 1;
+            const postsResponse = await postService.getPosts(nextPage, 10, currentUserId);
+
+            dispatch(appendDashboardPosts(postsResponse.posts));
+            setPage(nextPage);
+            setHasNextPage(postsResponse.has_next);
+        } catch (error) {
+            console.error('Failed to load more posts:', error);
+        } finally {
+            setIsFetchingMore(false);
+        }
+    }, [hasNextPage, isFetchingMore, isLoading, isRefreshing, page, user?.id, dispatch]);
 
     useEffect(() => {
         fetchDashboardData();
@@ -244,6 +270,15 @@ const DashboardScreen: React.FC = () => {
                             />
                         }
                         ListEmptyComponent={<EmptyPostsState />}
+                        onEndReached={loadMorePosts}
+                        onEndReachedThreshold={0.5}
+                        ListFooterComponent={
+                            isFetchingMore ? (
+                                <View style={{ padding: 16 }}>
+                                    <ActivityIndicator size="small" color={theme.colors.primary} />
+                                </View>
+                            ) : null
+                        }
                     />
                 )}
             </View>

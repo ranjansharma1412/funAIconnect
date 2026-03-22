@@ -21,6 +21,9 @@ const postSlice = createSlice({
         setDashboardPosts(state, action: PayloadAction<Post[]>) {
             state.dashboardPosts = action.payload;
         },
+        appendDashboardPosts(state, action: PayloadAction<Post[]>) {
+            state.dashboardPosts = [...state.dashboardPosts, ...action.payload];
+        },
         updatePost(state, action: PayloadAction<Partial<Post> & { id: number }>) {
             const indexMyPosts = state.myPosts.findIndex((p) => p.id === action.payload.id);
             if (indexMyPosts !== -1) {
@@ -35,6 +38,6 @@ const postSlice = createSlice({
     },
 });
 
-export const { setMyPosts, setDashboardPosts, updatePost } = postSlice.actions;
+export const { setMyPosts, setDashboardPosts, appendDashboardPosts, updatePost } = postSlice.actions;
 
 export default postSlice.reducer;
