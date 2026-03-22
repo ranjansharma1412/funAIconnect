@@ -489,7 +489,7 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                 <ImageBackground
                     source={ImagesAssets.chat_image_bg_dark}
                     style={{ flex: 1 }}
-                    imageStyle={{ opacity: theme.mode === 'dark' ? 0.15 : 0.4 }}
+                    imageStyle={{ opacity: theme.mode === 'dark' ? 0.18 : 0.4 }}
                 // resizeMode="repeat"
                 >
                     <FlashList

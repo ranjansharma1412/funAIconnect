@@ -19,19 +19,23 @@ import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './CreativeScreenStyle';
 import { launchImageLibrary, ImageLibraryOptions, Asset } from 'react-native-image-picker';
 import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import ImageEditorModal from '../../components/organisms/imageEditorModal/ImageEditorModal';
 
 
 const CreativeScreen = () => {
     const { theme } = useTheme();
     const { t } = useTranslation();
+    const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [description, setDescription] = useState('');
     const [hashtags, setHashtags] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [postType, setPostType] = useState<'post' | 'story'>('post');
+    const [isEditorVisible, setIsEditorVisible] = useState(false);
+    const [tempImageUri, setTempImageUri] = useState<string | null>(null);
 
     useEffect(() => {
         if (route.params) {
@@ -62,7 +66,11 @@ const CreativeScreen = () => {
             console.log('ImagePicker Error: ', result.errorMessage);
             Alert.alert(t('common.error'), result.errorMessage);
         } else if (result.assets && result.assets.length > 0) {
-            setSelectedImage(result.assets[0].uri || null);
+            const uri = result.assets[0].uri || null;
+            if (uri) {
+                setTempImageUri(uri);
+                setIsEditorVisible(true);
+            }
         }
     };
 
@@ -85,7 +93,8 @@ const CreativeScreen = () => {
                 const photo = await camera.current.takePhoto({
                     flash: 'off',
                 });
-                setSelectedImage(`file://${photo.path}`);
+                setTempImageUri(`file://${photo.path}`);
+                setIsEditorVisible(true);
                 setIsCameraOpen(false);
             } catch (error: any) {
                 console.error('Failed to take photo:', error);
@@ -271,9 +280,23 @@ const CreativeScreen = () => {
                     disabled={isPosting}
                 />
             </ScrollView>
+
+            {/* Image Editor Modal */}
+            <ImageEditorModal
+                visible={isEditorVisible}
+                imageUri={tempImageUri}
+                onClose={() => {
+                    setIsEditorVisible(false);
+                    setTempImageUri(null);
+                }}
+                onApply={(uri) => {
+                    setSelectedImage(uri);
+                    setIsEditorVisible(false);
+                    setTempImageUri(null);
+                }}
+            />
         </SafeAreaView>
     );
 };
-
 
 export default CreativeScreen;
