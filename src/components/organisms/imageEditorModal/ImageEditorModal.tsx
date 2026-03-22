@@ -7,8 +7,10 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../theme/ThemeContext';
 import { createStyles } from './ImageEditorModalStyle';
 import ImageCropPicker from 'react-native-image-crop-picker';
-import { Canvas, Image as SkiaImage, Text as SkiaText, useImage, matchFont, useCanvasRef } from '@shopify/react-native-skia';
+import { Canvas, Image as SkiaImage, Text as SkiaText, useImage, matchFont, useCanvasRef, ColorMatrix } from '@shopify/react-native-skia';
 import RNFS from 'react-native-fs';
+import Slider from '@react-native-community/slider';
+import { multiplyColorMatrix, getBrightnessMatrix, getContrastMatrix, getSaturationMatrix, IDENTITY_MATRIX, PRESET_FILTERS } from './ImageFilters';
 
 interface TextLayer {
     id: string;
@@ -30,13 +32,15 @@ const FONTS = Platform.select({
 }) || ['System'];
 
 const SkiaTextLayerComponent: React.FC<{ layer: TextLayer }> = ({ layer }) => {
-    const fontStyle = {
-        fontFamily: layer.fontFamily === 'System' ? undefined : layer.fontFamily,
+    const fontStyle: any = {
         fontSize: layer.fontSize,
         fontStyle: layer.fontStyle,
         fontWeight: layer.fontWeight,
     };
-    const font = matchFont(fontStyle as any);
+    if (layer.fontFamily && layer.fontFamily !== 'System') {
+        fontStyle.fontFamily = layer.fontFamily;
+    }
+    const font = matchFont(fontStyle);
     return <SkiaText text={layer.text} x={layer.x} y={layer.y} color={layer.color} font={font} />;
 };
 
@@ -79,9 +83,24 @@ const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ visible, imageUri, 
     const [inputFontStyle, setInputFontStyle] = useState<'normal' | 'italic'>('normal');
     const [inputFontWeight, setInputFontWeight] = useState<'normal' | 'bold'>('normal');
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+    
+    const [filterType, setFilterType] = useState('none');
+    const [brightness, setBrightness] = useState(1);
+    const [contrast, setContrast] = useState(1);
+    const [saturation, setSaturation] = useState(1);
 
     const canvasRef = useCanvasRef();
     const skiaImage = useImage(editedImageUri);
+
+    const finalMatrix = useMemo(() => {
+        let result = IDENTITY_MATRIX;
+        const preset = PRESET_FILTERS.find(p => p.id === filterType)?.matrix || IDENTITY_MATRIX;
+        result = multiplyColorMatrix(result, preset);
+        result = multiplyColorMatrix(result, getBrightnessMatrix(brightness));
+        result = multiplyColorMatrix(result, getContrastMatrix(contrast));
+        result = multiplyColorMatrix(result, getSaturationMatrix(saturation));
+        return result;
+    }, [brightness, contrast, saturation, filterType]);
 
     const dragContext = React.useRef({ id: null as string | null, startX: 0, startY: 0 });
     const textsRef = React.useRef(texts);
@@ -119,6 +138,12 @@ const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ visible, imageUri, 
     // Sync state when new image is provided
     useEffect(() => {
         setEditedImageUri(normalizeUri(imageUri));
+        // Reset all edits when a new image is loaded
+        setTexts([]);
+        setFilterType('none');
+        setBrightness(1);
+        setContrast(1);
+        setSaturation(1);
     }, [imageUri]);
 
     const handleUseOriginal = () => {
@@ -130,7 +155,9 @@ const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ visible, imageUri, 
     const handleApply = async () => {
         if (!editedImageUri) return;
 
-        if (texts.length > 0 && canvasRef.current) {
+        const hasEdits = texts.length > 0 || filterType !== 'none' || brightness !== 1 || contrast !== 1 || saturation !== 1;
+
+        if (hasEdits && canvasRef.current) {
             try {
                 const imageSnapshot = canvasRef.current.makeImageSnapshot();
                 if (imageSnapshot) {
@@ -168,6 +195,8 @@ const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ visible, imageUri, 
                 setSelectedTool(null);
             } else if (toolId === 'text') {
                 setIsAddingText(true);
+            } else if (toolId === 'brightness' || toolId === 'filter') {
+                // UI panels will show natively below
             }
             // Add logic for other tools here in the future
         } catch (error) {
@@ -205,7 +234,9 @@ const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ visible, imageUri, 
                                     y={0} 
                                     width={canvasSize.width} 
                                     height={canvasSize.height} 
-                                />
+                                >
+                                    <ColorMatrix matrix={finalMatrix} />
+                                </SkiaImage>
                             )}
                             {texts.map(t => (
                                 <SkiaTextLayerComponent key={t.id} layer={t} />
@@ -291,6 +322,41 @@ const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ visible, imageUri, 
                                 </TouchableOpacity>
                             </View>
                         </View>
+                    </View>
+                )}
+
+                {/* Adjustments Panel */}
+                {selectedTool === 'brightness' && (
+                    <View style={styles.adjustmentsContainer}>
+                        <View style={styles.sliderRow}>
+                            <Text style={styles.sliderLabel}>Brightness</Text>
+                            <Slider style={styles.slider} minimumValue={0} maximumValue={2} value={brightness} onValueChange={setBrightness} minimumTrackTintColor="#FFFFFF" maximumTrackTintColor="#888888" />
+                        </View>
+                        <View style={styles.sliderRow}>
+                            <Text style={styles.sliderLabel}>Contrast</Text>
+                            <Slider style={styles.slider} minimumValue={0} maximumValue={2} value={contrast} onValueChange={setContrast} minimumTrackTintColor="#FFFFFF" maximumTrackTintColor="#888888" />
+                        </View>
+                        <View style={styles.sliderRow}>
+                            <Text style={styles.sliderLabel}>Saturation</Text>
+                            <Slider style={styles.slider} minimumValue={0} maximumValue={2} value={saturation} onValueChange={setSaturation} minimumTrackTintColor="#FFFFFF" maximumTrackTintColor="#888888" />
+                        </View>
+                    </View>
+                )}
+
+                {/* Filters Panel */}
+                {selectedTool === 'filter' && (
+                    <View style={styles.filtersContainer}>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            {PRESET_FILTERS.map(p => (
+                                <TouchableOpacity 
+                                    key={p.id} 
+                                    style={[styles.filterPresetPill, filterType === p.id && styles.filterPresetPillSelected]} 
+                                    onPress={() => setFilterType(p.id)}
+                                >
+                                    <Text style={styles.filterPresetText}>{p.label}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
                     </View>
                 )}
 

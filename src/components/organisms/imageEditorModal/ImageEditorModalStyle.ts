@@ -133,5 +133,45 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
     styleToggleText: {
         color: 'white',
         fontSize: 18,
+    },
+    adjustmentsContainer: {
+        width: '100%',
+        paddingHorizontal: 20,
+        marginVertical: 10,
+        justifyContent: 'center',
+    },
+    sliderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 5,
+    },
+    sliderLabel: {
+        color: 'white',
+        width: 80,
+        fontSize: 14,
+    },
+    slider: {
+        flex: 1,
+        height: 40,
+    },
+    filterPresetPill: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        marginHorizontal: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    filterPresetPillSelected: {
+        backgroundColor: theme.colors.primary,
+    },
+    filterPresetText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    filtersContainer: {
+        paddingVertical: 15,
     }
 });
