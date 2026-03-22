@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -6,6 +6,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../theme/ThemeContext';
 import { createStyles } from './ImageEditorModalStyle';
+import ImageCropPicker from 'react-native-image-crop-picker';
 
 const TOOLS = [
     { id: 'crop', icon: 'crop-outline', label: 'Crop' },
@@ -29,6 +30,12 @@ const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ visible, imageUri, 
     const styles = useMemo(() => createStyles(theme), [theme]);
 
     const [selectedTool, setSelectedTool] = useState<string | null>(null);
+    const [editedImageUri, setEditedImageUri] = useState<string | null>(imageUri);
+
+    // Sync state when new image is provided
+    useEffect(() => {
+        setEditedImageUri(imageUri);
+    }, [imageUri]);
 
     const handleUseOriginal = () => {
         if (imageUri) {
@@ -37,9 +44,34 @@ const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ visible, imageUri, 
     };
 
     const handleApply = () => {
-        if (imageUri) {
-            // Placeholder: currently just applies the original
-            onApply(imageUri);
+        if (editedImageUri) {
+            onApply(editedImageUri);
+        }
+    };
+
+    const handleToolPress = async (toolId: string) => {
+        setSelectedTool(toolId);
+        
+        if (!editedImageUri) return;
+
+        try {
+            if (toolId === 'crop' || toolId === 'rotate') {
+                const result = await ImageCropPicker.openCropper({
+                    path: editedImageUri,
+                    mediaType: 'photo',
+                    freeStyleCropEnabled: true,
+                    compressImageQuality: 0.9,
+                });
+                
+                if (result && result.path) {
+                    setEditedImageUri(result.path);
+                }
+                setSelectedTool(null);
+            }
+            // Add logic for other tools here in the future
+        } catch (error) {
+            console.log('Image crop/rotate cancelled or failed', error);
+            setSelectedTool(null);
         }
     };
 
@@ -58,9 +90,9 @@ const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ visible, imageUri, 
 
                 {/* Main Image View */}
                 <View style={styles.imageContainer}>
-                    {imageUri ? (
+                    {editedImageUri ? (
                         <FastImage 
-                            source={{ uri: imageUri }} 
+                            source={{ uri: editedImageUri }} 
                             style={styles.image as any} 
                             resizeMode={FastImage.resizeMode.contain} 
                         />
@@ -77,7 +109,7 @@ const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ visible, imageUri, 
                             <TouchableOpacity
                                 key={tool.id}
                                 style={styles.toolButton}
-                                onPress={() => setSelectedTool(tool.id)}
+                                onPress={() => handleToolPress(tool.id)}
                             >
                                 <Ionicons 
                                     name={tool.icon} 
