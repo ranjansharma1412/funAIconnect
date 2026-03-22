@@ -4,6 +4,7 @@ export interface User {
     email: string;
     profileImage?: string;
     token?: string;
+    gender?: string;
 }
 
 export interface RegisterRequest {
@@ -11,6 +12,7 @@ export interface RegisterRequest {
     username: string;
     email: string;
     password: string;
+    gender?: string;
 }
 
 export interface LoginRequest {

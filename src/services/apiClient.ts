@@ -7,7 +7,7 @@ import axios, { AxiosInstance } from 'axios';
  */
 const API_CONFIG = {
     BASE_URL: 'https://glaucomatous-isis-lazily.ngrok-free.dev', // Updated to 5001 to avoid AirPlay conflict
-    TIMEOUT: 30000, // 30 seconds
+    TIMEOUT: 60000, // 30 seconds
     HEADERS: {
         'Content-Type': 'application/json',
         Accept: 'application/json',

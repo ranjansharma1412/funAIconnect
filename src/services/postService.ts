@@ -76,6 +76,15 @@ export const postService = {
         }
     },
 
+    deletePost: async (postId: number): Promise<void> => {
+        try {
+            await apiClient.delete(`/api/posts/${postId}`);
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            throw error;
+        }
+    },
+
     getPosts: async (page: number = 1, perPage: number = 10, userId?: string): Promise<GetPostsResponse> => {
         try {
             const params: any = { page, per_page: perPage };

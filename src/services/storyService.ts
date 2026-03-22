@@ -158,4 +158,13 @@ export const storyService = {
             throw error;
         }
     },
+
+    deleteStory: async (storyId: number): Promise<void> => {
+        try {
+            await apiClient.delete(`/api/stories/${storyId}`);
+        } catch (error) {
+            console.error('Error deleting story:', error);
+            throw error;
+        }
+    },
 };

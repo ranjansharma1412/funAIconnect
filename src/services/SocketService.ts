@@ -83,6 +83,19 @@ class SocketService {
             this.socket.on('chat_list_update', callback);
         }
     }
+
+    checkOnlineStatus(friendId: string) {
+        if (this.socket) {
+            this.socket.emit('check_online_status', { friendId });
+        }
+    }
+
+    onUserStatusUpdate(callback: (data: { userId: string, isOnline: boolean, lastSeen: string | null }) => void) {
+        if (this.socket) {
+            this.socket.off('user_status_update');
+            this.socket.on('user_status_update', callback);
+        }
+    }
 }
 
 const socketService = new SocketService();

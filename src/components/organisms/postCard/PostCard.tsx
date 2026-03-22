@@ -10,6 +10,7 @@ import { createStyles } from './PostCardStyle';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableWithoutFeedback } from 'react-native';
 import GradientHeartIcon from '../../atoms/gradientHeartIcon/GradientHeartIcon';
+import { ImagesAssets } from '../../../assets/images';
 
 const { width } = Dimensions.get('window');
 
@@ -24,10 +25,12 @@ interface PostCardProps {
     commentsCount?: number;
     onCommentPress?: () => void;
     onSharePress?: () => void;
+    onDeletePress?: () => void;
     onLikePress?: () => void;
     onLikesCountPress?: () => void;
     isShowHeaderView?: boolean;
     customMediaContainerStyle?: StyleProp<ViewStyle>;
+    gender?: string | null;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -40,11 +43,13 @@ const PostCard: React.FC<PostCardProps> = ({
     hasLiked = false,
     onCommentPress,
     onSharePress,
+    onDeletePress,
     onLikePress,
     onLikesCountPress,
     commentsCount = 0,
     isShowHeaderView = true,
-    customMediaContainerStyle
+    customMediaContainerStyle,
+    gender
 }) => {
     const { theme } = useTheme();
     const styles = createStyles(theme);
@@ -59,7 +64,17 @@ const PostCard: React.FC<PostCardProps> = ({
 
     // Default processing code...
     const validPostImage = postImage || 'https://via.placeholder.com/500?text=No+Image';
-    const validUserImage = userImage || 'https://i.pravatar.cc/300';
+    
+    let validUserImage: any = { uri: 'https://i.pravatar.cc/300' };
+    if (userImage && userImage.trim() !== '' && !userImage.includes('pravatar') && !userImage.includes('ui-avatars') && !userImage.includes('via.placeholder')) {
+        validUserImage = { uri: userImage };
+    } else {
+        if (gender?.toLowerCase() === 'female') {
+            validUserImage = ImagesAssets.profile_placeholder_female;
+        } else {
+            validUserImage = ImagesAssets.profile_placeholder_male;
+        }
+    }
 
     const triggerHeartBeat = () => {
         Animated.sequence([
@@ -138,7 +153,7 @@ const PostCard: React.FC<PostCardProps> = ({
         const headerContent = (
             <TouchableOpacity activeOpacity={0.9} onPress={handleGlassHeaderClick} style={styles.glassHeaderInner}>
                 <View style={styles.userInfo}>
-                    <Avatar source={{ uri: validUserImage }} size={40} />
+                    <Avatar source={validUserImage} size={40} />
                     <View style={styles.textContainer}>
                         <View style={styles.nameRow}>
                             <Text style={styles.glassName}>
@@ -282,6 +297,11 @@ const PostCard: React.FC<PostCardProps> = ({
                         <TouchableOpacity style={styles.actionButton} onPress={onSharePress}>
                             <Ionicons name="share-outline" size={24} color="white" />
                         </TouchableOpacity>
+                        {onDeletePress && (
+                            <TouchableOpacity style={[styles.actionButton, { marginLeft: 15 }]} onPress={onDeletePress}>
+                                <Ionicons name="trash-outline" size={24} color="#ff4444" />
+                            </TouchableOpacity>
+                        )}
                     </View>
                     <Text style={styles.caption} numberOfLines={2}>
                         <Text style={styles.captionName}>{userName} </Text>

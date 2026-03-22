@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ImageBackground, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ImageBackground, Modal, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
 import { FlashList } from '@shopify/flash-list';
@@ -16,11 +16,13 @@ import socketService from '../../services/SocketService';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { API_CONFIG } from '../../services/apiClient';
+import { ImagesAssets } from '../../assets/images';
+import { timeAgo } from '../../utils/dateUtils';
 
 const API_URL = API_CONFIG.BASE_URL
 
 type RootStackParamList = {
-    Chat: { chatId: string; userId: string; userName: string; userImage: string };
+    Chat: { chatId: string; userId: string; userName: string; userImage: string; gender?: string };
 };
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
@@ -30,10 +32,21 @@ interface Props {
     route: ChatScreenRouteProp;
 }
 const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
-    const { userName, userImage } = route.params || {
+    const { userName, userImage, gender } = route.params || {
         userName: 'Alex Johnson',
         userImage: 'https://picsum.photos/id/1025/150/150'
     };
+
+    let validUserImage: any = { uri: 'https://i.pravatar.cc/300' };
+    if (userImage && userImage.trim() !== '' && !userImage.includes('pravatar') && !userImage.includes('ui-avatars') && !userImage.includes('via.placeholder') && !userImage.includes('picsum.photos')) {
+        validUserImage = { uri: userImage };
+    } else {
+        if (gender?.toLowerCase() === 'female') {
+            validUserImage = ImagesAssets.profile_placeholder_female;
+        } else {
+            validUserImage = ImagesAssets.profile_placeholder_male;
+        }
+    }
 
     const { theme } = useTheme();
     const styles = createStyles(theme);
@@ -41,6 +54,11 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     const [selectedMedia, setSelectedMedia] = useState<MessageProps | null>(null);
     const [isPlaying, setIsPlaying] = useState(true);
     const [progress, setProgress] = useState({ currentTime: 0, seekableDuration: 0 });
+    const [friendStatus, setFriendStatus] = useState({ isOnline: false, lastSeen: null as string | null });
+
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     const currentUser = useSelector((state: RootState) => state.auth.user);
     const currentUserId = currentUser?.id?.toString();
@@ -51,12 +69,24 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     React.useEffect(() => {
         if (!currentUserId || !friendId) return;
 
+        setPage(1);
+        setHasMore(true);
+        setMessages([]);
+
         socketService.connect(currentUserId);
         socketService.joinChat(currentUserId, friendId);
 
-        const fetchHistory = async () => {
+        socketService.onUserStatusUpdate((data) => {
+            if (String(data.userId) === String(friendId)) {
+                setFriendStatus({ isOnline: data.isOnline, lastSeen: data.lastSeen });
+            }
+        });
+
+        socketService.checkOnlineStatus(friendId);
+
+        const fetchInitialHistory = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/chat/${friendId}/messages?user_id=${currentUserId}`);
+                const res = await fetch(`${API_URL}/api/chat/${friendId}/messages?user_id=${currentUserId}&page=1&limit=20`);
                 const data = await res.json();
                 if (data.messages) {
                     const mapped = data.messages.map((m: any) => ({
@@ -67,43 +97,141 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                         isOwnMessage: String(m.senderId) === currentUserId,
                         status: m.status,
                         mediaUrl: m.mediaUrl
-                    }));
+                    })).reverse();
+
                     setMessages(mapped);
-                    setTimeout(() => flashListRef.current?.scrollToEnd({ animated: true }), 300);
+                    if (data.messages.length < 20) {
+                        setHasMore(false);
+                    }
                 }
             } catch (e) {
                 console.log('Error fetching history:', e);
             }
         };
-        fetchHistory();
+        fetchInitialHistory();
 
         socketService.onReceiveMessage((m: any) => {
+            const actualId = m.id ? String(m.id) : `sock_${Date.now()}_${Math.random()}`;
             const incomingMsg: MessageProps = {
-                id: String(m.id),
+                id: actualId,
                 text: m.text,
                 type: m.mediaType || 'text',
                 time: m.time || 'Just now',
                 isOwnMessage: String(m.senderId) === currentUserId,
-                status: m.status,
+                status: m.status || 'delivered',
                 mediaUrl: m.mediaUrl
             };
-            setMessages(prev => [...prev, incomingMsg]);
-            setTimeout(() => flashListRef.current?.scrollToEnd({ animated: true }), 100);
 
-            // Send read receipt if received msg isn't our own
+            setMessages(prev => {
+                if (incomingMsg.isOwnMessage) {
+                    if (incomingMsg.type === 'text') {
+                        const tempMessages = prev.filter(p => p.id.startsWith('temp_text_') && p.text === incomingMsg.text);
+                        if (tempMessages.length > 0) {
+                            const targetTempId = tempMessages[tempMessages.length - 1].id;
+                            const newPrev = prev.filter(p => p.id !== targetTempId);
+
+                            const existingIdx = newPrev.findIndex(p => p.id === actualId);
+                            if (existingIdx !== -1) {
+                                const copy = [...newPrev];
+                                copy[existingIdx] = incomingMsg;
+                                return copy;
+                            }
+                            return [incomingMsg, ...newPrev];
+                        }
+                    } else if (incomingMsg.type === 'image' || incomingMsg.type === 'video') {
+                        const tempMessages = prev.filter(p => p.id.startsWith('temp_') && p.type === incomingMsg.type);
+                        if (tempMessages.length > 0) {
+                            const targetTempId = tempMessages[tempMessages.length - 1].id;
+                            const newPrev = prev.filter(p => p.id !== targetTempId);
+
+                            const existingIdx = newPrev.findIndex(p => p.id === actualId);
+                            if (existingIdx !== -1) {
+                                const copy = [...newPrev];
+                                copy[existingIdx] = incomingMsg;
+                                return copy;
+                            }
+                            return [incomingMsg, ...newPrev];
+                        }
+                    }
+                }
+
+                // Standard echo update or prepend
+                const existingIndex = prev.findIndex(p => p.id === actualId);
+                if (existingIndex !== -1) {
+                    const copy = [...prev];
+                    copy[existingIndex] = incomingMsg;
+                    return copy;
+                }
+
+                return [incomingMsg, ...prev];
+            });
+
+            // Always scroll to end whenever ANY new message arrives
+            setTimeout(() => flashListRef.current?.scrollToOffset({ offset: 0, animated: true }), 100);
+
             if (String(m.senderId) !== currentUserId) {
+                // Send read receipt if received msg isn't our own
                 socketService.readMessage({ messageId: m.id, userId: currentUserId, friendId });
             }
         });
 
         socketService.onMessageStatusUpdate((data: any) => {
-            setMessages(prev => prev.map(msg => msg.id === data.messageId ? { ...msg, status: data.status as any } : msg));
+            setMessages(prev => prev.map(msg => String(msg.id) === String(data.messageId) ? { ...msg, status: data.status as any } : msg));
         });
+
+        // Add wildcard listener for 'message_deleted' just in case the backend uses a dedicated event
+        if ((socketService as any).socket) {
+            (socketService as any).socket.off('message_deleted');
+            (socketService as any).socket.on('message_deleted', (data: any) => {
+                setMessages(prev => prev.map(msg => String(msg.id) === String(data.messageId) ? { ...msg, status: 'deleted', text: undefined, mediaUrl: undefined } : msg));
+            });
+        }
 
         return () => {
             socketService.leaveChat(currentUserId, friendId);
         };
     }, [currentUserId, friendId]);
+
+    const loadMoreMessages = async () => {
+        if (isLoadingMore || !hasMore) return;
+        setIsLoadingMore(true);
+        try {
+            const nextPage = page + 1;
+            const res = await fetch(`${API_URL}/api/chat/${friendId}/messages?user_id=${currentUserId}&page=${nextPage}&limit=20`);
+            const data = await res.json();
+            if (data.messages && data.messages.length > 0) {
+                const mapped = data.messages.map((m: any) => ({
+                    id: String(m.id),
+                    text: m.text,
+                    type: m.mediaType || 'text',
+                    time: m.time || '00:00',
+                    isOwnMessage: String(m.senderId) === currentUserId,
+                    status: m.status,
+                    mediaUrl: m.mediaUrl
+                })).reverse();
+
+                let uniqueCount = 0;
+                setMessages(prev => {
+                    const existingIds = new Set(prev.map(msg => msg.id));
+                    const uniqueMapped = mapped.filter((msg: any) => !existingIds.has(msg.id));
+                    uniqueCount = uniqueMapped.length;
+                    return [...prev, ...uniqueMapped];
+                });
+
+                if (uniqueCount === 0 || data.messages.length < 20) {
+                    setHasMore(false);
+                } else {
+                    setPage(nextPage);
+                }
+            } else {
+                setHasMore(false);
+            }
+        } catch (e) {
+            console.log('Error fetching more history:', e);
+        } finally {
+            setIsLoadingMore(false);
+        }
+    };
 
     const formatTime = (seconds: number) => {
         if (isNaN(seconds) || seconds < 0) return '00:00';
@@ -113,6 +241,24 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     };
 
     const handleSend = (text: string) => {
+        if (!text.trim()) return;
+
+        const tempId = 'temp_text_' + Date.now();
+        const now = new Date();
+        const formattedTime = `${now.getHours() < 10 ? '0' : ''}${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+
+        const tempMsg: MessageProps = {
+            id: tempId,
+            text,
+            type: 'text',
+            time: formattedTime,
+            isOwnMessage: true,
+            status: 'sent',
+            mediaUrl: undefined
+        };
+
+        setMessages(prev => [tempMsg, ...prev]);
+
         console.log('Sending message:', text);
         socketService.sendMessage({
             userId: currentUserId || '',
@@ -120,14 +266,18 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             text,
             mediaType: 'text'
         });
+        setTimeout(() => flashListRef.current?.scrollToOffset({ offset: 0, animated: true }), 100);
     };
 
-    const uploadMedia = async (uri: string, type: string) => {
+    const uploadMedia = async (uri: string, type: string | undefined, isVideo: boolean) => {
         const formData = new FormData();
+        const fileType = type || (isVideo ? 'video/mp4' : 'image/jpeg');
+        const extension = isVideo ? 'mp4' : 'jpg';
+
         formData.append('file', {
             uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
-            type: type || 'image/jpeg',
-            name: `upload_${Date.now()}.${type?.includes('video') ? 'mp4' : 'jpg'}`
+            type: fileType,
+            name: `upload_${Date.now()}.${extension}`
         } as any);
 
         const res = await fetch(`${API_URL}/api/chat/upload`, {
@@ -138,25 +288,74 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             },
         });
         const data = await res.json();
-        if (data.url) return data.url;
+        let finalUrl = data.url;
+        if (finalUrl && finalUrl.startsWith('http://')) {
+            finalUrl = finalUrl.replace('http://', 'https://');
+        }
+        if (finalUrl) return finalUrl;
         throw new Error('Upload failed');
+    };
+
+    const processMediaUpload = async (asset: any) => {
+        const isVideo = asset.type?.includes('video') || asset.uri?.endsWith('.mp4') || asset.uri?.endsWith('.mov');
+        const mediaType = isVideo ? 'video' : 'image';
+        const tempId = 'temp_' + Date.now();
+
+        const tempMsg: MessageProps = {
+            id: tempId,
+            type: mediaType,
+            time: 'Sending...',
+            isOwnMessage: true,
+            status: 'sending',
+            mediaUrl: asset.uri
+        };
+
+        setMessages(prev => [tempMsg, ...prev]);
+        setTimeout(() => flashListRef.current?.scrollToOffset({ offset: 0, animated: true }), 100);
+
+        try {
+            const uploadedUrl = await uploadMedia(asset.uri, asset.type, isVideo);
+
+            const now = new Date();
+            const formattedTime = `${now.getHours() < 10 ? '0' : ''}${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+
+            // Update temp message with resulting URL and mark sent instantly
+            setMessages(prev => prev.map(m => m.id === tempId ? {
+                ...m,
+                mediaUrl: uploadedUrl,
+                status: 'sent',
+                time: formattedTime
+            } : m));
+
+            socketService.sendMessage({
+                userId: currentUserId || '',
+                friendId: friendId,
+                mediaUrl: uploadedUrl,
+                mediaType: mediaType
+            });
+        } catch (error) {
+            console.log('Upload/Send Error: ', error);
+            setMessages(prev => prev.map(m => m.id === tempId ? { ...m, status: 'failed' } : m));
+        }
     };
 
     const handleAttachCamera = async () => {
         try {
-            const result = await launchCamera({ mediaType: 'mixed', cameraType: 'back' });
+            const result = await launchCamera({
+                mediaType: 'photo',
+                cameraType: 'back',
+                quality: 0.7,
+                maxWidth: 1280,
+                maxHeight: 1280
+            });
             if (result.assets && result.assets.length > 0) {
                 const asset = result.assets[0];
                 if (!asset.uri) return;
-
-                const uploadedUrl = await uploadMedia(asset.uri, asset.type || 'image/jpeg');
-
-                socketService.sendMessage({
-                    userId: currentUserId || '',
-                    friendId: friendId,
-                    mediaUrl: uploadedUrl,
-                    mediaType: asset.type?.includes('video') ? 'video' : 'image'
-                });
+                if (asset.fileSize && asset.fileSize > 2 * 1024 * 1024) {
+                    Alert.alert('File Too Large', 'The selected file exceeds the 2MB limit after compression. Please choose a smaller file.');
+                    return;
+                }
+                await processMediaUpload(asset);
             }
         } catch (error) {
             console.log('Camera Error: ', error);
@@ -165,19 +364,22 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
 
     const handleAttachGallery = async () => {
         try {
-            const result = await launchImageLibrary({ mediaType: 'mixed', selectionLimit: 1 });
+            const result = await launchImageLibrary({
+                mediaType: 'mixed',
+                selectionLimit: 1,
+                quality: 0.7,
+                maxWidth: 1280,
+                maxHeight: 1280,
+                videoQuality: 'low'
+            });
             if (result.assets && result.assets.length > 0) {
                 const asset = result.assets[0];
                 if (!asset.uri) return;
-
-                const uploadedUrl = await uploadMedia(asset.uri, asset.type || 'image/jpeg');
-
-                socketService.sendMessage({
-                    userId: currentUserId || '',
-                    friendId: friendId,
-                    mediaUrl: uploadedUrl,
-                    mediaType: asset.type?.includes('video') ? 'video' : 'image'
-                });
+                if (asset.fileSize && asset.fileSize > 2 * 1024 * 1024) {
+                    Alert.alert('File Too Large', 'The selected file exceeds the 2MB limit after compression. Please choose a smaller file.');
+                    return;
+                }
+                await processMediaUpload(asset);
             }
         } catch (error) {
             console.log('Gallery Error: ', error);
@@ -206,6 +408,11 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                                 setMessages((prev) =>
                                     prev.map(m => m.id === msg.id ? { ...m, status: 'deleted', text: undefined, mediaUrl: undefined } : m)
                                 );
+                                // Attempt to force socket sync of deletion to the friend's side
+                                if ((socketService as any).socket) {
+                                    (socketService as any).socket.emit('message_status_update', { messageId: msg.id, status: 'deleted', friendId });
+                                    (socketService as any).socket.emit('delete_message', { messageId: msg.id, userId: currentUserId, friendId });
+                                }
                             }
                         } catch (e) { console.log(e) }
                     }
@@ -217,13 +424,22 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     const handleClearHistory = () => {
         Alert.alert(
             'Clear History',
-            'Are you sure you want to clear all messages in this chat?',
+            'Are you sure you want to clear all messages in this chat? This cannot be undone.',
             [
                 { text: 'Cancel', style: 'cancel' },
                 {
                     text: 'Clear',
                     style: 'destructive',
-                    onPress: () => setMessages([])
+                    onPress: async () => {
+                        try {
+                            // Clear locally immediately for responsive UI
+                            setMessages([]);
+                            // Hit backend to clear permanently
+                            await fetch(`${API_URL}/api/chat/${friendId}/messages?user_id=${currentUserId}`, { method: 'DELETE' });
+                        } catch (e) {
+                            console.log('Error clearing history:', e);
+                        }
+                    }
                 }
             ]
         );
@@ -236,20 +452,24 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
             </TouchableOpacity>
 
             <View style={styles.headerProfile}>
-                <FastImage source={{ uri: userImage }} style={styles.avatar as any} />
+                <FastImage source={validUserImage as any} style={styles.avatar as any} />
                 <View style={styles.headerTextContainer}>
-                    <Text style={styles.headerName}>{userName}</Text>
-                    <Text style={styles.headerStatus}>Online</Text>
+                    <Text style={styles.headerName} numberOfLines={1} ellipsizeMode='tail'>{userName}</Text>
+                    <Text style={styles.headerStatus}>
+                        {friendStatus.isOnline ? 'Online' : (friendStatus.lastSeen ? `Last seen ${timeAgo(friendStatus.lastSeen)}` : 'Offline')}
+                    </Text>
                 </View>
             </View>
 
             <View style={styles.headerActions}>
+                {/* Audio/Video Call features disabled for future implementation
                 <TouchableOpacity style={styles.actionButton}>
                     <Icon name="call-outline" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionButton}>
                     <Icon name="videocam-outline" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
+                */}
                 <TouchableOpacity style={styles.actionButton} onPress={handleClearHistory}>
                     <Icon name="trash-outline" size={24} color={theme.colors.accentRed} />
                 </TouchableOpacity>
@@ -260,21 +480,22 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
     return (
         <KeyboardAvoidingView
             style={{ flex: 1, backgroundColor: theme.colors.background }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
             <SafeAreaView style={styles.safeArea}>
                 {renderHeader()}
 
                 <ImageBackground
-                    source={{ uri: 'https://user-images.githubusercontent.com/15071540/59552788-37227300-8fa1-11e9-89d5-db22bfcc37ac.png' }}
+                    source={ImagesAssets.chat_image_bg_dark}
                     style={{ flex: 1 }}
                     imageStyle={{ opacity: theme.mode === 'dark' ? 0.15 : 0.4 }}
-                    resizeMode="repeat"
+                // resizeMode="repeat"
                 >
                     <FlashList
                         ref={flashListRef}
                         data={messages}
+                        inverted={true}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <ChatBubble message={item} onLongPress={handleLongPressMsg} onPressMedia={(msg) => {
@@ -287,10 +508,11 @@ const ChatScreen: React.FC<Props> = ({ navigation, route }) => {
                         )}
                         contentContainerStyle={styles.listContent}
                         showsVerticalScrollIndicator={false}
-                        onContentSizeChange={() => flashListRef.current?.scrollToEnd({ animated: true })}
-                        onLayout={() => flashListRef.current?.scrollToEnd({ animated: true })}
+                        onEndReached={loadMoreMessages}
+                        onEndReachedThreshold={0.5}
+                        ListFooterComponent={() => isLoadingMore ? <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginVertical: 10 }} /> : null}
                         ListEmptyComponent={() => (
-                            <View style={styles.emptyStateContainer}>
+                            <View style={[styles.emptyStateContainer, { transform: [{ scaleY: -1 }] }]}>
                                 <Text style={styles.emptyStateText}>Say hi to {userName}!</Text>
                             </View>
                         )}

@@ -7,7 +7,7 @@ import { useTheme } from '../../../theme/ThemeContext';
 import Video from 'react-native-video';
 
 export type MessageType = 'text' | 'image' | 'video';
-export type MessageStatus = 'sent' | 'delivered' | 'read' | 'failed' | 'deleted';
+export type MessageStatus = 'sent' | 'delivered' | 'read' | 'failed' | 'deleted' | 'sending';
 
 export interface MessageProps {
     id: string;
@@ -35,12 +35,16 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onLongPress, onPressMe
     const getStatusIcon = () => {
         if (!message.isOwnMessage || isDeleted) return null;
         switch (message.status) {
+            case 'sending':
+                return <Icon name="time-outline" size={14} color={theme.colors.textSecondary} style={styles.statusIcon} />;
             case 'sent':
-                return <Icon name="checkmark" size={14} color="rgba(255, 255, 255, 0.7)" style={styles.statusIcon} />;
+                return <Icon name="checkmark-done" size={14} color={theme.colors.textSecondary} style={styles.statusIcon} />;
             case 'delivered':
-                return <Icon name="checkmark-done" size={14} color="rgba(255, 255, 255, 0.7)" style={styles.statusIcon} />;
+                return <Icon name="checkmark-done" size={14} color={theme.colors.textSecondary} style={styles.statusIcon} />;
             case 'read':
                 return <Icon name="checkmark-done" size={14} color={theme.colors.primaryGradient[1]} style={styles.statusIcon} />;
+            case 'failed':
+                return <Icon name="alert-circle" size={14} color="#FF6B6B" style={styles.statusIcon} />;
             default:
                 return null;
         }
@@ -61,14 +65,24 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onLongPress, onPressMe
             return (
                 <TouchableOpacity activeOpacity={0.9} onPress={() => onPressMedia?.(message)} style={styles.mediaSkeleton}>
                     {isLoading && (
-                        <View style={[styles.skeletonOverlay, { backgroundColor: theme.colors.skeletonBackground }]}>
+                        <View style={[styles.skeletonOverlay, { backgroundColor: theme.colors.skeletonBackground, zIndex: 1 }]}>
                             <ActivityIndicator size="small" color={theme.colors.primary} />
                         </View>
                     )}
-                    <FastImage 
-                        source={{ uri: message.mediaUrl }} 
-                        style={styles.image as any} 
-                        resizeMode={FastImage.resizeMode.cover} 
+                    {message.status === 'sending' && !isLoading && (
+                        <View style={{ position: 'absolute', top: 8, right: 8, zIndex: 2, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 12, padding: 4 }}>
+                            <ActivityIndicator size="small" color="#FFF" />
+                        </View>
+                    )}
+                    {message.status === 'failed' && (
+                        <View style={{ position: 'absolute', top: 8, right: 8, zIndex: 2, backgroundColor: 'rgba(255,0,0,0.7)', borderRadius: 12, padding: 4 }}>
+                            <Icon name="refresh" size={16} color="#FFF" />
+                        </View>
+                    )}
+                    <FastImage
+                        source={{ uri: message.mediaUrl }}
+                        style={styles.image as any}
+                        resizeMode={FastImage.resizeMode.cover}
                         onLoadStart={() => setIsLoading(true)}
                         onLoadEnd={() => setIsLoading(false)}
                     />
@@ -80,14 +94,19 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onLongPress, onPressMe
             return (
                 <TouchableOpacity activeOpacity={0.9} onPress={() => onPressMedia?.(message)} style={[styles.videoContainer, isLoading && { backgroundColor: theme.colors.skeletonBackground }]}>
                     {isLoading && (
-                        <View style={styles.skeletonOverlay}>
+                        <View style={[styles.skeletonOverlay, { zIndex: 1 }]}>
                             <ActivityIndicator size="small" color={theme.colors.primary} />
                         </View>
                     )}
+                    {message.status === 'sending' && !isLoading && (
+                        <View style={{ position: 'absolute', top: 8, right: 8, zIndex: 2, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 12, padding: 4 }}>
+                            <ActivityIndicator size="small" color="#FFF" />
+                        </View>
+                    )}
                     <View pointerEvents="none" style={[styles.image, { overflow: 'hidden', borderRadius: 16 }]}>
-                        <Video 
-                            source={{ uri: message.mediaUrl! }} 
-                            style={styles.image} 
+                        <Video
+                            source={{ uri: message.mediaUrl! }}
+                            style={styles.image}
                             resizeMode="cover"
                             paused={true}
                             muted={true}

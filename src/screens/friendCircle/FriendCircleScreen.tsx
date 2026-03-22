@@ -13,14 +13,15 @@ import GridPostCard from '../../components/organisms/gridPostCard/GridPostCard';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../store';
-import { setMyPosts } from '../../store/slices/postSlice';
+import { setMyPosts, removePost } from '../../store/slices/postSlice';
 import { friendService, FriendRequestDto } from '../../services/friendService';
 import { postService, Post } from '../../services/postService';
 import { storyService } from '../../services/storyService';
 import StoriesRail from '../../components/organisms/storiesRail/StoriesRail';
 import StatusViewerModal, { UserStory } from '../../components/organisms/statusViewerModal/StatusViewerModal';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Alert } from 'react-native';
+import { sharePost } from '../../utils/shareUtils';
 const { width } = Dimensions.get('window');
 
 const FriendCircleScreen = () => {
@@ -307,6 +308,28 @@ const FriendCircleScreen = () => {
         setIsStoryModalVisible(true);
     };
 
+    const handleDeletePost = useCallback((post: Post) => {
+        Alert.alert(
+            t('post.delete_title', 'Delete Post'),
+            t('post.delete_confirm', 'Are you sure you want to delete this post?'),
+            [
+                { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+                {
+                    text: t('common.delete', 'Delete'),
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await postService.deletePost(post.id);
+                            dispatch(removePost(post.id));
+                        } catch (error) {
+                            Alert.alert(t('common.error', 'Error'), t('post.delete_failed', 'Failed to delete post'));
+                        }
+                    }
+                }
+            ]
+        );
+    }, [t, dispatch]);
+
     const renderMyPostsTab = () => {
         if (loading && myPosts.length === 0 && myStories.length === 0) {
             return (
@@ -353,7 +376,18 @@ const FriendCircleScreen = () => {
                             description={item.description}
                             hasLiked={item.hasLiked}
                             onPress={() => navigation.navigate('PostDetails', { post: item })}
-                            onSharePress={() => { }}
+                            onSharePress={async () => {
+                                await sharePost({
+                                    message: `${item.description}\n\nCheck out this post on BeeGather!`,
+                                    url: item.postImage,
+                                    title: 'Share Post',
+                                });
+                            }}
+                            onDeletePress={
+                                currentUser && ((currentUser as any).username === item.userHandle || (currentUser as any).handle === item.userHandle)
+                                    ? () => handleDeletePost(item)
+                                    : undefined
+                            }
                         />
                     )}
                     ListEmptyComponent={
@@ -369,6 +403,9 @@ const FriendCircleScreen = () => {
                     initialUserIndex={0}
                     initialStoryIndex={selectedStoryIndex}
                     onClose={() => setIsStoryModalVisible(false)}
+                    onStoryDeleted={() => {
+                        fetchMyPostsData();
+                    }}
                 />
             </>
         );

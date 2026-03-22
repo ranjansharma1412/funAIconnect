@@ -61,7 +61,7 @@ export const createStyles = (theme: Theme): Styles => StyleSheet.create<Styles>(
     },
     timeText: {
         fontSize: 11,
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: theme.colors.textSecondary,
         marginRight: 4,
     },
     deletedContainer: {

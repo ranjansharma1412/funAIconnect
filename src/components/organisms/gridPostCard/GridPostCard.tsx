@@ -15,6 +15,7 @@ interface GridPostCardProps {
     hasLiked?: boolean;
     onPress?: () => void;
     onSharePress?: () => void;
+    onDeletePress?: () => void;
 }
 
 const GridPostCard: React.FC<GridPostCardProps> = ({
@@ -24,7 +25,8 @@ const GridPostCard: React.FC<GridPostCardProps> = ({
     description,
     hasLiked = false,
     onPress,
-    onSharePress
+    onSharePress,
+    onDeletePress
 }) => {
     const { theme } = useTheme();
     const styles = createStyles(theme);
@@ -69,13 +71,24 @@ const GridPostCard: React.FC<GridPostCardProps> = ({
             </LinearGradient>
 
             {/* Top Right Share Button matching Dashboard PostCard */}
-            <TouchableOpacity
-                style={styles.shareButton}
-                onPress={onSharePress}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-                <Ionicons name="share-outline" size={20} color="white" />
-            </TouchableOpacity>
+            <View style={{ position: 'absolute', top: 12, right: 12, flexDirection: 'row' }}>
+                {onDeletePress && (
+                    <TouchableOpacity
+                        style={[styles.shareButton, { position: 'relative', top: 0, right: 0, marginRight: 8 }]}
+                        onPress={onDeletePress}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                        <Ionicons name="trash-outline" size={20} color="#ff4444" />
+                    </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                    style={[styles.shareButton, { position: 'relative', top: 0, right: 0 }]}
+                    onPress={onSharePress}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                    <Ionicons name="share-outline" size={20} color="white" />
+                </TouchableOpacity>
+            </View>
         </TouchableOpacity>
     );
 };
