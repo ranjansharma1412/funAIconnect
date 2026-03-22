@@ -7,6 +7,7 @@ import {
     Animated,
     StatusBar,
     TouchableWithoutFeedback,
+    Alert,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Modal from 'react-native-modal';
@@ -49,6 +50,7 @@ interface StatusViewerModalProps {
     initialUserIndex?: number;
     initialStoryIndex?: number;
     onClose: () => void;
+    onStoryDeleted?: (storyId: number) => void;
 }
 
 const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
@@ -57,6 +59,7 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
     initialUserIndex = 0,
     initialStoryIndex = 0,
     onClose,
+    onStoryDeleted,
 }) => {
     const { theme } = useTheme();
     const styles = createStyles(theme);
@@ -175,6 +178,41 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
             progressAnim.current.stop();
         }
         setIsCommentsVisible(true);
+    };
+
+    const handleDeleteStory = () => {
+        if (progressAnim.current) {
+            progressAnim.current.stop();
+        }
+        Alert.alert(
+            t('story.delete_title', 'Delete Story'),
+            t('story.delete_confirm', 'Are you sure you want to delete this story?'),
+            [
+                { 
+                    text: t('common.cancel', 'Cancel'), 
+                    style: 'cancel',
+                    onPress: () => startProgress() // Resume auto-play
+                },
+                {
+                    text: t('common.delete', 'Delete'),
+                    style: 'destructive',
+                    onPress: async () => {
+                        if (!currentStory?.raw_id) return;
+                        try {
+                            const storyIdRaw = Number(currentStory.raw_id);
+                            await storyService.deleteStory(storyIdRaw);
+                            if (onStoryDeleted) {
+                                onStoryDeleted(storyIdRaw);
+                            }
+                            onClose();
+                        } catch (error) {
+                            Alert.alert(t('common.error', 'Error'), t('story.delete_failed', 'Failed to delete story'));
+                            startProgress();
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     const handleHeartPress = async () => {
@@ -318,14 +356,19 @@ const StatusViewerModal: React.FC<StatusViewerModalProps> = ({
                     </TouchableOpacity>
 
                     {isCurrentUserStory() ? (
-                        <TouchableOpacity onPress={handleEyePress} style={{ marginHorizontal: 15 }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Ionicons name="eye-outline" size={30} color="white" />
-                                {currentStory.likesCount ? (
-                                    <Text style={{ color: 'white', marginLeft: 4 }}>{currentStory.likesCount}</Text>
-                                ) : null}
-                            </View>
-                        </TouchableOpacity>
+                        <>
+                            <TouchableOpacity onPress={handleEyePress} style={{ marginHorizontal: 15 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Ionicons name="eye-outline" size={30} color="white" />
+                                    {currentStory.likesCount ? (
+                                        <Text style={{ color: 'white', marginLeft: 4 }}>{currentStory.likesCount}</Text>
+                                    ) : null}
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={handleDeleteStory} style={{ marginHorizontal: 15 }}>
+                                <Ionicons name="trash-outline" size={30} color="#ff4444" />
+                            </TouchableOpacity>
+                        </>
                     ) : (
                         <TouchableOpacity onPress={handleHeartPress} style={{ marginHorizontal: 15 }}>
                             {currentStory.hasLiked ? (

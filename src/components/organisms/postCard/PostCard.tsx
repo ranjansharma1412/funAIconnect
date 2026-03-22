@@ -25,6 +25,7 @@ interface PostCardProps {
     commentsCount?: number;
     onCommentPress?: () => void;
     onSharePress?: () => void;
+    onDeletePress?: () => void;
     onLikePress?: () => void;
     onLikesCountPress?: () => void;
     isShowHeaderView?: boolean;
@@ -42,6 +43,7 @@ const PostCard: React.FC<PostCardProps> = ({
     hasLiked = false,
     onCommentPress,
     onSharePress,
+    onDeletePress,
     onLikePress,
     onLikesCountPress,
     commentsCount = 0,
@@ -295,6 +297,11 @@ const PostCard: React.FC<PostCardProps> = ({
                         <TouchableOpacity style={styles.actionButton} onPress={onSharePress}>
                             <Ionicons name="share-outline" size={24} color="white" />
                         </TouchableOpacity>
+                        {onDeletePress && (
+                            <TouchableOpacity style={[styles.actionButton, { marginLeft: 15 }]} onPress={onDeletePress}>
+                                <Ionicons name="trash-outline" size={24} color="#ff4444" />
+                            </TouchableOpacity>
+                        )}
                     </View>
                     <Text style={styles.caption} numberOfLines={2}>
                         <Text style={styles.captionName}>{userName} </Text>

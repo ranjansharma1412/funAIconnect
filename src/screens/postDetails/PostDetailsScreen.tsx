@@ -13,7 +13,7 @@ import CommentsModal from '../../components/organisms/commentsModal/CommentsModa
 import LikesModal from '../../components/organisms/likesModal/LikesModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../store';
-import { updatePost } from '../../store/slices/postSlice';
+import { updatePost, removePost } from '../../store/slices/postSlice';
 import { sharePost } from '../../utils/shareUtils';
 
 const PostDetailsScreen = () => {
@@ -133,6 +133,33 @@ const PostDetailsScreen = () => {
         });
     }, [dispatch]);
 
+    const handleDeletePost = () => {
+        Alert.alert(
+            t('post.delete_title', 'Delete Post'),
+            t('post.delete_confirm', 'Are you sure you want to delete this post?'),
+            [
+                { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+                {
+                    text: t('common.delete', 'Delete'),
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await postService.deletePost(post.id);
+                            dispatch(removePost(post.id));
+                            if (navigation.canGoBack()) {
+                                navigation.goBack();
+                            } else {
+                                navigation.replace('Main');
+                            }
+                        } catch (error) {
+                            Alert.alert(t('common.error', 'Error'), t('post.delete_failed', 'Failed to delete post'));
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     return (
         <View style={[styles.safeArea, { paddingTop: insets.top }]}>
             <View style={styles.header}>
@@ -163,6 +190,11 @@ const PostDetailsScreen = () => {
                                 title: 'Share Post',
                             });
                         }}
+                        onDeletePress={
+                            user && ((user as any).username === post.userHandle || (user as any).handle === post.userHandle)
+                                ? handleDeletePost
+                                : undefined
+                        }
                         isShowHeaderView={false}
                         customMediaContainerStyle={styles.mediaContainer}
                     />
