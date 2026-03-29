@@ -109,6 +109,16 @@ const authSlice = createSlice({
                     refreshToken: state.refreshToken
                 }));
             }
+        },
+        updateUser: (state, action: PayloadAction<any>) => {
+            if (state.user) {
+                state.user = { ...state.user, ...action.payload };
+                AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+                    user: state.user,
+                    token: state.token,
+                    refreshToken: state.refreshToken
+                }));
+            }
         }
     },
     extraReducers: (builder) => {
@@ -167,5 +177,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { logout, clearError, updateTokens } = authSlice.actions;
+export const { logout, clearError, updateTokens, updateUser } = authSlice.actions;
 export default authSlice.reducer;

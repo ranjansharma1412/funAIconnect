@@ -22,6 +22,7 @@ import StatusViewerModal, { UserStory } from '../../components/organisms/statusV
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ActivityIndicator, Alert } from 'react-native';
 import { sharePost } from '../../utils/shareUtils';
+import { ImagesAssets } from '../../assets/images';
 const { width } = Dimensions.get('window');
 
 const FriendCircleScreen = () => {
@@ -96,7 +97,7 @@ const FriendCircleScreen = () => {
                 storyService.getStories(1, 10, currentUserId)
             ]);
             dispatch(setMyPosts(response.posts));
-            
+
             const u = currentUser as any;
             const myHandle = u?.username || u?.handle;
             const myGroup = storiesResponse.stories.find(g => g.id === myHandle) as any;
@@ -173,11 +174,13 @@ const FriendCircleScreen = () => {
         const displayUser = isRequest ? item.user : item;
         const displayName = displayUser.name || displayUser.username;
         const displayHandle = `@${displayUser.username}`;
-        const isValidImage = displayUser.userImage || 'https://i.pravatar.cc/150';
+        const avatar = displayUser.userImage;
+
+        const profileImage = avatar ? { uri: avatar } : displayUser?.gender?.toLowerCase() === 'female' ? ImagesAssets.profile_placeholder_female : ImagesAssets.profile_placeholder_male
 
         return (
             <View style={[styles.userCard, { backgroundColor: theme.colors.card }]}>
-                <FastImage source={{ uri: isValidImage }} style={styles.userAvatar as any} />
+                <FastImage source={profileImage} style={styles.userAvatar as any} />
                 <View style={styles.userInfo}>
                     <Text style={[styles.userName, { color: theme.colors.text }]} numberOfLines={1}>{displayName}</Text>
                     {item.mutualFriends ? (
@@ -271,11 +274,12 @@ const FriendCircleScreen = () => {
                 renderItem={({ item }) => {
                     const displayName = item.name || item.username;
                     const displayHandle = `@${item.username}`;
-                    const isValidImage = item.userImage || 'https://i.pravatar.cc/150';
+                    const avatar = item.userImage
+                    const profileImage = avatar ? { uri: avatar } : item?.gender?.toLowerCase() === 'female' ? ImagesAssets.profile_placeholder_female : ImagesAssets.profile_placeholder_male
 
                     return (
                         <View style={[styles.userCard, { backgroundColor: theme.colors.card }]}>
-                            <FastImage source={{ uri: isValidImage }} style={styles.userAvatar as any} />
+                            <FastImage source={profileImage} style={styles.userAvatar as any} />
                             <View style={styles.userInfo}>
                                 <Text style={[styles.userName, { color: theme.colors.text }]} numberOfLines={1}>{displayName}</Text>
                                 <Text style={[styles.userHandle, { color: theme.colors.textSecondary }]}>{displayHandle}</Text>
@@ -286,7 +290,7 @@ const FriendCircleScreen = () => {
                                     chatId: '', // Chat ID will be resolved implicitly
                                     userId: item.id.toString(),
                                     userName: displayName,
-                                    userImage: isValidImage
+                                    userImage: profileImage
                                 })}
                             >
                                 <Ionicons name="chatbubble-ellipses-outline" size={24} color={theme.colors.textSecondary} />
@@ -341,22 +345,22 @@ const FriendCircleScreen = () => {
 
         const myGroup = myStories.length > 0 ? myStories[0] : null;
         const railData = myGroup ? myGroup.stories.map((s: any, idx: number) => ({
-             id: s.id,
-             name: `Story ${idx + 1}`,
-             image: s.url,
-             isLive: true
+            id: s.id,
+            name: `Story ${idx + 1}`,
+            image: s.url,
+            isLive: true
         })) : [];
 
         const renderHeader = () => {
-             if (railData.length > 0) {
-                 return (
-                     <View style={{ marginBottom: 16 }}>
-                         <Text style={[styles.sectionHeader, { color: theme.colors.text, paddingHorizontal: 16, marginBottom: 8 }]}>My Stories</Text>
-                         <StoriesRail data={railData} onPressItem={handleMyStoryPress} />
-                     </View>
-                 );
-             }
-             return null;
+            if (railData.length > 0) {
+                return (
+                    <View style={{ marginBottom: 16 }}>
+                        <Text style={[styles.sectionHeader, { color: theme.colors.text, paddingHorizontal: 16, marginBottom: 8 }]}>My Stories</Text>
+                        <StoriesRail data={railData} onPressItem={handleMyStoryPress} />
+                    </View>
+                );
+            }
+            return null;
         };
 
         return (
@@ -366,7 +370,7 @@ const FriendCircleScreen = () => {
                     keyExtractor={(item) => item.id.toString()}
                     numColumns={2}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 4, paddingTop: 16 }}
+                    contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 4, paddingTop: 16 }}
                     ListHeaderComponent={renderHeader}
                     renderItem={({ item }) => (
                         <GridPostCard
@@ -396,7 +400,7 @@ const FriendCircleScreen = () => {
                         </View>
                     }
                 />
-                
+
                 <StatusViewerModal
                     visible={isStoryModalVisible}
                     userStories={myStories}

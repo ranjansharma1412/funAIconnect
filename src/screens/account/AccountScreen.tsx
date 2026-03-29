@@ -25,7 +25,7 @@ import { useCameraPermission } from 'react-native-vision-camera';
 import { authService } from '../../services/authService';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../../store/slices/authSlice';
+import { logout, updateUser } from '../../store/slices/authSlice';
 import { useNavigation } from '@react-navigation/native';
 import { ImagesAssets } from '../../assets/images';
 
@@ -46,7 +46,7 @@ const AccountScreen = () => {
     // Personal Info State
     const [email, setEmail] = useState(user?.email || '');
     const [mobile, setMobile] = useState(user?.mobile || '');
-    const [dob, setDob] = useState('');
+    const [dob, setDob] = useState(user?.dob || '');
 
     // DatePicker State handled by component
 
@@ -126,7 +126,19 @@ const AccountScreen = () => {
             }
 
             console.log('Updating profile...', formData);
-            await authService.updateProfile(formData);
+            const response = await authService.updateProfile(formData);
+
+            if (response && response.user) {
+                dispatch(updateUser(response.user));
+            } else if (response) {
+                dispatch(updateUser({
+                    fullName: name,
+                    bio: bio,
+                    mobile: mobile,
+                    dob: dob,
+                    userImage: avatar && avatar.startsWith('http') ? avatar : user?.userImage
+                }));
+            }
 
             Alert.alert(t('account.success'), t('account.profile_updated'));
             setIsEditing(false);
@@ -266,6 +278,7 @@ const AccountScreen = () => {
                                 placeholder={t('account.mobile_placeholder')}
                                 placeholderTextColor={theme.colors.textSecondary}
                                 editable={isEditing}
+                                maxLength={10}
                             />
                         </View>
                         <DatePicker
