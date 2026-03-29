@@ -250,6 +250,8 @@ const DashboardScreen: React.FC = () => {
 
     // ... renderItem and return
 
+    console.log("===item==", posts)
+
     const renderItem = ({ item }: { item: Post }) => (
         <PostCard
             userName={item.userName}
@@ -259,6 +261,7 @@ const DashboardScreen: React.FC = () => {
             postImage={item.postImage}
             likes={item.likes}
             hasLiked={item.hasLiked}
+            gender={item.gender || null}
             commentsCount={item.commentsCount}
             onLikePress={() => handleLikePress(item)}
             onCommentPress={() => handleCommentPress(item.id)}

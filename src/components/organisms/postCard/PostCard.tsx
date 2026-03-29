@@ -63,10 +63,10 @@ const PostCard: React.FC<PostCardProps> = ({
     const headerWrapperRef = useRef<View>(null);
 
     // Default processing code...
-    const validPostImage = postImage || 'https://via.placeholder.com/500?text=No+Image';
-    
-    let validUserImage: any = { uri: 'https://i.pravatar.cc/300' };
-    if (userImage && userImage.trim() !== '' && !userImage.includes('pravatar') && !userImage.includes('ui-avatars') && !userImage.includes('via.placeholder')) {
+    const validPostImage = postImage
+
+    let validUserImage: any = null
+    if (userImage && userImage.trim() !== '') {
         validUserImage = { uri: userImage };
     } else {
         if (gender?.toLowerCase() === 'female') {
@@ -212,10 +212,10 @@ const PostCard: React.FC<PostCardProps> = ({
                         blurAmount={5}
                         style={StyleSheet.absoluteFillObject}
                     />
-                    <TouchableOpacity 
-                        style={StyleSheet.absoluteFillObject} 
-                        activeOpacity={1} 
-                        onPress={closeExpandedHeader} 
+                    <TouchableOpacity
+                        style={StyleSheet.absoluteFillObject}
+                        activeOpacity={1}
+                        onPress={closeExpandedHeader}
                     />
                     <Animated.View style={[
                         styles.expandedHeaderWrapper,

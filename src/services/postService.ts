@@ -25,6 +25,7 @@ export interface Post {
     hasLiked?: boolean;
     createdAt: string;
     commentsCount?: number;
+    gender?: string;
 }
 
 export interface GetPostsResponse {

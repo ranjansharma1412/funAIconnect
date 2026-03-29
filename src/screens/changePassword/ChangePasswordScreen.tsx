@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import Button from '../../components/atoms/button/Button';
 import TextInput from '../../components/atoms/textInput/TextInput';
 import { styles } from './ChangePasswordScreenStyles';
 import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/authService';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const ChangePasswordScreen = ({ navigation }: any) => {
     const { theme } = useTheme();
@@ -13,6 +14,8 @@ const ChangePasswordScreen = ({ navigation }: any) => {
 
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
+    const [showOldPassword, setShowOldPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleChangePassword = async () => {
@@ -47,16 +50,26 @@ const ChangePasswordScreen = ({ navigation }: any) => {
             <TextInput
                 label={t('auth.old_password_label', 'Old Password')}
                 placeholder={t('auth.old_password_placeholder', 'Enter old password')}
-                secureTextEntry
+                secureTextEntry={!showOldPassword}
                 value={oldPassword}
                 onChangeText={setOldPassword}
+                rightIcon={
+                    <TouchableOpacity onPress={() => setShowOldPassword(!showOldPassword)}>
+                        <Ionicons name={showOldPassword ? "eye" : "eye-off"} size={20} color={theme.colors.textSecondary} />
+                    </TouchableOpacity>
+                }
             />
             <TextInput
                 label={t('auth.new_password_label', 'New Password')}
                 placeholder={t('auth.new_password_placeholder', 'Enter new password')}
-                secureTextEntry
+                secureTextEntry={!showNewPassword}
                 value={newPassword}
                 onChangeText={setNewPassword}
+                rightIcon={
+                    <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)}>
+                        <Ionicons name={showNewPassword ? "eye" : "eye-off"} size={20} color={theme.colors.textSecondary} />
+                    </TouchableOpacity>
+                }
             />
             {isLoading ? (
                 <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 20 }} />

@@ -6,6 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Comment } from '../../../services/commentService';
 import { formatDistanceToNow } from 'date-fns';
 import { styles } from './CommentItemStyle';
+import { ImagesAssets } from '../../../assets/images';
 
 interface CommentItemProps {
     comment: Comment;
@@ -19,9 +20,13 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onDelete, currentUse
 
     const timeAgo = formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true });
 
+    const userProfileImage = comment.userImage && comment.userImage.trim() !== ''
+        ? { uri: comment.userImage }
+        : (comment.gender?.toLowerCase() === 'female' ? ImagesAssets.profile_placeholder_female : ImagesAssets.profile_placeholder_male);
+
     return (
         <View style={styles.container}>
-            <Avatar source={{ uri: comment.userImage }} size={32} />
+            <Avatar source={userProfileImage as any} size={32} />
             <View style={styles.contentContainer}>
                 <View style={styles.header}>
                     <Text style={[styles.userName, { color: theme.colors.text }]}>
