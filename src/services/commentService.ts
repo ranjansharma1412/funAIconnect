@@ -7,6 +7,7 @@ export interface Comment {
     userName: string;
     userHandle: string;
     userImage: string;
+    gender?: string;
     content: string;
     createdAt: string;
 }

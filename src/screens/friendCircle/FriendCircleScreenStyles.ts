@@ -33,12 +33,12 @@ export const styles = StyleSheet.create({
     },
     listContent: {
         paddingHorizontal: 16,
-        paddingBottom: 40,
+        paddingBottom: 120,
         marginTop: 14,
     },
     postsListContent: {
         paddingTop: 16,
-        paddingBottom: 40,
+        paddingBottom: 120,
     },
     sectionHeader: {
         fontSize: 18,

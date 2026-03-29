@@ -15,11 +15,17 @@ import { useTheme } from '../../theme/ThemeContext';
 import { createStyles } from './AccountScreenStyle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
+import DatePicker from '../../components/atoms/datePicker/DatePicker';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
 import { launchImageLibrary, launchCamera, ImageLibraryOptions, CameraOptions } from 'react-native-image-picker';
+import { useCameraPermission } from 'react-native-vision-camera';
 import { authService } from '../../services/authService';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../../store/slices/authSlice';
+import { logout, updateUser } from '../../store/slices/authSlice';
 import { useNavigation } from '@react-navigation/native';
 import { ImagesAssets } from '../../assets/images';
 
@@ -40,12 +46,16 @@ const AccountScreen = () => {
     // Personal Info State
     const [email, setEmail] = useState(user?.email || '');
     const [mobile, setMobile] = useState(user?.mobile || '');
-    const [startDob, setDob] = useState(user?.dob || ''); // Renamed to avoid confusion if needed, or keep
+    const [dob, setDob] = useState(user?.dob || '');
+
+    // DatePicker State handled by component
 
     // Using dob from state directly
 
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    const { hasPermission, requestPermission } = useCameraPermission();
 
     const changeLanguage = (lang: string) => {
         i18n.changeLanguage(lang);
@@ -58,8 +68,22 @@ const AccountScreen = () => {
             {
                 text: t('account.camera'),
                 onPress: async () => {
+                    const permissionStatus = await requestPermission();
+                    if (!permissionStatus) {
+                        Alert.alert(t('creative.permission_denied'), t('creative.permission_instruction'), [
+                            { text: t('common.cancel'), style: 'cancel' },
+                            { text: t('creative.settings'), onPress: () => Linking.openSettings() },
+                        ]);
+                        return;
+                    }
+
                     const result = await launchCamera({ mediaType: 'photo', quality: 0.8 });
-                    if (result.assets && result.assets.length > 0) {
+                    if (result.didCancel) {
+                        console.log('User cancelled camera picker');
+                    } else if (result.errorCode) {
+                        console.log('CameraPicker Error: ', result.errorMessage);
+                        Alert.alert(t('common.error'), result.errorMessage);
+                    } else if (result.assets && result.assets.length > 0) {
                         setAvatar(result.assets[0].uri || null);
                     }
                 },
@@ -68,7 +92,12 @@ const AccountScreen = () => {
                 text: t('account.gallery'),
                 onPress: async () => {
                     const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.8, selectionLimit: 1 });
-                    if (result.assets && result.assets.length > 0) {
+                    if (result.didCancel) {
+                        console.log('User cancelled image picker');
+                    } else if (result.errorCode) {
+                        console.log('ImagePicker Error: ', result.errorMessage);
+                        Alert.alert(t('common.error'), result.errorMessage);
+                    } else if (result.assets && result.assets.length > 0) {
                         setAvatar(result.assets[0].uri || null);
                     }
                 },
@@ -85,7 +114,7 @@ const AccountScreen = () => {
             // formData.append('email', email);
             formData.append('mobile', mobile);
             formData.append('bio', bio);
-            formData.append('dob', startDob);
+            formData.append('dob', dob);
 
             if (avatar && !avatar.startsWith('http')) {
                 const imageFile = {
@@ -97,7 +126,19 @@ const AccountScreen = () => {
             }
 
             console.log('Updating profile...', formData);
-            await authService.updateProfile(formData);
+            const response = await authService.updateProfile(formData);
+
+            if (response && response.user) {
+                dispatch(updateUser(response.user));
+            } else if (response) {
+                dispatch(updateUser({
+                    fullName: name,
+                    bio: bio,
+                    mobile: mobile,
+                    dob: dob,
+                    userImage: avatar && avatar.startsWith('http') ? avatar : user?.userImage
+                }));
+            }
 
             Alert.alert(t('account.success'), t('account.profile_updated'));
             setIsEditing(false);
@@ -237,19 +278,16 @@ const AccountScreen = () => {
                                 placeholder={t('account.mobile_placeholder')}
                                 placeholderTextColor={theme.colors.textSecondary}
                                 editable={isEditing}
+                                maxLength={10}
                             />
                         </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>{t('account.dob')}</Text>
-                            <TextInput
-                                style={[styles.input, !isEditing && styles.inputReadOnly]}
-                                value={startDob}
-                                onChangeText={setDob}
-                                placeholder={t('account.dob_placeholder')}
-                                placeholderTextColor={theme.colors.textSecondary}
-                                editable={isEditing}
-                            />
-                        </View>
+                        <DatePicker
+                            label={t('account.dob')}
+                            value={dob}
+                            onChange={setDob}
+                            placeholder={t('account.dob_placeholder')}
+                            editable={isEditing}
+                        />
                     </View>
                 </View>
 
@@ -268,6 +306,8 @@ const AccountScreen = () => {
                 </TouchableOpacity>
 
             </ScrollView>
+
+            {/* DatePicker is now an inline component */}
         </View>
     );
 };

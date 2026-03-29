@@ -51,7 +51,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId,
         try {
             const currentPage = reset ? 1 : page;
             let response;
-            
+
             if (postId) {
                 response = await commentService.getComments(postId, currentPage);
             } else if (storyId) {
@@ -108,7 +108,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ visible, onClose, postId,
                 addedComment = await storyService.addStoryComment(storyId, newComment.trim(), currentUserId);
                 if (onCommentAdded) onCommentAdded(storyId, 'story');
             }
-            
+
             if (addedComment) {
                 setComments(prev => [addedComment, ...prev]);
                 setNewComment('');

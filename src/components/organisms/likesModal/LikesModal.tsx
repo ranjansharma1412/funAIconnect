@@ -14,6 +14,7 @@ import { createStyles } from './LikesModalStyle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { postService } from '../../../services/postService';
 import Avatar from '../../atoms/avatar/Avatar';
+import { ImagesAssets } from '../../../assets/images';
 
 interface LikesModalProps {
     visible: boolean;
@@ -75,11 +76,11 @@ const LikesModal: React.FC<LikesModalProps> = ({ visible, onClose, postId }) => 
     const renderItem = ({ item }: { item: any }) => {
         const displayName = item.fullName || item.username;
         const displayHandle = `@${item.username}`;
-        const isValidImage = item.userImage || 'https://i.pravatar.cc/150';
+        const likedUserImage = item.userImage && item.userImage.trim() !== '' ? { uri: item.userImage } : (item.gender?.toLowerCase() === 'female' ? ImagesAssets.profile_placeholder_female : ImagesAssets.profile_placeholder_male);
 
         return (
             <View style={styles.userCard}>
-                <Avatar source={{ uri: isValidImage }} size={40} />
+                <Avatar source={likedUserImage} size={40} />
                 <View style={styles.userInfo}>
                     <Text style={[styles.userName, { color: theme.colors.text }]} numberOfLines={1}>
                         {displayName}
