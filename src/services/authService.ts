@@ -10,11 +10,9 @@ export const authService = {
      */
     register: async (data: RegisterRequest): Promise<AuthResponse> => {
         try {
-            console.log("===data==", data)
             const response = await apiClient.post<AuthResponse>('/api/auth/register', data);
             return response.data;
         } catch (error: any) {
-            console.log("===error==", error)
             throw parseApiError(error);
         }
     },

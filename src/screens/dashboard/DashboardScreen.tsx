@@ -250,8 +250,6 @@ const DashboardScreen: React.FC = () => {
 
     // ... renderItem and return
 
-    console.log("===item==", posts)
-
     const renderItem = ({ item }: { item: Post }) => (
         <PostCard
             userName={item.userName}
